@@ -1,0 +1,45 @@
+2026-09-29 05:45:14 UTC
+Windows-11-10.0.26100-SP0
+Ren'Py 8.5.3.26051504
+
+Early init took 337 ms
+Loading error handling took 234 ms
+Loading script took 9584 ms
+Loading save slot metadata took 64 ms
+Loading persistent took 31 ms
+Set script version to: None (alternate path)
+ - Init at launcher/game/android.rpyc:24 took 1340 ms.
+ - Init at launcher/game/download.rpyc:22 took 2013 ms.
+ - Init at launcher/game/project.rpyc:27 took 386 ms.
+Running init code took 5106 ms
+Loading analysis data took 132 ms
+Analyze and compile ATL took 7 ms
+Reloading save slot metadata took 5 ms
+Dump and make backups took 0 ms
+Cleaning cache took 0 ms
+Making clean stores took 1 ms
+Initial gc took 113 ms
+DPI scale factor: 1.000000
+nvdrs: Loaded, about to disable thread optimizations.
+nvdrs: b"Couldn't load nvlib." (can be ignored)
+Creating interface object took 6 ms
+Init translation took 1 ms
+Cleaning stores took 0 ms
+Load screen analysis took 93 ms
+Analyze screens took 3 ms
+Save screen analysis took 0 ms
+Save pyanalysis took 0 ms
+Save bytecode took 0 ms
+Running _start took 2 ms
+Interface start took 1075 ms
+
+Initializing gl2 renderer:
+primary display bounds: (0, 0, 1366, 768)
+swap interval: 1 frames
+Windowed mode.
+Vendor: 'Intel'
+Renderer: 'Intel(R) HD Graphics'
+Version: '4.0.0 - Build 10.18.10.5161'
+Display Info: <Info({'bitsize': 32, 'bytesize': 4, 'masks': (16711680, 65280, 255, 0), 'shifts': (16, 8, 0, 0), 'losses': (0, 0, 0, 8), 'current_w': 1366, 'current_h': 768, 'refresh_rate': 60, 'hw': False, 'wm': True, 'video_mem': 268435456, 'blit_hw': False, 'blit_hw_CC': False, 'blit_hw_A': False, 'blit_sw': False, 'blit_sw_CC': False, 'blit_sw_A': False})>
+Screen sizes: virtual=(800, 600) physical=(800, 600) drawable=(800, 600)
+Maximum texture size: 4096x4096

@@ -1,0 +1,28 @@
+O Photoshop CS6 é excelente e vai rodar leve no seu computador! 
+Fazer por ele garante que você tenha total controle das camadas e salve o fundo transparente de forma nativa e rápida.
+Como você vai usar o Photoshop, configure o seu arquivo base com as mesmas medidas: 220x70 pixels 
+e o Modo de Cores em RGB (8-bits) com o Conteúdo do Segundo Plano como Transparente.Aqui está a lista limpa e sem distrações. 
+Use o formato Salvar como... (ou Ctrl + Shift + S) e escolha a extensão PNG. Copie e cole os nomes exatamente como estão abaixo:
+📦 1. Botões do Quick Menu (Barra Lateral Deslizante)Botão QUICK 
+(Gatilho inicial no canto da tela):btn_quick_idle.pngbtn_quick_hover.png 
+Texto: FECHAR btn_fechar_idle.pngbtn_fechar_hover.png 
+Texto: VOLTAR btn_voltar_idle.pngbtn_voltar_hover.png
+Texto: PULAR btn_pular_idle.pngbtn_pular_hover.png
+Texto: SALVAR btn_salvar_idle.pngbtn_salvar_hover.png
+Texto: CARREGAR btn_carregar_idle.pngbtn_carregar_hover.png
+Texto: OPÇÕES btn_opcoes_idle.pngbtn_opcoes_hover.png
+Texto: MENU btn_menu_idle.pngbtn_menu_hover.png
+
+⚙️ 2. Botões de Navegação do Menu Principal (wells_menu_language)
+Texto: ERFORMANCE btn_performance_idle.pngbtn_performance_hover.png
+Texto: IDIOMAS btn_idiomas_idle.pngbtn_idiomas_hover.png
+Texto: DIÁLOGO btn_dialogo_idle.pngbtn_dialogo_hover.png
+Texto: FECHAR MENU btn_fechar_menu_idle.pngbtn_fechar_menu_hover.png
+
+↩️ 3. Botão de Retorno (Telas Internas de Performance, Idiomas e Diálogo)
+Texto: VOLTAR AO MENU btn_voltar_menu_idle.pngbtn_voltar_menu_hover.png
+Dica de Produtividade no Photoshop: Deixe a imagem do botão e a camada de texto prontas. 
+Salve o primeiro arquivo (_idle). Depois, basta dar dois cliques na miniatura da camada de texto,
+ mudar a cor para o Verde Neon, e usar o atalho Ctrl + Shift + S para salvar a versão (_hover).
+ Caso você precise de ajuda ou o Ren'Py mostre alguma mensagem de erro de imagem não encontrada após você colocar os arquivos na pasta game/wells/gui/, me avise!
+ Quer que eu te passe o atalho exato do Photoshop para exportar tudo em PNG de forma ainda mais rápida?
