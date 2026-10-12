@@ -489,18 +489,68 @@ def review_file(path: Path, base_dir: Path, progress=None):
 # ---------------------------------------------------------------------------
 # REVISÃO JSON PAREADA
 # ---------------------------------------------------------------------------
+def _term_pattern(term: str):
+    """Fronteira lexical conservadora para termos cadastrados manualmente."""
+    escaped = re.escape(term)
+    left = r"(?<![A-Za-zÀ-ÖØ-öø-ÿ0-9_])" if term[:1].isalnum() else ""
+    right = r"(?![A-Za-zÀ-ÖØ-öø-ÿ0-9_])" if term[-1:].isalnum() else ""
+    return re.compile(left + escaped + right, re.IGNORECASE)
+
+
+def _native_blindados(native: str, blindados, overlap):
+    """Retorna apenas termos explicitamente cadastrados encontrados no NATIVO."""
+    encontrados = []
+    for term in blindados:
+        if term.casefold() in overlap:
+            continue
+        if _term_pattern(term).search(native):
+            encontrados.append(term)
+    # Termos maiores primeiro evita sobreposição acidental entre cadastros.
+    return sorted(encontrados, key=len, reverse=True)
+
+
+def _protect_manual_terms(text: str, terms):
+    """Protege termos que sobreviveram na tradução antes da revisão linguística.
+
+    Se um nome já foi destruído pelo tradutor automático, não inventamos onde
+    recolocá-lo: esse caso é reportado como unresolved e fica para a camada de
+    reconstrução nativo↔traduzido.
+    """
+    protected = text
+    tokens = []
+    for term in terms:
+        rx = _term_pattern(term)
+        def repl(match):
+            marker = f"__WELLS_NAME_{len(tokens):06d}__"
+            tokens.append((marker, term))
+            return marker
+        protected = rx.sub(repl, protected)
+    return protected, tokens
+
+
+def _restore_manual_terms(text: str, tokens):
+    for marker, term in tokens:
+        text = text.replace(marker, term)
+    return text
+
+
 def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
                      blindagem_path: Path | None = None, progress=None):
-    """Revisa o documento traduzido usando o documento nativo como âncora.
+    """Revisa o traduzido usando o nativo como âncora sem congelar o registro.
 
-    Regras da primeira versão:
-    - o arquivo nativo nunca é escrito;
-    - NOMES_BLINDADOS vale somente para igualdade exata do registro nativo;
-    - não existe proteção por substring;
-    - conflito entre as duas listas não recebe prioridade automática;
-    - NOMES_TRADUZIVEIS apenas autoriza o fluxo normal nesta versão. Um futuro
-      mapeamento de títulos/cargos será implementado somente quando seu formato
-      estiver explicitamente definido.
+    NOMES_BLINDADOS são termos manuais procurados primeiro no NATIVO. Se o
+    termo também sobreviveu no traduzido, ele é isolado durante a revisão e
+    restaurado exatamente com a grafia cadastrada. O restante do registro
+    continua revisável.
+
+    Se o termo existe no NATIVO mas já foi destruído pela tradução automática,
+    esta camada conservadora não tenta adivinhar sua posição: registra o caso
+    em unresolved_names. A reconstrução semântica nativo↔traduzido poderá
+    tratar esses casos posteriormente.
+
+    NOMES_TRADUZIVEIS continuam explicitamente livres para revisão. Não existe
+    inferência automática de nomes e conflitos entre listas não recebem
+    prioridade escondida.
     """
     from wells_blindagem_json import (
         LISTA_BLINDADOS, LISTA_TRADUZIVEIS, carregar_listas, conflitos
@@ -528,8 +578,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
     lists = carregar_listas(blindagem_path) if blindagem_path else {
         LISTA_BLINDADOS: [], LISTA_TRADUZIVEIS: []
     }
-    blindados = {x.casefold() for x in lists[LISTA_BLINDADOS]}
-    traduziveis = {x.casefold() for x in lists[LISTA_TRADUZIVEIS]}
+    blindados = list(lists[LISTA_BLINDADOS])
     overlap = {x.casefold() for x in conflitos(lists)}
 
     try:
@@ -540,33 +589,41 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
     output = []
     changed = 0
     protected_records = 0
+    protected_names = 0
+    unresolved_names = []
     token_count = 0
     conflict_records = 0
     total = len(natives)
 
     for idx, (native_record, translated_record) in enumerate(zip(natives, translated), 1):
-        native, native_quoted = _decode_record(native_record)
+        native, _native_quoted = _decode_record(native_record)
         text, quoted = _decode_record(translated_record)
-        key = native.casefold()
 
-        if key in overlap:
-            # Sem prioridade automática: mantém o valor traduzido e só aplica
-            # a revisão linguística normal.
+        terms = _native_blindados(native, blindados, overlap)
+        if overlap and any(_term_pattern(term).search(native)
+                           for term in lists[LISTA_BLINDADOS]
+                           if term.casefold() in overlap):
             conflict_records += 1
-            reviewed, _count, tokens = review_text(
-                text, dictionary=None, base_linguistica=base_linguistica
-            )
-        elif key in blindados:
-            # Blindagem EXATA da unidade/registro. Nunca procura o termo dentro
-            # de outro registro composto.
-            reviewed = native
-            tokens = len([s for s in segmentar(native) if s.tipo == "protegido"])
+
+        protected_text, manual_tokens = _protect_manual_terms(text, terms)
+        present = {term.casefold() for _marker, term in manual_tokens}
+        missing = [term for term in terms if term.casefold() not in present]
+        for term in missing:
+            unresolved_names.append({
+                "record": idx,
+                "term": term,
+                "native": native,
+                "translated": text,
+            })
+
+        reviewed, _count, tokens = review_text(
+            protected_text, dictionary=None, base_linguistica=base_linguistica
+        )
+        reviewed = _restore_manual_terms(reviewed, manual_tokens)
+
+        if manual_tokens:
             protected_records += 1
-        else:
-            # Inclui registros explicitamente traduzíveis e não cadastrados.
-            reviewed, _count, tokens = review_text(
-                text, dictionary=None, base_linguistica=base_linguistica
-            )
+            protected_names += len(manual_tokens)
 
         encoded = _encode_record(reviewed, quoted)
         if encoded != translated_record:
@@ -591,6 +648,8 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         "records": total,
         "changed": changed,
         "protected_records": protected_records,
+        "protected_names": protected_names,
+        "unresolved_names": unresolved_names,
         "conflict_records": conflict_records,
         "tokens": token_count,
         "native_unchanged": str(native_path),
