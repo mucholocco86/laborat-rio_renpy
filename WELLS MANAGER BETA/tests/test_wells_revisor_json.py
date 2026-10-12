@@ -168,6 +168,96 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         self.assertEqual(result["protected_names"], 2)
         self.assertEqual(before, after)
 
+    def test_nome_acentuado_reconstruido_por_slot_classificado(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander Éloïse"], ["Comandante Eloise"],
+            blindados=["Éloïse"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante Éloïse"'])
+        self.assertEqual(result["reconstructed_names"], 1)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_apostrofo_em_nome_sobrevivente_e_reconstruido(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander A'nai", "Commander A'nai"],
+            ["Comandante a'nai", "Comandante Anai"],
+            blindados=["A'nai"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante A\'nai"', '"Comandante A\'nai"'])
+        self.assertEqual(result["reconstructed_names"], 1)
+        self.assertEqual(result["protected_names"], 2)
+        self.assertEqual(before, after)
+
+    def test_overlap_em_nome_composto_nao_substitui_parte_de_outro(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander Anna", "Commander Ann"],
+            ["Comandante anna", "Comandante Ana"],
+            blindados=["Ann", "Anna"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante Anna"', '"Comandante Ann"'])
+        self.assertEqual(result["reconstructed_names"], 1)
+        self.assertEqual(result["protected_names"], 2)
+        self.assertEqual(before, after)
+
+    def test_nome_dentro_de_token_renpy_nao_e_texto_blindavel(self):
+        td, result, before, after, lines = self._pair(
+            ["[Gaius]"], ["[gaius]"],
+            blindados=["Gaius"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"[gaius]"'])
+        self.assertEqual(result["protected_names"], 0)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_nome_em_dialogo_proximo_a_token_renpy_preserva_token(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander [player] Gaius {b}"],
+            ["Comandante [player] gaius {b}"],
+            blindados=["Gaius"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante [player] Gaius {b}"'])
+        self.assertEqual(result["protected_names"], 1)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_token_renpy_impede_reconstrucao_posicional_ambigua(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander [player] Gaius"],
+            ["Comandante [player] Go"],
+            blindados=["Gaius"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante [player] Go"'])
+        self.assertEqual(result["reconstructed_names"], 0)
+        self.assertEqual(len(result["unresolved_names"]), 1)
+        self.assertEqual(before, after)
+
+    def test_docx_reconstroi_nome_composto_preservando_nativo(self):
+        td = tempfile.TemporaryDirectory()
+        self.addCleanup(td.cleanup)
+        root = Path(td.name)
+        n, t, b = root / "nativo.docx", root / "traduzido.docx", root / "blindagem.txt"
+        for path, value in ((n, '"Commander Gaius"'), (t, '"Comandante Go"')):
+            doc = Document()
+            doc.add_paragraph(value)
+            doc.save(path)
+        salvar_listas(b, {
+            LISTA_BLINDADOS: ["Gaius"],
+            LISTA_TRADUZIVEIS: ["Commander"],
+        })
+        before = n.read_bytes()
+        result = review_json_pair(n, t, root, b)
+        self.assertEqual([p.text for p in Document(t).paragraphs], ['"Comandante Gaius"'])
+        self.assertEqual(result["reconstructed_names"], 1)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(n.read_bytes(), before)
+
     def test_docx_restaura_nome_integral_sem_alterar_nativo(self):
         td = tempfile.TemporaryDirectory()
         self.addCleanup(td.cleanup)
