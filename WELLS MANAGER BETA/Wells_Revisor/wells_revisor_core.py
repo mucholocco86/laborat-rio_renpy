@@ -290,6 +290,34 @@ def _grammar(text):
 
     return text, changes
 
+
+def diagnosticar_texto(text):
+    """Detecta anomalias fortes sem inventar uma reescrita.
+
+    Esta camada é deliberadamente separada de review_text: problemas de
+    concordância/ordem podem ser inequívocos como defeito, mas ainda admitir
+    mais de uma correção válida no contexto narrativo.
+    """
+    protegido, _tokens = _protect_renpy(text)
+    issues = []
+
+    def add(code, message, trecho):
+        issues.append({"code": code, "message": message, "trecho": trecho})
+
+    for m in re.finditer(r"\bSeu\s+(Mãe|Irmã|Filha|Avó|Tia|Esposa|Namorada|Amiga)\b", protegido, re.I):
+        add("concordancia_possessivo", "Possessivo masculino antes de termo feminino.", m.group(0))
+
+    for m in re.finditer(r"\bO\s+nome\s+de\s+é\b", protegido, re.I):
+        add("ordem_nome_quebrada", "Construção 'o nome de é' indica ordem sintática quebrada.", m.group(0))
+
+    for m in re.finditer(r"\b(?:dela|dele)\s+(Filho|Filha|Irmão|Irmã)\b", protegido):
+        add("parentesco_pos_pronome", "Parentesco aparece solto após pronome relacional.", m.group(0))
+
+    for m in re.finditer(r"(?<![.!?])\s+(Irmão|Irmã|Filho|Filha)\.\s+(?=[A-ZÁÀÂÃÉÊÍÓÔÕÚÜÇ])", protegido):
+        add("fragmento_parentesco", "Termo de parentesco isolado como fragmento de frase.", m.group(1))
+
+    return issues
+
 def review_text(text, dictionary=None, base_linguistica=None):
     protected, tokens = _protect_renpy(text)
     before_tokens = list(tokens)
