@@ -59,8 +59,11 @@ class WellsJsonEndToEndTests(unittest.TestCase):
         elif not blocks:
             result = export_json_full_docx(source, work, return_session=True)
         else:
+            # Um limite abaixo do tamanho normal do pacote DOCX força a
+            # divisão recursiva até blocos unitários, exercitando de fato
+            # coleta/revisão/reinjeção em múltiplos arquivos.
             result = export_json_blocks_docx(
-                source, work, max_file_bytes=37000, return_session=True
+                source, work, max_file_bytes=1, return_session=True
             )
         session = result[-1]
 
@@ -88,7 +91,13 @@ class WellsJsonEndToEndTests(unittest.TestCase):
             source, work, fmt, session=session
         )
         self.assertEqual(count, len(self.PAIRS))
-        self.assertEqual(mode, "blocks" if blocks else "full")
+        expected_mode = {
+            ("txt", False): "JSON/TXT completo",
+            ("txt", True): "JSON/TXT em blocos",
+            ("docx", False): "JSON/DOCX completo",
+            ("docx", True): "JSON/DOCX em blocos",
+        }[(fmt, blocks)]
+        self.assertEqual(mode, expected_mode)
 
         final_pairs = json.loads(
             source.read_text(encoding="utf-8"),
