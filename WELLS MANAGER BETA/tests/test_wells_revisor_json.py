@@ -29,7 +29,7 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
             LISTA_TRADUZIVEIS: list(traduziveis),
         })
         before = n.read_bytes()
-        result = review_json_pair(n, t, JSON_DIR, b)
+        result = review_json_pair(n, t, root, b)
         after = n.read_bytes()
         lines = t.read_text(encoding="utf-8").splitlines()
         return td, result, before, after, lines
