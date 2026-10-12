@@ -29,7 +29,8 @@ ROOT = resource_root()
 EXTRACTOR_DIR = ROOT / "Wells_Extractor"
 TRANSLATOR_DIR = ROOT / "Wells_Translator"
 REVISOR_DIR = ROOT / "Wells_Revisor"
-for folder in (EXTRACTOR_DIR, TRANSLATOR_DIR, REVISOR_DIR):
+REVISOR_JSON_DIR = ROOT / "Wells_Revisor_JSON"
+for folder in (EXTRACTOR_DIR, TRANSLATOR_DIR, REVISOR_DIR, REVISOR_JSON_DIR):
     if str(folder) not in sys.path:
         sys.path.insert(0, str(folder))
 
@@ -44,11 +45,12 @@ from Wells_Translator.wells_json_core import (
     inject_json_translations,
 )
 from Wells_Revisor.wells_revisor_core import review_file
-from Wells_Revisor.wells_blindagem import (
+from Wells_Revisor_JSON.wells_blindagem_json import (
     LISTA_BLINDADOS, LISTA_TRADUZIVEIS,
     carregar_listas, adicionar_termo, editar_termo, excluir_termo,
     conflitos,
 )
+from Wells_Revisor_JSON.wells_revisor_json_core import review_json_pair
 
 
 def load_last_dir():
@@ -316,13 +318,19 @@ class WellsManager(tk.Tk):
             self.review_docx_button = self._tool_button(
                 body, "▣  Revisar DOCX", lambda: self.choose_and_review("docx")
             )
-            self.blindagem_button = self._tool_button(
-                body, "▣  Gerenciar blindagem", self.open_blindagem
-            )
 
-            # A revisão JSON pareada será integrada depois da persistência,
-            # CRUD e política explícita de conflitos.
-        return self._open_tool_window("revisor", "Revisor", build, "260x180")
+            spacer = tk.Frame(body, bg="#222222", height=7)
+            spacer.pack(fill="x")
+            self.review_json_txt_button = self._tool_button(
+                body, "▣  Revisar JSON/TXT", lambda: self.choose_and_review_json("txt")
+            )
+            self.review_json_docx_button = self._tool_button(
+                body, "▣  Revisar JSON/DOCX", lambda: self.choose_and_review_json("docx")
+            )
+            self.blindagem_button = self._tool_button(
+                body, "▣  Gerenciar blindagem JSON", self.open_blindagem
+            )
+        return self._open_tool_window("revisor", "Revisor", build, "280x260")
 
     def _blindagem_path(self):
         # No executável fica fisicamente ao lado do Wells Manager.exe.
@@ -1043,6 +1051,65 @@ class WellsManager(tk.Tk):
             self._log(f"[OK] Saída: {result['output']}")
             messagebox.showinfo(APP, f"Revisão concluída.\n\n{result['output']}")
         self._run_background(worker, done, "Status: Erro na revisão.")
+
+    def choose_and_review_json(self, fmt):
+        """Aciona somente o Revisor JSON independente; o fluxo RPY não participa."""
+        if self.busy:
+            return
+        ext = ".txt" if fmt == "txt" else ".docx"
+        types = [("Documento TXT", "*.txt")] if fmt == "txt" else [("Documento Word", "*.docx")]
+        translated = self._ask_openfilename(
+            "Selecione o arquivo traduzido JSON para revisar",
+            types + [("Todos os arquivos", "*.*")]
+        )
+        if not translated:
+            return
+
+        translated_path = Path(translated)
+        name = translated_path.name
+        if not name.startswith("traduzido"):
+            messagebox.showwarning(
+                APP,
+                "Selecione um arquivo traduzido.txt/.docx ou traduzido_N correspondente à extração JSON."
+            )
+            return
+        native_name = "nativo" + name[len("traduzido"):]
+        native_path = translated_path.with_name(native_name)
+        if not native_path.is_file():
+            messagebox.showwarning(
+                APP,
+                f"Não encontrei o par nativo correspondente:\n\n{native_path}"
+            )
+            return
+
+        self.progress["value"] = 0
+        self.status_var.set("Status: Preparando revisão JSON pareada...")
+        self._begin_log_session("REVISOR JSON")
+        self._log(f"Nativo JSON: {native_path}")
+        self._log(f"Traduzido JSON: {translated_path}")
+
+        def worker():
+            return review_json_pair(
+                native_path,
+                translated_path,
+                REVISOR_JSON_DIR,
+                blindagem_path=self._blindagem_path(),
+                progress=self._revisor_progress,
+            )
+
+        def done(result):
+            self.progress["value"] = 100
+            self.status_var.set(f"Status: {result['records']} registros JSON revisados.")
+            self._log(f"[OK] Revisão JSON concluída: {result['records']} registros.")
+            self._log(f"[OK] Registros alterados: {result['changed']}.")
+            self._log(f"[OK] Registros blindados exatos: {result['protected_records']}.")
+            self._log(f"[INFO] Conflitos sem prioridade automática: {result['conflict_records']}.")
+            self._log(f"[OK] Tokens Ren'Py preservados: {result['tokens']}.")
+            self._log(f"[OK] Nativo preservado: {result['native_unchanged']}")
+            self._log(f"[OK] Saída: {result['output']}")
+            messagebox.showinfo(APP, f"Revisão JSON concluída.\n\n{result['output']}")
+
+        self._run_background(worker, done, "Status: Erro na revisão JSON.")
 
     def _revisor_progress(self, value, text=None, log=None):
         self.events.put(("translator_progress", (value, text)))
