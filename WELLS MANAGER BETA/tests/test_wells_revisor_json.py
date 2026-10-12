@@ -79,13 +79,13 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         self.assertEqual(result["unresolved_names"], [])
         self.assertEqual(before, after)
 
-    def test_nome_destruido_em_registro_composto_fica_pendente(self):
+    def test_nome_destruido_em_composto_sem_classificacao_total_fica_pendente(self):
         td, result, before, after, lines = self._pair(
-            ["Commander Gaius"], ["Comandante Go"],
+            ["Commander Gaius arrives"], ["Comandante Go chega"],
             blindados=["Gaius"], traduziveis=["Commander"]
         )
         self.addCleanup(td.cleanup)
-        self.assertEqual(lines, ['"Comandante Go"'])
+        self.assertEqual(lines, ['"Comandante Go chega"'])
         self.assertEqual(result["protected_names"], 0)
         self.assertEqual(result["reconstructed_names"], 0)
         self.assertEqual(len(result["unresolved_names"]), 1)
