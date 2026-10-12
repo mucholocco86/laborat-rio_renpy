@@ -543,10 +543,10 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
     restaurado exatamente com a grafia cadastrada. O restante do registro
     continua revisável.
 
-    Se o termo existe no NATIVO mas já foi destruído pela tradução automática,
-    esta camada conservadora não tenta adivinhar sua posição: registra o caso
-    em unresolved_names. A reconstrução semântica nativo↔traduzido poderá
-    tratar esses casos posteriormente.
+    Se o NATIVO inteiro for exatamente um termo blindado destruído pela tradução,
+    a restauração é determinística e o termo é recuperado. Em registros compostos,
+    esta camada não adivinha a posição do nome: registra o caso em unresolved_names
+    para a reconstrução nativo↔traduzido posterior.
 
     NOMES_TRADUZIVEIS continuam explicitamente livres para revisão. Não existe
     inferência automática de nomes e conflitos entre listas não recebem
@@ -591,6 +591,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
     protected_records = 0
     protected_names = 0
     unresolved_names = []
+    reconstructed_names = 0
     token_count = 0
     conflict_records = 0
     total = len(natives)
@@ -608,6 +609,26 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         protected_text, manual_tokens = _protect_manual_terms(text, terms)
         present = {term.casefold() for _marker, term in manual_tokens}
         missing = [term for term in terms if term.casefold() not in present]
+
+        # Caso determinístico: o registro NATIVO inteiro é exatamente um termo
+        # blindado. Se a tradução automática o destruiu (ex.: Dalen -> O Vale),
+        # não há posição semântica a inferir: o valor correto é o próprio termo.
+        reconstructed = []
+        if missing:
+            native_stripped = native.strip()
+            exact_missing = [
+                term for term in missing
+                if native_stripped.casefold() == term.casefold()
+            ]
+            if len(exact_missing) == 1:
+                term = exact_missing[0]
+                marker = f"__WELLS_NAME_{len(manual_tokens):06d}__"
+                protected_text = marker
+                manual_tokens.append((marker, term))
+                present.add(term.casefold())
+                reconstructed.append(term)
+                missing = [x for x in missing if x.casefold() != term.casefold()]
+
         for term in missing:
             unresolved_names.append({
                 "record": idx,
@@ -624,6 +645,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         if manual_tokens:
             protected_records += 1
             protected_names += len(manual_tokens)
+        reconstructed_names += len(reconstructed)
 
         encoded = _encode_record(reviewed, quoted)
         if encoded != translated_record:
@@ -650,6 +672,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         "protected_records": protected_records,
         "protected_names": protected_names,
         "unresolved_names": unresolved_names,
+        "reconstructed_names": reconstructed_names,
         "conflict_records": conflict_records,
         "tokens": token_count,
         "native_unchanged": str(native_path),
