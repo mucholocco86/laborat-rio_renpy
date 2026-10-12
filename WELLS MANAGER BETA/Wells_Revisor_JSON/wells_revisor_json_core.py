@@ -534,6 +534,80 @@ def _restore_manual_terms(text: str, tokens):
     return text
 
 
+def _lexical_slots(text: str):
+    """Separa palavras e o esqueleto não lexical sem interpretar semântica."""
+    matches = list(WORD_RE.finditer(text))
+    words = [m.group(0) for m in matches]
+    separators = []
+    last = 0
+    for m in matches:
+        separators.append(text[last:m.start()])
+        last = m.end()
+    separators.append(text[last:])
+    return words, separators, matches
+
+
+def _reconstruct_composite_slot(native: str, translated: str, missing,
+                                blindados, traduziveis):
+    """Reconstrói UM nome ausente apenas por alinhamento estrutural manual.
+
+    A regra não tenta descobrir traduções. Ela só é válida quando:
+    - há exatamente um blindado ausente;
+    - todos os termos cadastrados envolvidos são uma única unidade lexical;
+    - cada palavra do nativo foi classificada manualmente como blindada ou
+      traduzível;
+    - nativo e traduzido mantêm a mesma quantidade de slots lexicais e o mesmo
+      esqueleto de separadores.
+
+    Assim, o slot correspondente ao nome ausente é determinado pela estrutura,
+    não por semelhança entre a tradução automática e o nome original.
+    """
+    if len(missing) != 1:
+        return None
+
+    term = missing[0]
+    if WORD_RE.fullmatch(term) is None:
+        return None
+
+    native_words, native_sep, _ = _lexical_slots(native)
+    translated_words, translated_sep, translated_matches = _lexical_slots(translated)
+    if not native_words or len(native_words) != len(translated_words):
+        return None
+    if native_sep != translated_sep:
+        return None
+
+    blind_keys = {
+        x.casefold() for x in blindados
+        if WORD_RE.fullmatch(x) is not None
+    }
+    trans_keys = {
+        x.casefold() for x in traduziveis
+        if WORD_RE.fullmatch(x) is not None
+    }
+    classified = blind_keys | trans_keys
+    if any(word.casefold() not in classified for word in native_words):
+        return None
+
+    target_positions = [
+        i for i, word in enumerate(native_words)
+        if word.casefold() == term.casefold()
+    ]
+    if len(target_positions) != 1:
+        return None
+    target = target_positions[0]
+
+    # Blindados que não são o alvo precisam sobreviver no próprio slot. Isso
+    # impede que um rearranjo silencioso de nomes seja tratado como alinhado.
+    for i, word in enumerate(native_words):
+        key = word.casefold()
+        if i != target and key in blind_keys:
+            if translated_words[i].casefold() != key:
+                return None
+
+    m = translated_matches[target]
+    return translated[:m.start()] + term + translated[m.end():]
+
+
 def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
                      blindagem_path: Path | None = None, progress=None):
     """Revisa o traduzido usando o nativo como âncora sem congelar o registro.
@@ -544,9 +618,10 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
     continua revisável.
 
     Se o NATIVO inteiro for exatamente um termo blindado destruído pela tradução,
-    a restauração é determinística e o termo é recuperado. Em registros compostos,
-    esta camada não adivinha a posição do nome: registra o caso em unresolved_names
-    para a reconstrução nativo↔traduzido posterior.
+    a restauração é determinística e o termo é recuperado. Em registro composto,
+    só há reconstrução quando todos os slots nativos foram classificados
+    manualmente e o par preserva estrutura lexical equivalente; fora disso, o
+    caso permanece em unresolved_names.
 
     NOMES_TRADUZIVEIS continuam explicitamente livres para revisão. Não existe
     inferência automática de nomes e conflitos entre listas não recebem
@@ -579,6 +654,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         LISTA_BLINDADOS: [], LISTA_TRADUZIVEIS: []
     }
     blindados = list(lists[LISTA_BLINDADOS])
+    traduziveis = list(lists[LISTA_TRADUZIVEIS])
     overlap = {x.casefold() for x in conflitos(lists)}
 
     try:
@@ -610,9 +686,8 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         present = {term.casefold() for _marker, term in manual_tokens}
         missing = [term for term in terms if term.casefold() not in present]
 
-        # Caso determinístico: o registro NATIVO inteiro é exatamente um termo
-        # blindado. Se a tradução automática o destruiu (ex.: Dalen -> O Vale),
-        # não há posição semântica a inferir: o valor correto é o próprio termo.
+        # Caso determinístico 1: o registro NATIVO inteiro é exatamente um
+        # termo blindado destruído pela tradução.
         reconstructed = []
         if missing:
             native_stripped = native.strip()
@@ -622,12 +697,25 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
             ]
             if len(exact_missing) == 1:
                 term = exact_missing[0]
-                marker = f"__WELLS_NAME_{len(manual_tokens):06d}__"
-                protected_text = marker
-                manual_tokens.append((marker, term))
-                present.add(term.casefold())
+                text = term
                 reconstructed.append(term)
                 missing = [x for x in missing if x.casefold() != term.casefold()]
+
+        # Caso determinístico 2: registro composto integralmente classificado
+        # pelo usuário e com slots lexicais estruturalmente alinhados.
+        if missing:
+            rebuilt = _reconstruct_composite_slot(
+                native, text, missing, blindados, traduziveis
+            )
+            if rebuilt is not None:
+                term = missing[0]
+                text = rebuilt
+                reconstructed.append(term)
+                missing = []
+
+        # A proteção é refeita depois de qualquer reconstrução para que o nome
+        # recuperado também atravesse a revisão linguística como token opaco.
+        protected_text, manual_tokens = _protect_manual_terms(text, terms)
 
         for term in missing:
             unresolved_names.append({
