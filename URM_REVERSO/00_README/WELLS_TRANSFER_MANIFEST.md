@@ -27,7 +27,7 @@ A nova conversa deve agir como continuidade do mesmo parceiro técnico: preserva
 
 Repositório: `mucholocco86/laborat-rio_renpy`
 
-Commit histórico de referência: `81397ad93ae4a038f6b28a0668338aab5db6834d`
+Commit histórico de referência no repositório anterior `mucholocco86/modulos`: `81397ad93ae4a038f6b28a0668338aab5db6834d` (não presumir que esse SHA pertença ao novo repositório).
 
 ### Não modificar
 
