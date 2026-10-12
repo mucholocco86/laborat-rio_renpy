@@ -9,7 +9,7 @@ RPY_DIR = ROOT / "Wells_Revisor"
 if str(RPY_DIR) not in sys.path:
     sys.path.insert(0, str(RPY_DIR))
 
-from wells_revisor_core import review_text, review_file
+from wells_revisor_core import review_text, review_file, diagnosticar_texto
 from wells_guia_ptbr import validar_revisao
 
 
@@ -78,6 +78,23 @@ class RevisorRpyLinguisticaTests(unittest.TestCase):
             self.assertEqual(result["records"], 3)
             self.assertGreaterEqual(result["tokens"], 2)
 
+
+    def test_corpus_real_diagnostica_sem_reescrever_parentesco_ambiguo(self):
+        casos = {
+            "Seu Mãe O nome de é Vivian Wells.": {"concordancia_possessivo", "ordem_nome_quebrada"},
+            "Você é dela Filho e você se dirigirá a ela como Mãe.": {"parentesco_pos_pronome"},
+            "O nome dela é Ariel Ela é sua filha mais nova. Irmã E você é mais velho que ela. Irmão.": {"fragmento_parentesco"},
+        }
+        for original, esperados in casos.items():
+            with self.subTest(original=original):
+                codigos = {x["code"] for x in diagnosticar_texto(original)}
+                self.assertTrue(esperados.issubset(codigos))
+                out, _, _ = review_text(original)
+                self.assertEqual(out, original)
+
+    def test_diagnostico_nao_marca_parentesco_normal(self):
+        self.assertEqual(diagnosticar_texto("Sua mãe se chama Vivian Wells."), [])
+        self.assertEqual(diagnosticar_texto("Você é filho dela."), [])
 
 if __name__ == "__main__":
     unittest.main()
