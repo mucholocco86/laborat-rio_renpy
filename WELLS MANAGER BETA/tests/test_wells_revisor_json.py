@@ -14,7 +14,7 @@ if str(JSON_DIR) not in sys.path:
 from wells_blindagem_json import (
     LISTA_BLINDADOS, LISTA_TRADUZIVEIS, salvar_listas
 )
-from wells_revisor_json_core import review_json_pair
+from wells_revisor_json_core import review_json_pair, diagnosticar_par_linguistico
 
 
 class RevisorJsonIndependenteTests(unittest.TestCase):
@@ -297,6 +297,38 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         self.assertEqual(result["conflict_records"], 1)
         self.assertEqual(before, after)
 
+
+    def test_corpus_real_detecta_relacao_aberta_especificada(self):
+        issues = diagnosticar_par_linguistico(
+            "She's your younger... (Enter relationship - Default: [a_mc_rel])",
+            "Ela é sua filha mais nova... (Insira o tipo de relacionamento - Padrão: [a_mc_rel])",
+        )
+        self.assertIn("relacao_aberta_especificada", {x["code"] for x in issues})
+
+    def test_corpus_real_detecta_call_como_ligar(self):
+        issues = diagnosticar_par_linguistico(
+            "You call [a_name] and/or [b_name] your ...",
+            "Você liga [a_name] e/ou [b_name] seu...",
+        )
+        self.assertIn("call_falso_cognato", {x["code"] for x in issues})
+
+    def test_corpus_real_detecta_relacao_pronominal_quebrada(self):
+        issues = diagnosticar_par_linguistico(
+            "So I am her ...",
+            "Então eu sou ela...",
+        )
+        self.assertIn("relacao_pronominal_quebrada", {x["code"] for x in issues})
+
+    def test_review_pair_reporta_diagnostico_sem_retraduzir(self):
+        td, result, before, after, lines = self._pair(
+            ["She's your older..."],
+            ["Ela é sua irmã mais velha..."],
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Ela é sua irmã mais velha..."'])
+        self.assertEqual(len(result["linguistic_issues"]), 1)
+        self.assertEqual(result["linguistic_issues"][0]["code"], "relacao_aberta_especificada")
+        self.assertEqual(before, after)
 
 if __name__ == "__main__":
     unittest.main()
