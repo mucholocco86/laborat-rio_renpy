@@ -330,5 +330,21 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         self.assertEqual(result["linguistic_issues"][0]["code"], "relacao_aberta_especificada")
         self.assertEqual(before, after)
 
+    def test_corpus_fisico_thief_of_hearts_variantes_reais(self):
+        casos = (
+            ("She's your younger... (Enter relationship - Default:", "Ela é sua mais nova... (Insira o tipo de relacionamento - Padrão:", set()),
+            ("She's your younger...", "Ela é sua filha mais nova...", {"relacao_aberta_especificada"}),
+            ("She's your older... (Enter relationship - Default:", "Ela é sua irmã mais velha... (Insira o tipo de relacionamento - Padrão:", {"relacao_aberta_especificada"}),
+            ("She's your older...", "Ela é sua irmã mais velha...", {"relacao_aberta_especificada"}),
+            ("So I am her ... (Enter relationship - Default:", "Então eu sou ela... (Inserir relação - Padrão:", {"relacao_pronominal_quebrada"}),
+            ("So I am her ...", "Então eu sou ela...", {"relacao_pronominal_quebrada"}),
+            ("You call [a_name] and/or [b_name] your ...", "Você liga [a_name] e/ou [b_name] seu...", {"call_falso_cognato"}),
+            ("You call [v_name] and/or [vic_name] your ...", "Você liga [v_name] e/ou [vic_name] seu...", {"call_falso_cognato"}),
+        )
+        for native, translated, esperados in casos:
+            with self.subTest(native=native, translated=translated):
+                codigos = {x["code"] for x in diagnosticar_par_linguistico(native, translated)}
+                self.assertEqual(codigos, esperados)
+
 if __name__ == "__main__":
     unittest.main()
