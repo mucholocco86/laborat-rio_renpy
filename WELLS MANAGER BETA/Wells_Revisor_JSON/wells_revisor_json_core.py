@@ -498,12 +498,22 @@ def _term_pattern(term: str):
 
 
 def _native_blindados(native: str, blindados, overlap):
-    """Retorna apenas termos explicitamente cadastrados encontrados no NATIVO."""
+    """Retorna termos manuais encontrados somente no texto humano do NATIVO.
+
+    Conteúdo estrutural protegido pelo isolador Ren'Py (por exemplo [variavel]
+    e {tag}) não participa da blindagem nominal. Isso evita transformar um
+    identificador estrutural apenas porque seu texto coincide com um nome
+    cadastrado pelo usuário.
+    """
+    texto_humano = "".join(
+        seg.valor if seg.tipo != "protegido" else " "
+        for seg in segmentar(native)
+    )
     encontrados = []
     for term in blindados:
         if term.casefold() in overlap:
             continue
-        if _term_pattern(term).search(native):
+        if _term_pattern(term).search(texto_humano):
             encontrados.append(term)
     # Termos maiores primeiro evita sobreposição acidental entre cadastros.
     return sorted(encontrados, key=len, reverse=True)
