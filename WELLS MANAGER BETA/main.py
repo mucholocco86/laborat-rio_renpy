@@ -1102,7 +1102,18 @@ class WellsManager(tk.Tk):
             self.status_var.set(f"Status: {result['records']} registros JSON revisados.")
             self._log(f"[OK] Revisão JSON concluída: {result['records']} registros.")
             self._log(f"[OK] Registros alterados: {result['changed']}.")
-            self._log(f"[OK] Registros blindados exatos: {result['protected_records']}.")
+            self._log(f"[OK] Registros com termos blindados: {result['protected_records']}.")
+            self._log(f"[OK] Termos blindados preservados/restaurados: {result['protected_names']}.")
+            self._log(f"[OK] Nomes reconstruídos com correspondência determinística: {result.get('reconstructed_names', 0)}.")
+            unresolved = result.get("unresolved_names", [])
+            self._log(f"[INFO] Nomes blindados ainda não resolvidos: {len(unresolved)}.")
+            for item in unresolved[:10]:
+                self._log(
+                    f"[PENDENTE] Registro {item['record']}: {item['term']} | "
+                    f"Nativo: {item['native']} | Traduzido: {item['translated']}"
+                )
+            if len(unresolved) > 10:
+                self._log(f"[INFO] ... e mais {len(unresolved) - 10} caso(s) pendente(s).")
             self._log(f"[INFO] Conflitos sem prioridade automática: {result['conflict_records']}.")
             self._log(f"[OK] Tokens Ren'Py preservados: {result['tokens']}.")
             self._log(f"[OK] Nativo preservado: {result['native_unchanged']}")
