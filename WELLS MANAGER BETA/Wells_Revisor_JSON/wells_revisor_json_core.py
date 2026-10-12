@@ -618,6 +618,33 @@ def _reconstruct_composite_slot(native: str, translated: str, missing,
     return translated[:m.start()] + term + translated[m.end():]
 
 
+
+def diagnosticar_par_linguistico(native: str, translated: str):
+    """Diagnósticos que só são seguros porque o JSON possui nativo + tradução.
+
+    Não retraduz nem corrige. O nativo funciona apenas como âncora estrutural
+    para apontar quando a tradução tornou específica uma relação originalmente
+    aberta ou escolheu um sentido incompatível com a construção.
+    """
+    issues = []
+    n = native.casefold()
+    tr = translated.casefold()
+
+    def add(code, message):
+        issues.append({"code": code, "message": message})
+
+    if ("she's your younger" in n or "she's your older" in n):
+        if re.search(r"\b(?:filha|irmã)\b", tr):
+            add("relacao_aberta_especificada", "A tradução fixa um parentesco onde o nativo deixa a relação aberta.")
+
+    if re.search(r"\byou\s+call\b", n) and re.search(r"\bvoc[eê]\s+liga\b", tr):
+        add("call_falso_cognato", "Em construção de tratamento/relação, 'call' foi traduzido como 'ligar'.")
+
+    if "so i am her" in n and re.search(r"\b(?:eu\s+)?sou\s+ela\b", tr):
+        add("relacao_pronominal_quebrada", "A tradução perdeu a construção relacional equivalente a 'I am her ...'.")
+
+    return issues
+
 def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
                      blindagem_path: Path | None = None, progress=None):
     """Revisa o traduzido usando o nativo como âncora sem congelar o registro.
@@ -680,11 +707,15 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
     reconstructed_names = 0
     token_count = 0
     conflict_records = 0
+    linguistic_issues = []
     total = len(natives)
 
     for idx, (native_record, translated_record) in enumerate(zip(natives, translated), 1):
         native, _native_quoted = _decode_record(native_record)
         text, quoted = _decode_record(translated_record)
+
+        for issue in diagnosticar_par_linguistico(native, text):
+            linguistic_issues.append({"record": idx, **issue, "native": native, "translated": text})
 
         terms = _native_blindados(native, blindados, overlap)
         if overlap and any(_term_pattern(term).search(native)
@@ -772,6 +803,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         "unresolved_names": unresolved_names,
         "reconstructed_names": reconstructed_names,
         "conflict_records": conflict_records,
+        "linguistic_issues": linguistic_issues,
         "tokens": token_count,
         "native_unchanged": str(native_path),
     }
