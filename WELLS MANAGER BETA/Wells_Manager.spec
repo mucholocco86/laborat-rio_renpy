@@ -13,6 +13,7 @@ a = Analysis(
         ('Wells_Extractor', 'Wells_Extractor'),
         ('Wells_Translator', 'Wells_Translator'),
         ('Wells_Revisor', 'Wells_Revisor'),
+        ('Wells_Revisor_JSON', 'Wells_Revisor_JSON'),
         ('wells.ico', '.'),
     ] + docx_datas,
     hiddenimports=docx_hiddenimports + [
@@ -20,7 +21,10 @@ a = Analysis(
         'Wells_Translator.wells_translator_core',
         'Wells_Translator.wells_json_core',
         'Wells_Revisor.wells_revisor_core',
+        'Wells_Revisor_JSON.wells_revisor_json_core',
+        'Wells_Revisor_JSON.wells_blindagem_json',
         'wells_guia_ptbr', 'wells_isolador_renpy', 'wells_base_linguistica',
+        'wells_guia_ptbr_json', 'wells_isolador_renpy_json', 'wells_base_linguistica_json',
         'argparse', 'glob', 'struct', 'zlib', 'base64', 'pickletools',
         'types', 'inspect', 'hashlib', 're', 'operator', 'io', 'contextlib',
         'copy', 'multiprocessing',
