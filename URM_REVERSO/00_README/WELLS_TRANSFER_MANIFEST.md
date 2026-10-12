@@ -25,7 +25,7 @@ A nova conversa deve agir como continuidade do mesmo parceiro técnico: preserva
 
 ## 2. Repositório e proteções
 
-Repositório: `mucholocco86/modulos`
+Repositório: `mucholocco86/laborat-rio_renpy`
 
 Commit histórico de referência: `81397ad93ae4a038f6b28a0668338aab5db6834d`
 
@@ -334,6 +334,14 @@ Registrar descobertas importantes no GitHub. O projeto deve sobreviver à troca 
 > **O conhecimento do projeto deve sobreviver à conversa.**
 
 ---
+
+## 17A. Migração para o laboratório canônico (outubro de 2026)
+
+O repositório canônico é agora `mucholocco86/laborat-rio_renpy`. O antigo `mucholocco86/modulos` fica preservado como origem de comparação/histórico.
+
+A comparação recursiva de `URM_REVERSO/` encontrou 260 entradas em cada repositório, sem caminhos exclusivos e sem diferenças de SHA. Os arquivos-fonte centrais do SDK comparados (`ast.py`, `exports.py`, `python.py`, `game.py`, `ui.py`, `display/core.py`, `loader.py`, `script.py` e `common/00action_file.rpy`) também têm hashes idênticos. O SDK completo, porém, não é byte a byte idêntico: o laboratório contém arquivos adicionais (incluindo o projeto de exemplo `the_question/` e dados em `tmp/`) e diferenças em arquivos compilados e diretórios. As diferenças textuais examinadas normalizam para conteúdo igual após normalização de finais de linha. Ver `MIGRACAO_LABORATORIO_COMPARACAO.md`.
+
+Não remover nem sincronizar automaticamente as diferenças do SDK. O usuário informa que fez melhorias no laboratório; preservar a cópia até que cada diferença relevante seja compreendida.
 
 ## 18. Estado atual
 
