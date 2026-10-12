@@ -8,7 +8,7 @@ import importlib
 from datetime import datetime
 from pathlib import Path
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, simpledialog
 
 APP = "Wells Manager"
 SCRIPT_EXTENSIONS = {".rpy", ".rpyc", ".py", ".pyo", ".rpym", ".rpymc", ".txt", ".ttf", ".otf"}
@@ -38,7 +38,17 @@ from Wells_Translator.wells_translator_core import (
     export_full, export_blocks, inject_translations,
     export_full_docx, export_blocks_docx, inject_docx_translations,
 )
+from Wells_Translator.wells_json_core import (
+    export_json_full_txt, export_json_blocks_txt,
+    export_json_full_docx, export_json_blocks_docx,
+    inject_json_translations,
+)
 from Wells_Revisor.wells_revisor_core import review_file
+from Wells_Revisor.wells_blindagem import (
+    LISTA_BLINDADOS, LISTA_TRADUZIVEIS,
+    carregar_listas, adicionar_termo, editar_termo, excluir_termo,
+    conflitos,
+)
 
 
 def load_last_dir():
@@ -87,9 +97,18 @@ class WellsManager(tk.Tk):
         self.pending_tl = None
         self.pending_session = None
         self.pending_format = None
+        self.pending_json = None
+        self.pending_json_session = None
+        self.pending_json_format = None
+        self.pending_json_button = None
+        self.pending_json_original_text = None
+        self.pending_json_original_command = None
         self.active_manual_button = None
         self.active_manual_original_text = None
         self.active_manual_original_command = None
+        # Subpainéis não modais. Permanecem vivos/minimizáveis para que, por
+        # exemplo, o Extractor aguarde enquanto o usuário trabalha no Revisor.
+        self.tool_windows = {}
         self.persistent_log_path = app_dir() / "Wells_Manager.log"
         self.status_var = tk.StringVar(value="Status: Nenhuma operação iniciada.")
         self.status = self.status_var
@@ -131,20 +150,17 @@ class WellsManager(tk.Tk):
             frame.grid_columnconfigure(0, weight=1)
 
         self.all_buttons = []
-        self.btn_rpyc_file = self._button(left, "▣  RPYC → RPY", self.choose_rpyc)
-        self.btn_rpyc_folder = self._button(left, "□  Pasta RPYC → RPY", self.choose_rpyc_folder)
-        self.btn_rpa_file = self._button(left, "◉  Extrair RPA", self.choose_rpa)
-        self.btn_rpa_folder = self._button(left, "□  Pasta RPA", self.choose_rpa_folder)
-        self.btn_rpa_create = self._button(left, "◉  Compactar RPA", self.choose_rpa_create)
+
+        # A janela principal agora é um painel de categorias. As operações já
+        # validadas continuam usando os mesmos callbacks, apenas foram movidas
+        # para subpainéis não modais.
+        self.decompiler_button = self._button(left, "▣  Decompilador", self.open_decompiler)
+        self.rpa_tools_button = self._button(left, "▣  Ferramentas RPA", self.open_rpa_tools)
 
         self.copy_project_button = self._button(center, "□  Copiar projeto", self.copy_project)
-        self.full_txt_button = self._button(center, "▣  TXT completo", self.extract_full_txt)
-        self.blocks_txt_button = self._button(center, "□  TXT em blocos", self.extract_blocks_txt)
-        self.full_docx_button = self._button(center, "▣  DOCX completo", self.extract_full_docx)
-        self.blocks_docx_button = self._button(center, "□  DOCX em blocos", self.extract_blocks_docx)
+        self.translations_button = self._button(center, "▣  Extrair traduções", self.open_translations)
 
-        self.review_txt_button = self._button(right, "▣  Revisar TXT", lambda: self.choose_and_review("txt"))
-        self.review_docx_button = self._button(right, "▣  Revisar DOCX", lambda: self.choose_and_review("docx"))
+        self.revisor_button = self._button(right, "▣  Revisar tradução", self.open_revisor)
 
         info = tk.Frame(self, bg="#222222")
         info.grid(row=3, column=0, sticky="ew", padx=26, pady=(11, 0))
@@ -178,6 +194,269 @@ class WellsManager(tk.Tk):
         b.pack(fill="x", pady=3)
         self.all_buttons.append(b)
         return b
+
+    def _tool_button(self, parent, text, command):
+        """Botão de subpainel; participa do bloqueio global durante operações."""
+        return self._button(parent, text, command)
+
+    def _open_tool_window(self, key, title, builder, geometry):
+        """Abre/restaura uma única instância não modal de cada ferramenta."""
+        win = self.tool_windows.get(key)
+        if win is not None:
+            try:
+                if win.winfo_exists():
+                    win.deiconify()
+                    win.lift()
+                    win.focus_force()
+                    return win
+            except tk.TclError:
+                pass
+
+        win = tk.Toplevel(self)
+        win.title(title)
+        win.geometry(geometry)
+        win.resizable(True, True)
+        win.configure(bg="#222222")
+        try:
+            win.iconbitmap(str(ROOT / "wells.ico"))
+        except Exception:
+            pass
+
+        self.tool_windows[key] = win
+
+        def close_window():
+            # Fechar a janela não apaga o estado de extração/reinjeção mantido
+            # pelo WellsManager; apenas destrói esta representação visual.
+            self.tool_windows.pop(key, None)
+            win.destroy()
+
+        win.protocol("WM_DELETE_WINDOW", close_window)
+        body = tk.Frame(win, bg="#222222")
+        body.pack(fill="both", expand=True, padx=15, pady=14)
+        builder(body)
+        return win
+
+    def open_decompiler(self):
+        def build(body):
+            self.btn_rpyc_file = self._tool_button(body, "▣  RPYC → RPY", self.choose_rpyc)
+            self.btn_rpyc_folder = self._tool_button(body, "□  Pasta RPYC → RPY", self.choose_rpyc_folder)
+        return self._open_tool_window("decompiler", "Decompilador", build, "228x130")
+
+    def open_rpa_tools(self):
+        def build(body):
+            self.btn_rpa_file = self._tool_button(body, "◉  Extrair RPA", self.choose_rpa)
+            self.btn_rpa_folder = self._tool_button(body, "□  Pasta RPA", self.choose_rpa_folder)
+            self.btn_rpa_create = self._tool_button(body, "◉  Compactar RPA", self.choose_rpa_create)
+        return self._open_tool_window("rpa", "Ferramentas RPA", build, "228x165")
+
+    def open_translations(self):
+        def build(body):
+            self.full_txt_button = self._tool_button(body, "▣  TL completa → TXT", self.extract_full_txt)
+            self.blocks_txt_button = self._tool_button(body, "□  TL em blocos → TXT", self.extract_blocks_txt)
+            self.full_docx_button = self._tool_button(body, "▣  TL completa → DOCX", self.extract_full_docx)
+            self.blocks_docx_button = self._tool_button(body, "□  TL em blocos → DOCX", self.extract_blocks_docx)
+
+            spacer = tk.Frame(body, bg="#222222", height=7)
+            spacer.pack(fill="x")
+            self.json_full_txt_button = self._tool_button(body, "▣  JSON completa → TXT", self.extract_json_full_txt)
+            self.json_blocks_txt_button = self._tool_button(body, "□  JSON em blocos → TXT", self.extract_json_blocks_txt)
+            self.json_full_docx_button = self._tool_button(body, "▣  JSON completa → DOCX", self.extract_json_full_docx)
+            self.json_blocks_docx_button = self._tool_button(body, "□  JSON em blocos → DOCX", self.extract_json_blocks_docx)
+
+            if self.pending_tl is not None and self.pending_format is not None:
+                waiting_button = {
+                    ("txt", "full"): self.full_txt_button,
+                    ("txt", "blocks"): self.blocks_txt_button,
+                    ("docx", "full"): self.full_docx_button,
+                    ("docx", "blocks"): self.blocks_docx_button,
+                }
+                # O modo (full/blocks) não era persistido separadamente na base.
+                # Identificamos o botão anterior quando ele ainda existe; se a
+                # janela foi fechada, oferecemos a injeção no primeiro botão do
+                # formato para não perder a sessão pendente.
+                previous_text = self.active_manual_original_text or ""
+                mode = "blocks" if "blocos" in previous_text.lower() else "full"
+                button = waiting_button[(self.pending_format, mode)]
+                original_command = button.cget("command")
+                self.active_manual_button = button
+                self.active_manual_original_text = button.cget("text")
+                self.active_manual_original_command = (
+                    self.extract_blocks_txt if (self.pending_format, mode) == ("txt", "blocks") else
+                    self.extract_full_txt if (self.pending_format, mode) == ("txt", "full") else
+                    self.extract_blocks_docx if mode == "blocks" else self.extract_full_docx
+                )
+                button.configure(text="Aguardando tradução...", command=self.inject)
+
+            if self.pending_json is not None and self.pending_json_format is not None:
+                previous = self.pending_json_original_text or ""
+                mode = "blocks" if "blocos" in previous.lower() else "full"
+                json_button = {
+                    ("txt", "full"): self.json_full_txt_button,
+                    ("txt", "blocks"): self.json_blocks_txt_button,
+                    ("docx", "full"): self.json_full_docx_button,
+                    ("docx", "blocks"): self.json_blocks_docx_button,
+                }[(self.pending_json_format, mode)]
+                self.pending_json_button = json_button
+                self.pending_json_original_text = json_button.cget("text")
+                self.pending_json_original_command = {
+                    ("txt", "full"): self.extract_json_full_txt,
+                    ("txt", "blocks"): self.extract_json_blocks_txt,
+                    ("docx", "full"): self.extract_json_full_docx,
+                    ("docx", "blocks"): self.extract_json_blocks_docx,
+                }[(self.pending_json_format, mode)]
+                json_button.configure(text="Aguardando revisão...", command=self.inject_json)
+
+        return self._open_tool_window("translations", "Wells Extractor", build, "270x350")
+
+    def open_revisor(self):
+        def build(body):
+            self.review_txt_button = self._tool_button(
+                body, "▣  Revisar TXT", lambda: self.choose_and_review("txt")
+            )
+            self.review_docx_button = self._tool_button(
+                body, "▣  Revisar DOCX", lambda: self.choose_and_review("docx")
+            )
+            self.blindagem_button = self._tool_button(
+                body, "▣  Gerenciar blindagem", self.open_blindagem
+            )
+
+            # A revisão JSON pareada será integrada depois da persistência,
+            # CRUD e política explícita de conflitos.
+        return self._open_tool_window("revisor", "Revisor", build, "260x180")
+
+    def _blindagem_path(self):
+        # No executável fica fisicamente ao lado do Wells Manager.exe.
+        # Em desenvolvimento, fica ao lado deste main.py.
+        return app_dir() / "blindagem.txt"
+
+    def open_blindagem(self):
+        path = self._blindagem_path()
+
+        def build(body):
+            body.pack_configure(padx=12, pady=12)
+            body.grid_columnconfigure(0, weight=1)
+            body.grid_columnconfigure(1, weight=1)
+            body.grid_rowconfigure(1, weight=1)
+
+            tk.Label(
+                body, text="Nomes blindados", bg="#222222", fg="#f0f0f0",
+                font=("Segoe UI", 10, "bold")
+            ).grid(row=0, column=0, sticky="w", padx=(0, 8))
+            tk.Label(
+                body, text="Nomes traduzíveis", bg="#222222", fg="#f0f0f0",
+                font=("Segoe UI", 10, "bold")
+            ).grid(row=0, column=1, sticky="w", padx=(8, 0))
+
+            left = tk.Frame(body, bg="#222222")
+            right = tk.Frame(body, bg="#222222")
+            left.grid(row=1, column=0, sticky="nsew", padx=(0, 8), pady=(5, 0))
+            right.grid(row=1, column=1, sticky="nsew", padx=(8, 0), pady=(5, 0))
+            for frame in (left, right):
+                frame.pack_propagate(False)
+
+            blindados_box = tk.Listbox(
+                left, bg="#2b2b2b", fg="#eeeeee", selectbackground="#555555",
+                relief="solid", bd=1, font=("Segoe UI", 10)
+            )
+            traduziveis_box = tk.Listbox(
+                right, bg="#2b2b2b", fg="#eeeeee", selectbackground="#555555",
+                relief="solid", bd=1, font=("Segoe UI", 10)
+            )
+            blindados_box.pack(fill="both", expand=True)
+            traduziveis_box.pack(fill="both", expand=True)
+
+            status = tk.StringVar(value=f"Arquivo: {path.name}")
+            tk.Label(
+                body, textvariable=status, bg="#222222", fg="#cfcfcf",
+                font=("Segoe UI", 9), anchor="w"
+            ).grid(row=3, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+
+            def refresh():
+                data = carregar_listas(path)
+                blindados_box.delete(0, "end")
+                traduziveis_box.delete(0, "end")
+                for value in data[LISTA_BLINDADOS]:
+                    blindados_box.insert("end", value)
+                for value in data[LISTA_TRADUZIVEIS]:
+                    traduziveis_box.insert("end", value)
+                overlap = conflitos(data)
+                if overlap:
+                    status.set(
+                        f"Conflito pendente: {len(overlap)} termo(s) presente(s) nas duas listas."
+                    )
+                else:
+                    status.set(f"Arquivo: {path.name}")
+
+            def selected(box):
+                indexes = box.curselection()
+                if not indexes:
+                    return None
+                return box.get(indexes[0])
+
+            def add(kind):
+                title = "Nome blindado" if kind == LISTA_BLINDADOS else "Nome traduzível"
+                value = simpledialog.askstring(title, "Digite o termo:", parent=body.winfo_toplevel())
+                if value is None:
+                    return
+                try:
+                    adicionar_termo(path, kind, value)
+                    refresh()
+                except ValueError as exc:
+                    messagebox.showwarning(APP, str(exc), parent=body.winfo_toplevel())
+
+            def edit(kind, box):
+                old = selected(box)
+                if old is None:
+                    messagebox.showinfo(APP, "Selecione uma entrada para editar.", parent=body.winfo_toplevel())
+                    return
+                value = simpledialog.askstring(
+                    "Editar entrada", "Corrija o termo:", initialvalue=old,
+                    parent=body.winfo_toplevel()
+                )
+                if value is None:
+                    return
+                try:
+                    editar_termo(path, kind, old, value)
+                    refresh()
+                except ValueError as exc:
+                    messagebox.showwarning(APP, str(exc), parent=body.winfo_toplevel())
+
+            def remove(kind, box):
+                value = selected(box)
+                if value is None:
+                    messagebox.showinfo(APP, "Selecione uma entrada para excluir.", parent=body.winfo_toplevel())
+                    return
+                if not messagebox.askyesno(
+                    APP, f'Excluir "{value}" da lista?', parent=body.winfo_toplevel()
+                ):
+                    return
+                try:
+                    excluir_termo(path, kind, value)
+                    refresh()
+                except ValueError as exc:
+                    messagebox.showwarning(APP, str(exc), parent=body.winfo_toplevel())
+
+            controls_left = tk.Frame(body, bg="#222222")
+            controls_right = tk.Frame(body, bg="#222222")
+            controls_left.grid(row=2, column=0, sticky="ew", padx=(0, 8), pady=(6, 0))
+            controls_right.grid(row=2, column=1, sticky="ew", padx=(8, 0), pady=(6, 0))
+
+            for frame, kind, box in (
+                (controls_left, LISTA_BLINDADOS, blindados_box),
+                (controls_right, LISTA_TRADUZIVEIS, traduziveis_box),
+            ):
+                tk.Button(frame, text="Adicionar", command=lambda k=kind: add(k),
+                          font=("Segoe UI", 9)).pack(side="left", expand=True, fill="x")
+                tk.Button(frame, text="Editar", command=lambda k=kind, b=box: edit(k, b),
+                          font=("Segoe UI", 9)).pack(side="left", expand=True, fill="x", padx=4)
+                tk.Button(frame, text="Excluir", command=lambda k=kind, b=box: remove(k, b),
+                          font=("Segoe UI", 9)).pack(side="left", expand=True, fill="x")
+
+            refresh()
+
+        return self._open_tool_window(
+            "blindagem", "Nomes blindados e traduzíveis", build, "650x420"
+        )
 
     # O seletor lembra o local que estava sendo EXIBIDO, não a pasta que
     # acabou de ser selecionada. Assim, se o usuário vê "game" dentro da raiz
@@ -289,10 +568,27 @@ class WellsManager(tk.Tk):
     def _set_busy(self, busy):
         self.busy = busy
         state = "disabled" if busy else "normal"
+        live_buttons = []
         for b in self.all_buttons:
-            b.configure(state=state)
+            try:
+                if b.winfo_exists():
+                    b.configure(state=state)
+                    live_buttons.append(b)
+            except tk.TclError:
+                pass
+        self.all_buttons = live_buttons
         if not busy and self.active_manual_button is not None:
-            self.active_manual_button.configure(state="normal")
+            try:
+                if self.active_manual_button.winfo_exists():
+                    self.active_manual_button.configure(state="normal")
+            except tk.TclError:
+                pass
+        if not busy and self.pending_json_button is not None:
+            try:
+                if self.pending_json_button.winfo_exists():
+                    self.pending_json_button.configure(state="normal")
+            except tk.TclError:
+                pass
 
     def _emit(self, kind, *args): self.events.put((kind, args))
     def _progress_from_worker(self, value, text=None): self.events.put(("translator_progress", (value, text)))
@@ -532,14 +828,32 @@ class WellsManager(tk.Tk):
 
     def _set_waiting(self, tl, session, fmt, button, original_text, original_command):
         if self.active_manual_button is not None and self.active_manual_button is not button:
-            self.active_manual_button.configure(text=self.active_manual_original_text, command=self.active_manual_original_command)
+            try:
+                if self.active_manual_button.winfo_exists():
+                    self.active_manual_button.configure(
+                        text=self.active_manual_original_text,
+                        command=self.active_manual_original_command
+                    )
+            except tk.TclError:
+                pass
         self.pending_tl, self.pending_session, self.pending_format = str(tl), session, fmt
         self.active_manual_button, self.active_manual_original_text, self.active_manual_original_command = button, original_text, original_command
-        button.configure(text="Aguardando tradução...", command=self.inject)
+        try:
+            if button.winfo_exists():
+                button.configure(text="Aguardando tradução...", command=self.inject)
+        except tk.TclError:
+            pass
 
     def _clear_waiting(self):
         if self.active_manual_button is not None:
-            self.active_manual_button.configure(text=self.active_manual_original_text, command=self.active_manual_original_command)
+            try:
+                if self.active_manual_button.winfo_exists():
+                    self.active_manual_button.configure(
+                        text=self.active_manual_original_text,
+                        command=self.active_manual_original_command
+                    )
+            except tk.TclError:
+                pass
         self.pending_tl = self.pending_session = self.pending_format = None
         self.active_manual_button = self.active_manual_original_text = self.active_manual_original_command = None
 
@@ -548,10 +862,10 @@ class WellsManager(tk.Tk):
         if not tl: return
         self.progress["value"] = 0
         labels = {
-            ("full","txt"): (export_full, self.full_txt_button, "▣  TXT completo", self.extract_full_txt),
-            ("blocks","txt"): (export_blocks, self.blocks_txt_button, "□  TXT em blocos", self.extract_blocks_txt),
-            ("full","docx"): (export_full_docx, self.full_docx_button, "▣  DOCX completo", self.extract_full_docx),
-            ("blocks","docx"): (export_blocks_docx, self.blocks_docx_button, "□  DOCX em blocos", self.extract_blocks_docx),
+            ("full","txt"): (export_full, self.full_txt_button, "▣  TL completa → TXT", self.extract_full_txt),
+            ("blocks","txt"): (export_blocks, self.blocks_txt_button, "□  TL em blocos → TXT", self.extract_blocks_txt),
+            ("full","docx"): (export_full_docx, self.full_docx_button, "▣  TL completa → DOCX", self.extract_full_docx),
+            ("blocks","docx"): (export_blocks_docx, self.blocks_docx_button, "□  TL em blocos → DOCX", self.extract_blocks_docx),
         }
         fn, button, original, original_command = labels[(kind, fmt)]
         self.status_var.set(f"Status: Extraindo {fmt.upper()}..."); self._log(f"Pasta TL: {tl}")
@@ -576,6 +890,118 @@ class WellsManager(tk.Tk):
     def extract_blocks_txt(self): self._extract_translation("blocks", "txt")
     def extract_full_docx(self): self._extract_translation("full", "docx")
     def extract_blocks_docx(self): self._extract_translation("blocks", "docx")
+
+    # Ferramenta JSON: fluxo independente do TL/RPY tradicional.
+    def _set_json_waiting(self, json_path, session, fmt, button, original_text, original_command):
+        if self.pending_json_button is not None and self.pending_json_button is not button:
+            try:
+                if self.pending_json_button.winfo_exists():
+                    self.pending_json_button.configure(
+                        text=self.pending_json_original_text,
+                        command=self.pending_json_original_command
+                    )
+            except tk.TclError:
+                pass
+        self.pending_json = str(Path(json_path).resolve())
+        self.pending_json_session = session
+        self.pending_json_format = fmt
+        self.pending_json_button = button
+        self.pending_json_original_text = original_text
+        self.pending_json_original_command = original_command
+        try:
+            if button.winfo_exists():
+                button.configure(text="Aguardando revisão...", command=self.inject_json)
+        except tk.TclError:
+            pass
+
+    def _clear_json_waiting(self):
+        if self.pending_json_button is not None:
+            try:
+                if self.pending_json_button.winfo_exists():
+                    self.pending_json_button.configure(
+                        text=self.pending_json_original_text,
+                        command=self.pending_json_original_command
+                    )
+            except tk.TclError:
+                pass
+        self.pending_json = self.pending_json_session = self.pending_json_format = None
+        self.pending_json_button = self.pending_json_original_text = self.pending_json_original_command = None
+
+    def _extract_json(self, kind, fmt):
+        if self.busy:
+            return
+        path = self._ask_openfilename(
+            "Selecione o JSON da tradução automática",
+            [("Arquivo JSON", "*.json"), ("Todos os arquivos", "*.*")]
+        )
+        if not path:
+            return
+
+        labels = {
+            ("full", "txt"): (export_json_full_txt, self.json_full_txt_button, "▣  JSON completa → TXT", self.extract_json_full_txt),
+            ("blocks", "txt"): (export_json_blocks_txt, self.json_blocks_txt_button, "□  JSON em blocos → TXT", self.extract_json_blocks_txt),
+            ("full", "docx"): (export_json_full_docx, self.json_full_docx_button, "▣  JSON completa → DOCX", self.extract_json_full_docx),
+            ("blocks", "docx"): (export_json_blocks_docx, self.json_blocks_docx_button, "□  JSON em blocos → DOCX", self.extract_json_blocks_docx),
+        }
+        fn, button, original, original_command = labels[(kind, fmt)]
+        self.progress["value"] = 0
+        self.status_var.set(f"Status: Extraindo JSON para {fmt.upper()}...")
+        self._begin_log_session(f"EXTRAIR JSON → {fmt.upper()}")
+        self._log(f"JSON: {path}")
+
+        def worker():
+            return fn(path, app_dir(), return_session=True, progress=self._progress_from_worker)
+
+        def done(result):
+            output, count, *rest = result
+            session = rest[-1]
+            self._set_json_waiting(path, session, fmt, button, original, original_command)
+            self.progress["value"] = 100
+            if kind == "blocks":
+                blocks = rest[0]
+                self.status_var.set(f"Status: {count} entradas JSON em {blocks} blocos {fmt.upper()}.")
+                self._log(f"[OK] Extração JSON {fmt.upper()} em blocos: {count} registros / {blocks} blocos.")
+            else:
+                self.status_var.set(f"Status: {count} entradas JSON extraídas.")
+                self._log(f"[OK] Extração JSON {fmt.upper()} completa: {count} registros.")
+                self._log(f"[OK] Arquivos: {output / ('nativo.' + fmt)}")
+                self._log(f"[OK] Arquivos: {output / ('traduzido.' + fmt)}")
+
+        self._run_background(worker, done, f"Status: Erro na extração JSON {fmt.upper()}.")
+
+    def extract_json_full_txt(self): self._extract_json("full", "txt")
+    def extract_json_blocks_txt(self): self._extract_json("blocks", "txt")
+    def extract_json_full_docx(self): self._extract_json("full", "docx")
+    def extract_json_blocks_docx(self): self._extract_json("blocks", "docx")
+
+    def inject_json(self):
+        if not self.pending_json:
+            messagebox.showinfo(APP, "Não há uma extração JSON aguardando reinjeção.")
+            return
+        fmt = self.pending_json_format
+        self.progress["value"] = 0
+        self.status_var.set("Status: Validando e reinjetando revisão no JSON...")
+        self._begin_log_session("REINJETAR JSON")
+        self._log(f"JSON: {self.pending_json}")
+
+        def worker():
+            return inject_json_translations(
+                self.pending_json,
+                app_dir(),
+                fmt,
+                session=self.pending_json_session,
+                progress=self._progress_from_worker,
+            )
+
+        def done(result):
+            count, mode = result
+            self.progress["value"] = 100
+            self.status_var.set(f"Status: {count} entradas reinjetadas no JSON.")
+            self._log(f"[OK] Injeção JSON concluída: {count} registros ({mode}).")
+            self._clear_json_waiting()
+            messagebox.showinfo(APP, f"Reinjeção JSON concluída.\n\n{count} entradas atualizadas.")
+
+        self._run_background(worker, done, "Status: Erro na reinjeção JSON.")
 
     def inject(self):
         tl = self.pending_tl or self.choose_tl("Selecione a mesma pasta TL usada na extração")
