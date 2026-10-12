@@ -42,3 +42,18 @@
 - Verificar CI e resultados dos testes existentes antes de promover qualquer nova regra à produção.
 
 **Classificação:** caminhos, variáveis, montagem `hbox` e pares citados = **COMPROVADO**; resultado do jogo em execução e correções automáticas = **PENDENTE**.
+
+
+## Validação automatizada — checkpoint 2026-10-12
+
+- CI `38301010914`, commit `109b924`: **49 testes aprovados**.
+- Os testes de diagnóstico derivados do corpus passaram tanto no RPY quanto no JSON.
+- O JSON agora expõe `linguistic_issues` sem retraduzir automaticamente os casos ambíguos.
+- Uma segunda bateria usa variantes textuais copiadas dos pares efetivamente presentes em `tl/brazil/strings.json` e `tl/brazil/strings.rpy`, inclusive um **controle negativo real**: `She's your younger... (Enter relationship - Default:` → `Ela é sua mais nova... (Insira o tipo de relacionamento - Padrão:` não deve ser marcado como parentesco inventado.
+- Commit dessa bateria física: `ec336f6`; CI ainda deve ser confirmada antes de classificá-la como TESTADA.
+
+### Evidência adicional do corpus
+
+O mesmo conceito aparece em variantes diferentes no próprio pacote: há uma tradução de `She's your younger...` sem parentesco inserido e outra com `filha`. Isso reforça que a regra deve comparar estrutura/semântica do par, e não simplesmente condenar a expressão `mais nova`.
+
+**Classificação atual:** camada de diagnóstico no checkpoint `109b924` = **TESTADO**; bateria física `ec336f6` = **PENDENTE DE CI**; autocorreção dos casos relacionais = **PENDENTE**.
