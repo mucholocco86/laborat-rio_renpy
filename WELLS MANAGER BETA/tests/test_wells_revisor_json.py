@@ -34,42 +34,68 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         lines = t.read_text(encoding="utf-8").splitlines()
         return td, result, before, after, lines
 
-    def test_blindagem_exata_restaura_registro_nativo(self):
+    def test_blindado_exato_e_restaurado_quando_sobrevive(self):
         td, result, before, after, lines = self._pair(
-            ["Christine"], ["Cristina"], blindados=["Christine"]
+            ["Christine"], ["christine"], blindados=["Christine"]
         )
         self.addCleanup(td.cleanup)
         self.assertEqual(lines, ['"Christine"'])
-        self.assertEqual(result["protected_records"], 1)
+        self.assertEqual(result["protected_names"], 1)
+        self.assertEqual(result["unresolved_names"], [])
         self.assertEqual(before, after)
 
-    def test_blindagem_nao_age_como_substring(self):
+    def test_blindagem_age_dentro_de_registro_composto_sem_congelar_unidade(self):
         td, result, before, after, lines = self._pair(
-            ["Princess Christine"], ["Princesa Cristina"], blindados=["Christine"]
+            ["Princess Christine"], ["Princesa christine"],
+            blindados=["Christine"]
         )
         self.addCleanup(td.cleanup)
-        self.assertEqual(lines, ['"Princesa Cristina"'])
-        self.assertEqual(result["protected_records"], 0)
+        self.assertEqual(lines, ['"Princesa Christine"'])
+        self.assertEqual(result["protected_records"], 1)
+        self.assertEqual(result["protected_names"], 1)
         self.assertEqual(before, after)
 
-    def test_registro_composto_precisa_ser_cadastrado_exatamente(self):
+    def test_termo_maior_nao_casa_com_parte_de_outra_palavra(self):
         td, result, before, after, lines = self._pair(
-            ["Princess Christine"], ["Princesa Cristina"],
-            blindados=["Princess Christine"]
+            ["Princess Dalenor"], ["Princesa dalenor"],
+            blindados=["Dalen"]
         )
         self.addCleanup(td.cleanup)
-        self.assertEqual(lines, ['"Princess Christine"'])
-        self.assertEqual(result["protected_records"], 1)
+        self.assertEqual(lines, ['"Princesa dalenor"'])
+        self.assertEqual(result["protected_names"], 0)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_nome_destruido_e_detectado_sem_reconstrucao_arriscada(self):
+        td, result, before, after, lines = self._pair(
+            ["Princess Dalen"], ["Princesa do Vale"],
+            blindados=["Dalen"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Princesa do Vale"'])
+        self.assertEqual(result["protected_names"], 0)
+        self.assertEqual(len(result["unresolved_names"]), 1)
+        self.assertEqual(result["unresolved_names"][0]["term"], "Dalen")
+        self.assertEqual(before, after)
+
+    def test_lista_vazia_nao_cria_protecao_implicita(self):
+        td, result, before, after, lines = self._pair(
+            ["Princess Dalen"], ["Princesa do Vale"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Princesa do Vale"'])
+        self.assertEqual(result["protected_names"], 0)
+        self.assertEqual(result["unresolved_names"], [])
         self.assertEqual(before, after)
 
     def test_conflito_nao_recebe_prioridade_automatica(self):
         td, result, before, after, lines = self._pair(
-            ["Christine"], ["Cristina"],
+            ["Princess Christine"], ["Princesa Cristina"],
             blindados=["Christine"], traduziveis=["Christine"]
         )
         self.addCleanup(td.cleanup)
-        self.assertEqual(lines, ['"Cristina"'])
-        self.assertEqual(result["protected_records"], 0)
+        self.assertEqual(lines, ['"Princesa Cristina"'])
+        self.assertEqual(result["protected_names"], 0)
         self.assertEqual(result["conflict_records"], 1)
         self.assertEqual(before, after)
 
