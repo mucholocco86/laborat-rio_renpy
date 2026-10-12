@@ -66,24 +66,36 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         self.assertEqual(result["unresolved_names"], [])
         self.assertEqual(before, after)
 
-    def test_nome_destruido_e_detectado_sem_reconstrucao_arriscada(self):
+    def test_nome_destruido_em_registro_integral_e_restaurado(self):
         td, result, before, after, lines = self._pair(
-            ["Princess Dalen"], ["Princesa do Vale"],
-            blindados=["Dalen"]
+            ["Dalen"], ["O Vale"], blindados=["Dalen"]
         )
         self.addCleanup(td.cleanup)
-        self.assertEqual(lines, ['"Princesa do Vale"'])
+        self.assertEqual(lines, ['"Dalen"'])
+        self.assertEqual(result["protected_names"], 1)
+        self.assertEqual(result["reconstructed_names"], 1)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_nome_destruido_em_registro_composto_fica_pendente(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander Gaius"], ["Comandante Go"],
+            blindados=["Gaius"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante Go"'])
         self.assertEqual(result["protected_names"], 0)
+        self.assertEqual(result["reconstructed_names"], 0)
         self.assertEqual(len(result["unresolved_names"]), 1)
-        self.assertEqual(result["unresolved_names"][0]["term"], "Dalen")
+        self.assertEqual(result["unresolved_names"][0]["term"], "Gaius")
         self.assertEqual(before, after)
 
     def test_lista_vazia_nao_cria_protecao_implicita(self):
         td, result, before, after, lines = self._pair(
-            ["Princess Dalen"], ["Princesa do Vale"]
+            ["Dalen"], ["O Vale"]
         )
         self.addCleanup(td.cleanup)
-        self.assertEqual(lines, ['"Princesa do Vale"'])
+        self.assertEqual(lines, ['"O Vale"'])
         self.assertEqual(result["protected_names"], 0)
         self.assertEqual(result["unresolved_names"], [])
         self.assertEqual(before, after)
