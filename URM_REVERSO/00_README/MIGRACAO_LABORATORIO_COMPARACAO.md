@@ -114,3 +114,20 @@ Continuam protegidos contra modificações não autorizadas:
 - `__urw/`.
 
 Apenas a documentação de engenharia dentro de `URM_REVERSO/` foi atualizada nesta etapa.
+
+
+## 6. Alterações documentais feitas depois da comparação-base
+
+Os números de igualdade de `URM_REVERSO/` acima descrevem a árvore **antes** de adicionarmos as notas de migração e a análise complementar do loader. Para manter rastreabilidade, depois da comparação foram feitas as seguintes alterações intencionais somente dentro de `URM_REVERSO/` no laboratório:
+
+**Novos arquivos**
+- `URM_REVERSO/00_README/MIGRACAO_LABORATORIO_COMPARACAO.md` — este relatório.
+- `URM_REVERSO/05_LOADER/01_LOADER_X52MF2_CARGA_E_DEPENDENCIAS.md` — análise detalhada do loader.
+
+**Arquivos atualizados**
+- `URM_REVERSO/00_README/README.md` — identifica o laboratório canônico e aponta para os novos documentos.
+- `URM_REVERSO/00_README/COMO_CONTINUAR.md` — atualiza o ponto de retomada.
+- `URM_REVERSO/00_README/WELLS_TRANSFER_MANIFEST.md` — registra a migração e esclarece que o SHA histórico pertence ao repositório anterior.
+- `URM_REVERSO/05_LOADER/README.md` — indexa a nova análise.
+
+Portanto, **após essas alterações**, o repositório canônico contém intencionalmente seis mudanças documentais que não existiam na árvore comparada do repositório anterior. Isso não é uma falha de cópia: é o resultado esperado da continuação da engenharia no novo laboratório. Nenhum arquivo do SDK foi modificado por esta etapa.
