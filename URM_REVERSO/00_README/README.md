@@ -59,7 +59,7 @@ Essa separação evita tratar uma descoberta do SDK como se fosse código do URM
 
 `03_ARCHITECTURE/` — arquitetura e fluxo geral.
 `04_CHOICES/` — sistema completo de Choices.
-`05_LOADER/` — bootstrap, x52MF2 e carregamento de módulos.
+`05_LOADER/` — bootstrap, x52MF2 e carregamento de módulos. A análise detalhada do loader está em [01_LOADER_X52MF2_CARGA_E_DEPENDENCIAS.md](../05_LOADER/01_LOADER_X52MF2_CARGA_E_DEPENDENCIAS.md).
 `06_RENPY_COMPATIBILITY/` — mecanismos do Ren'Py relevantes para as dependências do URM.
 `07_EVIDENCE/` — evidências visuais e materiais de execução.
 `08_CROSS_REFERENCE/` — relações entre classes, arquivos e mecanismos.
