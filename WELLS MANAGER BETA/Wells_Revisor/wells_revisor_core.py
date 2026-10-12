@@ -313,7 +313,7 @@ def diagnosticar_texto(text):
     for m in re.finditer(r"\b(?:dela|dele)\s+(Filho|Filha|Irmão|Irmã)\b", protegido):
         add("parentesco_pos_pronome", "Parentesco aparece solto após pronome relacional.", m.group(0))
 
-    for m in re.finditer(r"(?<![.!?])\s+(Irmão|Irmã|Filho|Filha)\.\s+(?=[A-ZÁÀÂÃÉÊÍÓÔÕÚÜÇ])", protegido):
+    for m in re.finditer(r"[.!?]\s+(Irmão|Irmã|Filho|Filha)\s+E\b", protegido):
         add("fragmento_parentesco", "Termo de parentesco isolado como fragmento de frase.", m.group(1))
 
     return issues
