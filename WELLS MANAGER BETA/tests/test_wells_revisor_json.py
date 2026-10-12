@@ -4,6 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from docx import Document
+
 ROOT = Path(__file__).resolve().parents[1]
 JSON_DIR = ROOT / "Wells_Revisor_JSON"
 if str(JSON_DIR) not in sys.path:
@@ -97,6 +99,55 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         self.addCleanup(td.cleanup)
         self.assertEqual(lines, ['"O Vale"'])
         self.assertEqual(result["protected_names"], 0)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_multiplos_nomes_blindados_sobreviventes_sao_preservados(self):
+        td, result, before, after, lines = self._pair(
+            ["Dalen meets Gaius"], ["dalen encontra gaius"],
+            blindados=["Dalen", "Gaius"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Dalen encontra Gaius"'])
+        self.assertEqual(result["protected_names"], 2)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_overlap_ann_nao_altera_anna(self):
+        td, result, before, after, lines = self._pair(
+            ["Anna meets Ann"], ["anna encontra ann"],
+            blindados=["Ann", "Anna"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Anna encontra Ann"'])
+        self.assertEqual(result["protected_names"], 2)
+        self.assertEqual(before, after)
+
+    def test_docx_restaura_nome_integral_sem_alterar_nativo(self):
+        td = tempfile.TemporaryDirectory()
+        self.addCleanup(td.cleanup)
+        root = Path(td.name)
+        n = root / "nativo.docx"
+        t = root / "traduzido.docx"
+        b = root / "blindagem.txt"
+
+        for path, value in ((n, '"Dalen"'), (t, '"O Vale"')):
+            doc = Document()
+            doc.add_paragraph(value)
+            doc.save(path)
+
+        salvar_listas(b, {
+            LISTA_BLINDADOS: ["Dalen"],
+            LISTA_TRADUZIVEIS: [],
+        })
+        before = n.read_bytes()
+        result = review_json_pair(n, t, root, b)
+        after = n.read_bytes()
+
+        out = Document(t)
+        lines = [p.text for p in out.paragraphs]
+        self.assertEqual(lines, ['"Dalen"'])
+        self.assertEqual(result["reconstructed_names"], 1)
         self.assertEqual(result["unresolved_names"], [])
         self.assertEqual(before, after)
 
