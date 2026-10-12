@@ -92,6 +92,51 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
         self.assertEqual(result["unresolved_names"][0]["term"], "Gaius")
         self.assertEqual(before, after)
 
+    def test_nome_composto_reconstroi_com_slots_manuais_deterministicos(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander Gaius"], ["Comandante Go"],
+            blindados=["Gaius"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante Gaius"'])
+        self.assertEqual(result["protected_names"], 1)
+        self.assertEqual(result["reconstructed_names"], 1)
+        self.assertEqual(result["unresolved_names"], [])
+        self.assertEqual(before, after)
+
+    def test_composto_sem_ancora_traduzivel_continua_pendente(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander Gaius"], ["Comandante Go"],
+            blindados=["Gaius"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Comandante Go"'])
+        self.assertEqual(result["reconstructed_names"], 0)
+        self.assertEqual(len(result["unresolved_names"]), 1)
+        self.assertEqual(before, after)
+
+    def test_composto_com_contagem_lexical_diferente_continua_pendente(self):
+        td, result, before, after, lines = self._pair(
+            ["Commander Gaius"], ["O grande comandante Go"],
+            blindados=["Gaius"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"O grande comandante Go"'])
+        self.assertEqual(result["reconstructed_names"], 0)
+        self.assertEqual(len(result["unresolved_names"]), 1)
+        self.assertEqual(before, after)
+
+    def test_composto_com_nativo_nao_totalmente_classificado_continua_pendente(self):
+        td, result, before, after, lines = self._pair(
+            ["Supreme Commander Gaius"], ["Supremo Comandante Go"],
+            blindados=["Gaius"], traduziveis=["Commander"]
+        )
+        self.addCleanup(td.cleanup)
+        self.assertEqual(lines, ['"Supremo Comandante Go"'])
+        self.assertEqual(result["reconstructed_names"], 0)
+        self.assertEqual(len(result["unresolved_names"]), 1)
+        self.assertEqual(before, after)
+
     def test_lista_vazia_nao_cria_protecao_implicita(self):
         td, result, before, after, lines = self._pair(
             ["Dalen"], ["O Vale"]
