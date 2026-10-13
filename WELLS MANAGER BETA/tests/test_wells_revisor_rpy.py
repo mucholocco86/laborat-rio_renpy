@@ -96,5 +96,18 @@ class RevisorRpyLinguisticaTests(unittest.TestCase):
         self.assertEqual(diagnosticar_texto("Sua mãe se chama Vivian Wells."), [])
         self.assertEqual(diagnosticar_texto("Você é filho dela."), [])
 
+    def test_review_file_reporta_alertas_sem_forcar_correcao(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            p = root / "traduzido.txt"
+            original = '"Seu Mãe O nome de é Vivian Wells."\n"Você é filho dela."\n'
+            p.write_text(original, encoding="utf-8")
+            result = review_file(p, RPY_DIR)
+            codigos = {x["code"] for x in result["linguistic_issues"]}
+            self.assertIn("concordancia_possessivo", codigos)
+            self.assertIn("ordem_nome_quebrada", codigos)
+            self.assertEqual(len(result["linguistic_issues"]), 2)
+            self.assertIn('"Você é filho dela."', p.read_text(encoding="utf-8"))
+
 if __name__ == "__main__":
     unittest.main()
