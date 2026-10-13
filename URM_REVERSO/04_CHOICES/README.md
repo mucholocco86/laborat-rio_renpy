@@ -222,3 +222,9 @@ Essa separação será especialmente útil para investigar a fronteira de compat
 Primeiro entender → depois inspecionar → depois planejar → só então modificar.
 
 O objetivo continua sendo completar a árvore do URM antes de decidir o que será transplantado para o Wells Framework.
+
+## Continuação de 2026-10-13 — identidade e índice da Choice
+
+A nova análise [11 — Menu, Choice Screen e integridade da seleção](11_MENU_CHOICE_SCREEN_CORRELACAO_E_INTEGRIDADE_DA_SELECAO.md) aprofunda o documento 10: a posição original `i` de `Menu.items` é preservada em `URMChoice` e é o valor usado pela seleção nativa para resolver o bloco AST. A interface visual pode omitir/transformar entradas; não se deve tratar seu índice visual ou texto exibido como identificador estrutural universal.
+
+**Questões pendentes:** menus com `condition=False`, legendas, alternativas com rótulos duplicados, `set`, tradução, argumentos por item e testes após rollback. Essas questões devem ser investigadas por leitura e experimentação controlada, preservando a separação entre observação, hipótese e prova.
