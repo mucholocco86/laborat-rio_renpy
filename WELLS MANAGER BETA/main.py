@@ -1047,9 +1047,22 @@ class WellsManager(tk.Tk):
             self._log(f"[OK] Linhas alteradas: {result['changed']}.")
             self._log(f"[OK] Alterações efetivas: {result['changed']}.")
             self._log(f"[INFO] Ajustes internos avaliados: {result.get('internal_adjustments', result['changed'])}.")
+            issues = result.get("linguistic_issues", [])
+            self._log(f"[INFO] Alertas linguísticos para revisão manual: {len(issues)}.")
+            for item in issues[:10]:
+                self._log(
+                    f"[PENDENTE] Registro {item['record']}: {item['message']} | "
+                    f"Trecho: {item['trecho']}"
+                )
+            if len(issues) > 10:
+                self._log(f"[INFO] ... e mais {len(issues) - 10} alerta(s) linguístico(s).")
             self._log(f"[OK] Tokens Ren'Py preservados: {result['tokens']}.")
             self._log(f"[OK] Saída: {result['output']}")
-            messagebox.showinfo(APP, f"Revisão concluída.\n\n{result['output']}")
+            messagebox.showinfo(
+                APP,
+                f"Revisão concluída.\n\n{result['output']}\n\n"
+                f"Alertas para revisão manual: {len(issues)}"
+            )
         self._run_background(worker, done, "Status: Erro na revisão.")
 
     def choose_and_review_json(self, fmt):
@@ -1115,10 +1128,23 @@ class WellsManager(tk.Tk):
             if len(unresolved) > 10:
                 self._log(f"[INFO] ... e mais {len(unresolved) - 10} caso(s) pendente(s).")
             self._log(f"[INFO] Conflitos sem prioridade automática: {result['conflict_records']}.")
+            issues = result.get("linguistic_issues", [])
+            self._log(f"[INFO] Alertas linguísticos nativo↔tradução: {len(issues)}.")
+            for item in issues[:10]:
+                self._log(
+                    f"[PENDENTE] Registro {item['record']} ({item['code']}): "
+                    f"{item['message']} | Nativo: {item['native']} | Traduzido: {item['translated']}"
+                )
+            if len(issues) > 10:
+                self._log(f"[INFO] ... e mais {len(issues) - 10} alerta(s) linguístico(s).")
             self._log(f"[OK] Tokens Ren'Py preservados: {result['tokens']}.")
             self._log(f"[OK] Nativo preservado: {result['native_unchanged']}")
             self._log(f"[OK] Saída: {result['output']}")
-            messagebox.showinfo(APP, f"Revisão JSON concluída.\n\n{result['output']}")
+            messagebox.showinfo(
+                APP,
+                f"Revisão JSON concluída.\n\n{result['output']}\n\n"
+                f"Alertas linguísticos: {len(issues)}"
+            )
 
         self._run_background(worker, done, "Status: Erro na revisão JSON.")
 
