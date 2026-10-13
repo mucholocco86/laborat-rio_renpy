@@ -291,6 +291,53 @@ def _grammar(text):
     return text, changes
 
 
+def _correct_source_anchored_structures(native: str, translated: str):
+    """Corrige dois calques de baixo risco quando OLD/NEW estão alinhados.
+
+    A fonte só autoriza a regra de possessivo quando contém a estrutura
+    inglesa ``[placeholder]'s plan``. A tradução precisa conter o calque
+    específico ``[placeholder] o plano de``. Os tokens Ren'Py são isolados
+    para a regra conseguir reposicionar o placeholder sem modificá-lo.
+    """
+    changes = 0
+    protected_native, _ = _protect_renpy(native)
+    protected, tokens = _protect_renpy(translated)
+
+    # "... Leadership has increased" -> atributo feminino + particípio.
+    new = re.sub(
+        r"(?i)((?:__WELLS_TOKEN_\d{6}__)+Moralidade\s+Leve(?:__WELLS_TOKEN_\d{6}__)+\s+)aumentado\b",
+        r"\1aumentada",
+        protected,
+    )
+    if new != protected:
+        changes += 1
+        protected = new
+
+    # Só reposiciona o placeholder quando o original confirma possessivo
+    # inglês seguido de "plan" e o traduzido exibe o calque esperado.
+    native_names = re.findall(
+        r"(__WELLS_TOKEN_\d{6}__)\s*['’]s\s+(?:[A-Za-z-]+\s+){0,3}plan\b",
+        protected_native,
+        re.I,
+    )
+    if native_names:
+        name = re.escape(native_names[0])
+        rx = re.compile(
+            rf"(?i)\b(concordo\s+com)\s+({name})\s+(o\s+(?:(?:[\wÀ-ÖØ-öø-ÿ-]+\s+){{0,3}})plano(?:\s+[\wÀ-ÖØ-öø-ÿ-]+){{0,3}})\s+de(\.)?(?=$|\s)"
+        )
+
+        def reorder(match):
+            punctuation = match.group(4) or ""
+            return f"{match.group(1)} {match.group(3)} de {match.group(2)}{punctuation}"
+
+        new, count = rx.subn(reorder, protected, count=1)
+        if count:
+            protected = new
+            changes += count
+
+    return _restore_renpy(protected, tokens), changes
+
+
 def diagnosticar_texto(text):
     """Detecta anomalias fortes sem inventar uma reescrita.
 
@@ -495,6 +542,8 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
                 native, text, lists,
                 lambda value: review_text(value, dictionary=dictionary, base_linguistica=base_linguistica),
             )
+            reviewed, anchored_changes = _correct_source_anchored_structures(native, reviewed)
+            count += anchored_changes
             protected_names += stats["protected_names"]
             reconstructed_names += stats["reconstructed_names"]
             conflict_records += int(stats["conflict"])
