@@ -11,7 +11,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, simpledialog
 
 APP = "Wells Manager"
-SCRIPT_EXTENSIONS = {".rpy", ".rpyc", ".py", ".pyo", ".rpym", ".rpymc", ".txt", ".ttf", ".otf"}
+SCRIPT_EXTENSIONS = {".rpy", ".rpyc", ".py", ".pyo", ".rpym", ".rpymc", ".txt", ".ttf", ".otf", ".json"}
 
 
 def resource_root():
