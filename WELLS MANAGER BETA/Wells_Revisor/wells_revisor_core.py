@@ -441,6 +441,7 @@ def review_file(path: Path, base_dir: Path, progress=None):
     changed_lines = 0
     changes = 0
     token_count = 0
+    linguistic_issues = []
     output_records = []
 
     start_pct = 10 if dictionary is not None else 0
@@ -458,6 +459,8 @@ def review_file(path: Path, base_dir: Path, progress=None):
 
     for idx, record in enumerate(records, 1):
         text, quoted = _decode_record(record)
+        for issue in diagnosticar_texto(text):
+            linguistic_issues.append({"record": idx, **issue, "text": text})
         reviewed, count, tokens = review_text(text, dictionary=dictionary, base_linguistica=base_linguistica)
         encoded = _encode_record(reviewed, quoted)
 
@@ -509,5 +512,6 @@ def review_file(path: Path, base_dir: Path, progress=None):
         "changes": changed_lines,
         "internal_adjustments": changes,
         "tokens": token_count,
+        "linguistic_issues": linguistic_issues,
         "dictionary": str(dictionary_path) if dictionary_path else None,
     }
