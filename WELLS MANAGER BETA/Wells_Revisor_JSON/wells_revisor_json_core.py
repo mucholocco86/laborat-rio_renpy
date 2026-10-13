@@ -489,6 +489,13 @@ def review_file(path: Path, base_dir: Path, progress=None):
 # ---------------------------------------------------------------------------
 # REVISÃO JSON PAREADA
 # ---------------------------------------------------------------------------
+def _name_case(term: str, *references):
+    """Mantém gritos em caixa alta sem mudar a grafia nominal cadastrada."""
+    if any(reference.isupper() for reference in references):
+        return term.upper()
+    return term
+
+
 def _term_pattern(term: str):
     """Fronteira lexical conservadora para termos cadastrados manualmente."""
     escaped = re.escape(term)
@@ -532,7 +539,7 @@ def _protect_manual_terms(text: str, terms):
         rx = _term_pattern(term)
         def repl(match):
             marker = f"__WELLS_NAME_{len(tokens):06d}__"
-            tokens.append((marker, term))
+            tokens.append((marker, _name_case(term, match.group(0))))
             return marker
         protected = rx.sub(repl, protected)
     return protected, tokens
@@ -615,7 +622,7 @@ def _reconstruct_composite_slot(native: str, translated: str, missing,
                 return None
 
     m = translated_matches[target]
-    return translated[:m.start()] + term + translated[m.end():]
+    return translated[:m.start()] + _name_case(term, native_words[target], translated_words[target]) + translated[m.end():]
 
 
 
@@ -738,7 +745,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
             ]
             if len(exact_missing) == 1:
                 term = exact_missing[0]
-                text = term
+                text = _name_case(term, native_stripped, text)
                 reconstructed.append(term)
                 missing = [x for x in missing if x.casefold() != term.casefold()]
 
@@ -807,3 +814,4 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
         "tokens": token_count,
         "native_unchanged": str(native_path),
     }
+

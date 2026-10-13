@@ -5,6 +5,13 @@ from wells_isolador_renpy import segmentar
 from wells_blindagem import LISTA_BLINDADOS, LISTA_TRADUZIVEIS, conflitos
 WORD_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[-'][A-Za-zÀ-ÖØ-öø-ÿ]+)*", re.UNICODE)
 
+def _name_case(term: str, *references):
+    """Mantém gritos em caixa alta sem mudar a grafia nominal cadastrada."""
+    if any(reference.isupper() for reference in references):
+        return term.upper()
+    return term
+
+
 def _term_pattern(term: str):
     """Fronteira lexical conservadora para termos cadastrados manualmente."""
     escaped = re.escape(term)
@@ -48,7 +55,7 @@ def _protect_manual_terms(text: str, terms):
         rx = _term_pattern(term)
         def repl(match):
             marker = f"__WELLS_NAME_{len(tokens):06d}__"
-            tokens.append((marker, term))
+            tokens.append((marker, _name_case(term, match.group(0))))
             return marker
         protected = rx.sub(repl, protected)
     return protected, tokens
@@ -131,7 +138,7 @@ def _reconstruct_composite_slot(native: str, translated: str, missing,
                 return None
 
     m = translated_matches[target]
-    return translated[:m.start()] + term + translated[m.end():]
+    return translated[:m.start()] + _name_case(term, native_words[target], translated_words[target]) + translated[m.end():]
 
 
 
@@ -145,7 +152,7 @@ def revisar_com_blindagem(native, text, lists, reviewer):
     missing = [t for t in terms if not _term_pattern(t).search(human)]
     reconstructed = 0
     if len(missing) == 1 and native.strip().casefold() == missing[0].casefold():
-        text = missing[0]
+        text = _name_case(missing[0], native.strip(), text)
         missing = []
         reconstructed = 1
     elif missing:
@@ -166,7 +173,7 @@ def revisar_com_blindagem(native, text, lists, reviewer):
         for term in terms:
             def replace(match):
                 marker = f"__WELLS_NAME_{len(names):06d}__"
-                names.append((marker, term))
+                names.append((marker, _name_case(term, match.group(0))))
                 return marker
             part = _term_pattern(term).sub(replace, part)
         parts.append(part)
