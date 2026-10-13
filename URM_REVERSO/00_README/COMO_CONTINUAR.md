@@ -35,3 +35,19 @@ A descoberta arquitetural mais recente continua em `04_CHOICES/10_URM_CHOICES_CO
 Primeiro entender → depois inspecionar → depois planejar → só então modificar.
 
 Se faltar informação: pesquisar primeiro, nunca inventar. Registrar novas descobertas no GitHub. O objetivo é que o projeto sobreviva à troca de conta, conversa, modelo ou sessão.
+
+## Atualização de retomada — 2026-10-13
+
+A análise complementar mais recente de Choices foi adicionada em `04_CHOICES/11_MENU_CHOICE_SCREEN_CORRELACAO_E_INTEGRIDADE_DA_SELECAO.md` (commit `33f57d548294fc1c6c1d627d3b23f9fd90532aa9`). Ela confirma, no URM e no SDK 7.4.11, a correlação entre o índice original de `Menu.items`, o `value` da alternativa retornado via `ChoiceReturn` e o ramo selecionado por `Menu.execute`. **Não confundir a posição visual com o índice original**, especialmente quando itens sem bloco são omitidos, condições filtram opções ou textos são substituídos.
+
+### Para um novo chat de engenharia reversa
+
+1. Ler este arquivo e `00_README/WELLS_TRANSFER_MANIFEST.md`; depois `00_README/MIGRACAO_LABORATORIO_COMPARACAO.md`.
+2. Revisar `04_CHOICES/10_URM_CHOICES_COMO_PROJECAO_DA_INTERACAO_NATIVA.md` e **11** antes de retomar Choices; revisar `05_LOADER/01_LOADER_X52MF2_CARGA_E_DEPENDENCIAS.md` antes de retomar loader.
+3. Ler `10_URM_INTERNAL_MANUAL/README.md` e mapas de referências; buscar código primário em `01_MATERIAL_URM/` e comportamento nativo no SDK.
+4. Continuar sem resumir/podar a árvore: investigar efeitos de `condition`, entradas sem bloco, `set`, tradução, visibilidade e rollback na correlação Choice→AST; paralelamente, no loader, rastrear o produtor da variante `t`, `pendingUpdate`, `digest` e resolução do archive.
+5. Documentar evidência e lacunas com 🟢 URM, 🔵 Ren'Py, 🟡 observação, 🟠 hipótese, 🔴 descartado. Nunca afirmar execução/teste real se houve apenas inspeção estática.
+6. Trabalhar exclusivamente em documentos de `URM_REVERSO/` no laboratório canônico, salvo autorização explícita. Não sincronizar nem alterar `modulos`, SDK, `wells/`, `wells_beta/` ou `__urw/`.
+7. Método obrigatório: **primeiro entender → depois inspecionar → depois planejar → só então modificar**. Registrar fontes exatas, dúvidas e commit de cada avanço.
+
+**Estado da migração:** o relatório documenta a igualdade de `URM_REVERSO/` **antes** das atualizações documentais posteriores. Os diretórios de documentação alterados desde então são diferenças intencionais, não falhas da clonagem; verificar sempre a linha de base indicada no relatório.
