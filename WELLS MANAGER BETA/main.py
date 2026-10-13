@@ -328,7 +328,7 @@ class WellsManager(tk.Tk):
                 body, "▣  Revisar JSON/DOCX", lambda: self.choose_and_review_json("docx")
             )
             self.blindagem_button = self._tool_button(
-                body, "▣  Gerenciar blindagem JSON", self.open_blindagem
+                body, "▣  Gerenciar blindagem RPY / JSON", self.open_blindagem
             )
         return self._open_tool_window("revisor", "Revisor", build, "280x260")
 
@@ -1039,14 +1039,52 @@ class WellsManager(tk.Tk):
         types = [("Documento TXT", "*.txt")] if fmt == "txt" else [("Documento Word", "*.docx")]
         path = self._ask_openfilename("Selecione o documento traduzido para revisar", types + [("Todos os arquivos", "*.*")])
         if not path: return
-        self.progress["value"] = 0; self.status_var.set("Status: Preparando revisão..."); self._log(f"Documento: {path}")
-        def worker(): return review_file(Path(path), REVISOR_DIR, progress=self._revisor_progress)
+        translated_path = Path(path)
+        native_path = None
+        tl_root = None
+        if translated_path.stem == "old" or translated_path.stem.startswith("old_"):
+            messagebox.showwarning(APP, "Selecione o NEW traduzido. O OLD é referência e não deve ser revisado.")
+            return
+        if translated_path.stem == "new" or translated_path.stem.startswith("new_"):
+            native_path = translated_path.with_name("old" + translated_path.name[3:])
+            if not native_path.is_file():
+                messagebox.showwarning(APP, f"Não encontrei o OLD correspondente:\n{native_path}")
+                return
+            tl_root = self.pending_tl or self.choose_tl("Selecione a pasta TL usada para extrair este OLD/NEW")
+            if not tl_root:
+                return
+        self.progress["value"] = 0
+        self.status_var.set("Status: Preparando revisão...")
+        self._begin_log_session("REVISOR RPY")
+        self._log(f"Documento: {path}")
+        def worker():
+            if native_path is not None:
+                from Wells_Translator.wells_translator_core import scan_tl, _collect_txt_pair, _collect_docx_pair
+                _, entries = scan_tl(tl_root)
+                collector = _collect_txt_pair if fmt == "txt" else _collect_docx_pair
+                olds, news, _ = collector(translated_path.parent)
+                if olds != [entry["original_token"] for entry in entries] or len(news) != len(olds):
+                    raise ValueError("OLD/NEW não correspondem à pasta TL selecionada. Nada foi alterado.")
+            return review_file(translated_path, REVISOR_DIR, progress=self._revisor_progress,
+                               native_path=native_path, blindagem_path=self._blindagem_path())
         def done(result):
             self.progress["value"] = 100; self.status_var.set(f"Status: {result['records']} linhas revisadas.")
             self._log(f"[OK] Revisão concluída: {result['records']} linhas.")
             self._log(f"[OK] Linhas alteradas: {result['changed']}.")
             self._log(f"[OK] Alterações efetivas: {result['changed']}.")
             self._log(f"[INFO] Ajustes internos avaliados: {result.get('internal_adjustments', result['changed'])}.")
+            if result.get("native_unchanged"):
+                self._log(f"[OK] OLD preservado: {result['native_unchanged']}")
+                self._log(f"[OK] Termos blindados preservados: {result['protected_names']}.")
+                self._log(f"[OK] Nomes reconstruídos: {result['reconstructed_names']}.")
+                pending = result.get("unresolved_names", [])
+                self._log(f"[INFO] Nomes ainda não resolvidos: {len(pending)}.")
+                self._log(f"[INFO] Conflitos sem prioridade automática: {result['conflict_records']}.")
+                for item in pending[:10]:
+                    self._log(f"[PENDENTE] Registro {item['record']}: {item['term']} | Nativo: {item['native']} | Traduzido: {item['translated']}")
+                if len(pending) > 10:
+                    self._log(f"[INFO] ... e mais {len(pending) - 10} caso(s) pendente(s).")
+
             issues = result.get("linguistic_issues", [])
             self._log(f"[INFO] Alertas linguísticos para revisão manual: {len(issues)}.")
             for item in issues[:10]:
@@ -1155,3 +1193,4 @@ class WellsManager(tk.Tk):
 
 if __name__ == "__main__":
     WellsManager().mainloop()
+

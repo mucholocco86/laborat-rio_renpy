@@ -417,7 +417,7 @@ def _make_docx(records):
 def _write_docx(path: Path, records):
     path.write_bytes(_make_docx(records))
 
-def review_file(path: Path, base_dir: Path, progress=None):
+def review_file(path: Path, base_dir: Path, progress=None, native_path=None, blindagem_path=None):
     path = Path(path).resolve()
     if path.suffix.lower() not in (".txt", ".docx"):
         raise ValueError("Selecione um arquivo TXT ou DOCX.")
@@ -434,6 +434,29 @@ def review_file(path: Path, base_dir: Path, progress=None):
     else:
         records = _read_docx(path)
 
+    natives = None
+    lists = None
+    if native_path is not None:
+        from wells_blindagem import carregar_listas
+        native_path = Path(native_path).resolve()
+        if native_path == path or native_path.suffix.lower() != path.suffix.lower():
+            raise ValueError("OLD e NEW devem ser arquivos distintos do mesmo formato.")
+        natives = _read_txt(native_path) if path.suffix.lower() == ".txt" else _read_docx(native_path)
+        if len(natives) != len(records):
+            raise ValueError("Par OLD/NEW desalinhado. Nada foi alterado.")
+        # Valida todos os registros antes de qualquer gravação.
+        for label, values in (("OLD", natives), ("NEW", records)):
+            for index, value in enumerate(values, 1):
+                if not _QUOTED.fullmatch(value):
+                    raise ValueError(f"Registro {index} inválido no {label}; mantenha as aspas.")
+                try:
+                    decoded = ast.literal_eval(value.strip())
+                except Exception as exc:
+                    raise ValueError(f"Registro {index} inválido no {label}.") from exc
+                if not isinstance(decoded, str):
+                    raise ValueError(f"Registro {index} não textual no {label}.")
+        lists = carregar_listas(blindagem_path) if blindagem_path else {"NOMES_BLINDADOS": [], "NOMES_TRADUZIVEIS": []}
+
     total = len(records)
     if total == 0:
         raise ValueError("O documento não possui linhas/parágrafos para revisar.")
@@ -442,6 +465,8 @@ def review_file(path: Path, base_dir: Path, progress=None):
     changes = 0
     token_count = 0
     linguistic_issues = []
+    protected_names = reconstructed_names = conflict_records = 0
+    unresolved_names = []
     output_records = []
 
     start_pct = 10 if dictionary is not None else 0
@@ -461,7 +486,21 @@ def review_file(path: Path, base_dir: Path, progress=None):
         text, quoted = _decode_record(record)
         for issue in diagnosticar_texto(text):
             linguistic_issues.append({"record": idx, **issue, "text": text})
-        reviewed, count, tokens = review_text(text, dictionary=dictionary, base_linguistica=base_linguistica)
+        if natives is None:
+            reviewed, count, tokens = review_text(text, dictionary=dictionary, base_linguistica=base_linguistica)
+        else:
+            from wells_blindagem_review import revisar_com_blindagem
+            native = ast.literal_eval(natives[idx - 1].strip())
+            reviewed, count, tokens, stats = revisar_com_blindagem(
+                native, text, lists,
+                lambda value: review_text(value, dictionary=dictionary, base_linguistica=base_linguistica),
+            )
+            protected_names += stats["protected_names"]
+            reconstructed_names += stats["reconstructed_names"]
+            conflict_records += int(stats["conflict"])
+            unresolved_names.extend({"record": idx, "term": term, "native": native, "translated": text}
+                                    for term in stats["missing"])
+
         encoded = _encode_record(reviewed, quoted)
 
         item = analisar_registro(idx, text, reviewed, tokens)
@@ -513,5 +552,11 @@ def review_file(path: Path, base_dir: Path, progress=None):
         "internal_adjustments": changes,
         "tokens": token_count,
         "linguistic_issues": linguistic_issues,
+        "protected_names": protected_names,
+        "reconstructed_names": reconstructed_names,
+        "unresolved_names": unresolved_names,
+        "conflict_records": conflict_records,
+        "native_unchanged": str(native_path) if native_path is not None else None,
         "dictionary": str(dictionary_path) if dictionary_path else None,
     }
+

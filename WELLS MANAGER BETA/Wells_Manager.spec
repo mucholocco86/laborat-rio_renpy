@@ -24,6 +24,7 @@ a = Analysis(
         'Wells_Revisor_JSON.wells_revisor_json_core',
         'Wells_Revisor_JSON.wells_blindagem_json',
         'wells_guia_ptbr', 'wells_isolador_renpy', 'wells_base_linguistica',
+        'wells_blindagem', 'wells_blindagem_review',
         'wells_guia_ptbr_json', 'wells_isolador_renpy_json', 'wells_base_linguistica_json',
         'argparse', 'glob', 'struct', 'zlib', 'base64', 'pickletools',
         'types', 'inspect', 'hashlib', 're', 'operator', 'io', 'contextlib',
@@ -41,3 +42,4 @@ exe = EXE(
     argv_emulation=False, target_arch=None, codesign_identity=None,
     entitlements_file=None, icon=['wells.ico'],
 )
+
