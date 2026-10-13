@@ -14,7 +14,11 @@ if str(JSON_DIR) not in sys.path:
 from wells_blindagem_json import (
     LISTA_BLINDADOS, LISTA_TRADUZIVEIS, salvar_listas
 )
-from wells_revisor_json_core import review_json_pair, diagnosticar_par_linguistico
+from wells_revisor_json_core import (
+    review_json_pair, diagnosticar_par_linguistico,
+    _correct_source_anchored_structures,
+)
+from wells_isolador_renpy_json import segmentar
 
 
 class RevisorJsonIndependenteTests(unittest.TestCase):
@@ -345,6 +349,31 @@ class RevisorJsonIndependenteTests(unittest.TestCase):
             with self.subTest(native=native, translated=translated):
                 codigos = {x["code"] for x in diagnosticar_par_linguistico(native, translated)}
                 self.assertEqual(codigos, esperados)
+
+    def test_json_corrige_concordancia_atributo_sem_alterar_tags(self):
+        native = "{b}{color=#87e1fa}Light Morality{/color}{/b} increased by {size=+3}{b}{color=#2bff8b}3{/color}{/b}{/size}."
+        translated = "{b}{color=#87e1fa}Moralidade Leve{/color}{/b} aumentado por {size=+3}{b}{color=#2bff8b}3{/color}{/b}{/size}."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertIn("Moralidade Leve{/color}{/b} aumentada", actual)
+        self.assertEqual(changes, 1)
+        self.assertEqual(
+            [s.valor for s in segmentar(native) if s.tipo == "protegido"],
+            [s.valor for s in segmentar(actual) if s.tipo == "protegido"],
+        )
+
+    def test_json_reordena_placeholder_somente_com_possessivo_confirmado(self):
+        native = "Looks like it's settled then, I agree with [mc]'s plan."
+        translated = "Parece que está resolvido então, concordo com [mc] o plano de."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(actual, "Parece que está resolvido então, concordo com o plano de [mc].")
+        self.assertEqual(changes, 1)
+
+    def test_json_nao_reescreve_quando_original_nao_confirma_possessivo(self):
+        native = "I agree with [mc] about the plan."
+        translated = "concordo com [mc] o plano de."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(actual, translated)
+        self.assertEqual(changes, 0)
 
 if __name__ == "__main__":
     unittest.main()
