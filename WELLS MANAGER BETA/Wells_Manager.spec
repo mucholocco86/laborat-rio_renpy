@@ -14,6 +14,7 @@ a = Analysis(
         ('Wells_Translator', 'Wells_Translator'),
         ('Wells_Revisor', 'Wells_Revisor'),
         ('Wells_Revisor_JSON', 'Wells_Revisor_JSON'),
+        ('wells_sdk/runtime', 'wells_sdk/runtime'),
         ('wells.ico', '.'),
     ] + docx_datas,
     hiddenimports=docx_hiddenimports + [
@@ -22,6 +23,7 @@ a = Analysis(
         'Wells_Translator.wells_json_core',
         'Wells_Revisor.wells_revisor_core',
         'Wells_Revisor_JSON.wells_revisor_json_core',
+        'wells_sdk.core', 'wells_sdk.ui',
         'Wells_Revisor_JSON.wells_blindagem_json',
         'wells_guia_ptbr', 'wells_isolador_renpy', 'wells_base_linguistica',
         'wells_blindagem', 'wells_blindagem_review',
@@ -42,4 +44,5 @@ exe = EXE(
     argv_emulation=False, target_arch=None, codesign_identity=None,
     entitlements_file=None, icon=['wells.ico'],
 )
+
 

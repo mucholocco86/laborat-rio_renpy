@@ -51,6 +51,7 @@ from Wells_Revisor_JSON.wells_blindagem_json import (
     conflitos,
 )
 from Wells_Revisor_JSON.wells_revisor_json_core import review_json_pair
+from wells_sdk.ui import build_panel
 
 
 def load_last_dir():
@@ -163,6 +164,7 @@ class WellsManager(tk.Tk):
         self.translations_button = self._button(center, "▣  Extrair traduções", self.open_translations)
 
         self.revisor_button = self._button(right, "▣  Revisar tradução", self.open_revisor)
+        self.wells_sdk_button = self._button(right, "▣  Ren'Py SDK", self.open_wells_sdk)
 
         info = tk.Frame(self, bg="#222222")
         info.grid(row=3, column=0, sticky="ew", padx=26, pady=(11, 0))
@@ -309,6 +311,17 @@ class WellsManager(tk.Tk):
                 json_button.configure(text="Aguardando revisão...", command=self.inject_json)
 
         return self._open_tool_window("translations", "Wells Extractor", build, "270x350")
+
+    def open_wells_sdk(self):
+        def build(body):
+            self.wells_sdk_panel = build_panel(
+                body,
+                register_button=self.all_buttons.append,
+                on_busy=self._set_busy,
+                on_status=self.status_var.set,
+                on_log=self._log,
+            )
+        return self._open_tool_window("wells_sdk", "Ren'Py SDK", build, "780x500")
 
     def open_revisor(self):
         def build(body):
@@ -1193,4 +1206,5 @@ class WellsManager(tk.Tk):
 
 if __name__ == "__main__":
     WellsManager().mainloop()
+
 
