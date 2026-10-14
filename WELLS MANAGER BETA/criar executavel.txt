@@ -17,6 +17,7 @@ Esse .spec já inclui os módulos:
     Wells_Translator
     Wells_Revisor
     Wells_Revisor_JSON
+    wells_sdk\
 e coleta a dependência python-docx.
 
 1) EXTRAIA O ZIP / REPOSITORIO
@@ -33,6 +34,7 @@ Ela deve conter pelo menos:
     Wells_Translator\
     Wells_Revisor\
     Wells_Revisor_JSON\
+    wells_sdk\
 
 2) ABRA O CMD NESSA PASTA
 -------------------------
@@ -69,6 +71,7 @@ Com o ambiente virtual ativado:
 Ainda dentro de "WELLS MANAGER BETA":
 
     python -m unittest discover -s tests -p "test_*.py" -v
+    python -m unittest discover -s wells_sdk/tests -p "test_*.py" -v
 
 Somente prossiga se o final indicar OK.
 
@@ -100,13 +103,32 @@ Confira pelo menos:
     - os botoes de revisao TXT/DOCX aparecem;
     - os botoes JSON/TXT e JSON/DOCX aparecem;
     - Gerenciar blindagem JSON abre;
+    - o botão Ren'Py SDK abaixo de Revisar tradução abre um único painel;
+    - Gerar traduções aparece à esquerda e Extrair diálogos à direita;
     - fechar e reabrir o programa nao produz erro.
 
 Para considerar uma funcao especifica validada no seu PC, execute tambem
 um arquivo de teste real/copia. Gerar o EXE sozinho nao prova todos os
 fluxos de interface.
 
-8) CRIAR UM ZIP LOCAL DE DISTRIBUICAO
+8) GERAR O EXECUTAVEL INDIVIDUAL WELLS SDK
+-----------------------------------------
+O Wells SDK individual usa o runtime Ren'Py 8.5.3 empacotado em
+    wells_sdk\runtime\
+e nao exige selecionar uma instalacao externa do SDK.
+
+Rode no mesmo ambiente virtual:
+
+    python -m PyInstaller --clean --noconfirm wells_sdk\Wells_SDK.spec
+
+Saida esperada:
+
+    dist\Wells_SDK.exe
+
+O procedimento detalhado e a lista de testes ficam em
+    wells_sdk\BUILD.md
+
+9) CRIAR UM ZIP LOCAL DE DISTRIBUICAO
 -------------------------------------
 O arquivo "blindagem.txt" e configuracao editavel do usuario e deve ficar
 ao lado do executavel na distribuicao.
@@ -127,15 +149,16 @@ Conteudo esperado:
     Wells_Manager.exe
     blindagem.txt
 
-9) BUILD RAPIDO EM BUILDS FUTUROS
+10) BUILD RAPIDO EM BUILDS FUTUROS
 ---------------------------------
 Depois que Python, python-docx e PyInstaller ja estiverem instalados, o
 procedimento normalmente se reduz a:
 
     python -m unittest discover -s tests -p "test_*.py" -v
+    python -m unittest discover -s wells_sdk/tests -p "test_*.py" -v
     python -m PyInstaller --clean --noconfirm Wells_Manager.spec
 
-10) LIMPEZA OPCIONAL
+11) LIMPEZA OPCIONAL
 --------------------
 Para apagar somente saidas de build antes de recompilar:
 
@@ -155,3 +178,4 @@ Este procedimento corresponde ao Wells Manager Beta integrado no repositorio:
 
 Antes de gerar uma versao considerada definitiva, confirme que o GitHub
 Actions do commit baixado esta verde e guarde o SHA/commit correspondente.
+
