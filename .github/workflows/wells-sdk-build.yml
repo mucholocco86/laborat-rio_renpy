@@ -27,7 +27,7 @@ jobs:
       - name: Compile Wells SDK and Manager
         working-directory: WELLS MANAGER BETA
         run: |
-          python -m py_compile main.py Wells_Manager.spec wells_sdk/*.py wells_sdk/tests/test_core.py
+          python -m py_compile main.py Wells_Manager.spec wells_sdk/__init__.py wells_sdk/__main__.py wells_sdk/core.py wells_sdk/ui.py wells_sdk/standalone.py wells_sdk/tests/test_core.py
 
       - name: Run Wells SDK unit tests
         working-directory: WELLS MANAGER BETA
