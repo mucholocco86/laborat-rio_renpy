@@ -1,6 +1,6 @@
 WELLS MANAGER BETA - GERAR EXECUTAVEL NO WINDOWS
 =================================================
-Atualizado em 12/10/2026 para o Wells Manager integrado atual.
+Atualizado em 14/10/2026 para o Wells Manager integrado atual.
 
 IMPORTANTE
 ----------
@@ -17,6 +17,7 @@ Esse .spec já inclui os módulos:
     Wells_Translator
     Wells_Revisor
     Wells_Revisor_JSON
+    Wells_RenPy_Localization
 e coleta a dependência python-docx.
 
 1) EXTRAIA O ZIP / REPOSITORIO
@@ -33,6 +34,7 @@ Ela deve conter pelo menos:
     Wells_Translator\
     Wells_Revisor\
     Wells_Revisor_JSON\
+    Wells_RenPy_Localization\
 
 2) ABRA O CMD NESSA PASTA
 -------------------------
@@ -155,3 +157,16 @@ Este procedimento corresponde ao Wells Manager Beta integrado no repositorio:
 
 Antes de gerar uma versao considerada definitiva, confirme que o GitHub
 Actions do commit baixado esta verde e guarde o SHA/commit correspondente.
+
+
+VERSÃO INDIVIDUAL — FERRAMENTAS REN’PY
+---------------------------------------
+Para abrir a versão individual em Python, na raiz do Wells Manager Beta:
+
+    python -m Wells_RenPy_Localization
+
+Para gerar o executável individual no Windows:
+
+    python -m PyInstaller --clean --noconfirm Wells_RenPy_Localization/Wells_RenPy_Localization.spec
+
+O runtime do SDK Ren’Py 8.5.3 é selecionado na interface; ele não é incluído no executável Wells.

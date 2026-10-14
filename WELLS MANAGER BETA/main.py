@@ -35,6 +35,7 @@ for folder in (EXTRACTOR_DIR, TRANSLATOR_DIR, REVISOR_DIR, REVISOR_JSON_DIR):
         sys.path.insert(0, str(folder))
 
 extractor = importlib.import_module("Wells_Extractor.main")
+from Wells_RenPy_Localization.ui import RenPyLocalizationFrame
 from Wells_Translator.wells_translator_core import (
     export_full, export_blocks, inject_translations,
     export_full_docx, export_blocks_docx, inject_docx_translations,
@@ -265,6 +266,8 @@ class WellsManager(tk.Tk):
             self.json_full_docx_button = self._tool_button(body, "▣  JSON completa → DOCX", self.extract_json_full_docx)
             self.json_blocks_docx_button = self._tool_button(body, "□  JSON em blocos → DOCX", self.extract_json_blocks_docx)
 
+            self._tool_button(body, "Ren’Py SDK · Extrair / Gerar", self.open_renpy_sdk_tools)
+
             if self.pending_tl is not None and self.pending_format is not None:
                 waiting_button = {
                     ("txt", "full"): self.full_txt_button,
@@ -308,7 +311,15 @@ class WellsManager(tk.Tk):
                 }[(self.pending_json_format, mode)]
                 json_button.configure(text="Aguardando revisão...", command=self.inject_json)
 
-        return self._open_tool_window("translations", "Wells Extractor", build, "270x350")
+        return self._open_tool_window("translations", "Wells Extractor", build, "300x410")
+
+    def open_renpy_sdk_tools(self):
+        def build(body):
+            body.pack_configure(padx=0, pady=0)
+            RenPyLocalizationFrame(body).pack(fill="both", expand=True)
+        return self._open_tool_window(
+            "renpy_sdk_localization", "Ren'Py SDK · Extrair / Gerar", build, "780x600"
+        )
 
     def open_revisor(self):
         def build(body):

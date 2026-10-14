@@ -18,6 +18,8 @@ a = Analysis(
     ] + docx_datas,
     hiddenimports=docx_hiddenimports + [
         'Wells_Extractor.main',
+        'Wells_RenPy_Localization.core',
+        'Wells_RenPy_Localization.ui',
         'Wells_Translator.wells_translator_core',
         'Wells_Translator.wells_json_core',
         'Wells_Revisor.wells_revisor_core',
