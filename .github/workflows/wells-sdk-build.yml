@@ -1,0 +1,172 @@
+name: Build portable Wells Ren'Py tools
+
+on:
+  push:
+    branches:
+      - main
+      - wells-sdk-portable-2026-10-14
+    paths:
+      - "WELLS MANAGER BETA/**"
+      - ".github/workflows/wells-sdk-build.yml"
+  workflow_dispatch:
+
+jobs:
+  build-and-check:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: python -m pip install --upgrade pip pyinstaller python-docx
+
+      - name: Compile Wells SDK and Manager
+        working-directory: WELLS MANAGER BETA
+        run: |
+          python -m py_compile main.py Wells_Manager.spec wells_sdk/__init__.py wells_sdk/__main__.py wells_sdk/core.py wells_sdk/ui.py wells_sdk/standalone.py wells_sdk/tests/test_core.py
+
+      - name: Run Wells SDK unit tests
+        working-directory: WELLS MANAGER BETA
+        run: python -m unittest discover -s wells_sdk/tests -p "test_*.py" -v
+
+      - name: Compare embedded runtime with SDK 8.5.3
+        shell: pwsh
+        working-directory: WELLS MANAGER BETA
+        run: |
+          @'
+          import shutil
+          import subprocess
+          import tempfile
+          from pathlib import Path
+
+          from wells_sdk.core import run_operation
+
+          manager = Path.cwd()
+          sdk = manager.parent / "renpy-8.5.3-sdk"
+          sample = sdk / "the_question"
+          runtime = manager / "wells_sdk" / "runtime"
+          if not sample.is_dir():
+              raise SystemExit(f"SDK 8.5.3 fixture missing: {sample}")
+
+          with tempfile.TemporaryDirectory(prefix="wells-sdk-parity-") as temporary:
+              root = Path(temporary)
+              adapter_project = root / "adapter"
+              upstream_project = root / "upstream"
+              shutil.copytree(sample, adapter_project)
+              shutil.copytree(sample, upstream_project)
+
+              original_scripts = {
+                  p.relative_to(adapter_project / "game").as_posix(): p.read_bytes()
+                  for p in (adapter_project / "game").rglob("*.rpy")
+              }
+
+              def run_upstream(project, args):
+                  completed = subprocess.run(
+                      [str(sdk / "renpy.exe"), str(project), *args],
+                      cwd=sdk,
+                      text=True,
+                      capture_output=True,
+                      timeout=1200,
+                  )
+                  if completed.returncode:
+                      raise RuntimeError(
+                          f"SDK CLI failed ({completed.returncode}): "
+                          f"{completed.stdout[-3000:]}\n{completed.stderr[-3000:]}"
+                      )
+
+              generated = run_operation(
+                  adapter_project,
+                  "generate",
+                  "wells_ci",
+                  runtime_root=runtime,
+                  empty_strings=True,
+                  timeout=1200,
+              )
+              if generated.returncode:
+                  raise RuntimeError(
+                      f"Embedded translate failed ({generated.returncode}): "
+                      f"{generated.stdout[-3000:]}\n{generated.stderr[-3000:]}"
+                  )
+              run_upstream(upstream_project, ["translate", "wells_ci", "--empty"])
+
+              adapter_translation = adapter_project / "game" / "tl" / "wells_ci"
+              upstream_translation = upstream_project / "game" / "tl" / "wells_ci"
+              adapter_rpy = {p.name: p.read_bytes() for p in adapter_translation.glob("*.rpy")}
+              upstream_rpy = {p.name: p.read_bytes() for p in upstream_translation.glob("*.rpy")}
+              if not adapter_rpy or adapter_rpy != upstream_rpy:
+                  raise AssertionError("Generated .rpy files differ from SDK 8.5.3.")
+
+              extracted = run_operation(
+                  adapter_project,
+                  "extract",
+                  "None",
+                  runtime_root=runtime,
+                  include_strings=True,
+                  timeout=1200,
+              )
+              if extracted.returncode:
+                  raise RuntimeError(
+                      f"Embedded dialogue failed ({extracted.returncode}): "
+                      f"{extracted.stdout[-3000:]}\n{extracted.stderr[-3000:]}"
+                  )
+              run_upstream(upstream_project, ["dialogue", "None", "--strings"])
+
+              adapter_dialogue = (adapter_project / "dialogue.tab").read_bytes()
+              upstream_dialogue = (upstream_project / "dialogue.tab").read_bytes()
+              if adapter_dialogue != upstream_dialogue:
+                  raise AssertionError("dialogue.tab differs from SDK 8.5.3.")
+
+              generated_prefix = "tl/wells_ci/"
+              current_scripts = {
+                  p.relative_to(adapter_project / "game").as_posix(): p.read_bytes()
+                  for p in (adapter_project / "game").rglob("*.rpy")
+                  if not p.relative_to(adapter_project / "game").as_posix().startswith(generated_prefix)
+              }
+              for name, content in original_scripts.items():
+                  if name.startswith(generated_prefix):
+                      continue
+                  if current_scripts.get(name) != content:
+                      raise AssertionError(f"Game source script changed: {name}")
+
+              print(
+                  "Ren'Py 8.5.3 parity OK: generated .rpy files and dialogue.tab match; "
+                  "source .rpy files stayed unchanged."
+              )
+          '@ | python -
+
+      - name: Build standalone Wells SDK
+        working-directory: WELLS MANAGER BETA
+        run: python -m PyInstaller --clean --noconfirm wells_sdk/Wells_SDK.spec
+
+      - name: Build integrated Wells Manager
+        working-directory: WELLS MANAGER BETA
+        run: python -m PyInstaller --clean --noconfirm Wells_Manager.spec
+
+      - name: Package executables and SDK source
+        shell: pwsh
+        run: |
+          $stage = "Wells_SDK_Windows_Package"
+          New-Item -ItemType Directory -Force -Path "$stage/wells_sdk" | Out-Null
+          Copy-Item "WELLS MANAGER BETA/dist/Wells_SDK.exe" "$stage/Wells_SDK.exe"
+          Copy-Item "WELLS MANAGER BETA/dist/Wells_Manager.exe" "$stage/Wells_Manager.exe"
+          Copy-Item "WELLS MANAGER BETA/wells.ico" "$stage/wells.ico"
+          Copy-Item "WELLS MANAGER BETA/wells_sdk/*" "$stage/wells_sdk" -Recurse
+          Copy-Item "WELLS MANAGER BETA/Wells_Manager.spec" "$stage/Wells_Manager.spec"
+          Compress-Archive -Path "$stage/*" -DestinationPath "Wells_SDK_Windows_Package.zip" -Force
+          $exe = Get-Item "$stage/Wells_SDK.exe"
+          if ($exe.Length -lt 10000000) {
+            throw "Wells_SDK.exe unexpectedly small: $($exe.Length) bytes"
+          }
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wells_SDK_Windows_Package
+          path: Wells_SDK_Windows_Package.zip
+          if-no-files-found: error
+          retention-days: 90
