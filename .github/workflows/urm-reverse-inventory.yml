@@ -1,0 +1,35 @@
+name: URM Reverse Engineering Inventory
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: urm-reverse-inventory-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  static-inventory:
+    name: URM and RenPy 7.4.11 read-only inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout laboratory
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Collect static evidence
+        run: python URM_REVERSO/tools/urm_static_inventory.py "$RUNNER_TEMP/urm-inventory"
+      - name: Upload review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: urm-inventory-${{ github.run_id }}
+          path: ${{ runner.temp }}/urm-inventory/
+          if-no-files-found: error
+          retention-days: 30
