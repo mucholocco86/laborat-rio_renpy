@@ -51,3 +51,11 @@ A análise complementar mais recente de Choices foi adicionada em `04_CHOICES/11
 7. Método obrigatório: **primeiro entender → depois inspecionar → depois planejar → só então modificar**. Registrar fontes exatas, dúvidas e commit de cada avanço.
 
 **Estado da migração:** o relatório documenta a igualdade de `URM_REVERSO/` **antes** das atualizações documentais posteriores. Os diretórios de documentação alterados desde então são diferenças intencionais, não falhas da clonagem; verificar sempre a linha de base indicada no relatório.
+
+## Atualização — 2026-10-15: nova prioridade da engenharia
+
+O usuário confirmou (🟡 observação de testes) que o Walkthrough do Wells estável já funciona e está testado há semanas. Foi feita inspeção estática de `wells/` e criada a nota `09_WELLS_APPLICATION/OBSERVACAO_WELLS_ESTAVEL_2026_10_15.md` (commit `222e3a6`). **Não modificar Wells estável.**
+
+A pesquisa principal avançou para `04_CHOICES/12_CIRCUITOS_LEITURA_EDICAO_PESQUISA_PERSISTENCIA.md` (commit `ada15fa`): leitura de valores em `Var.value`, edição em `Var.setValue`, pesquisa em `SearchClass`, arquivos `.urm` (ZIP + JSON), configurações `persistent`/globais, saves nativos e snapshots. Trata-se de **mapa inicial, não conclusão**. O próximo passo prioritário é seguir todos os produtores/consumidores de stores e ações de interface, detalhar a recursão da pesquisa, comprovar reaplicação de dados carregados e cruzar APIs com o SDK 7.4.11. Não confundir edição do store com edição física de scripts, nem `.urm` com save nativo.
+
+**Plano de versões:** completar URM usando somente o SDK 7.4.11 como referência nativa; **após** fechar a investigação, comparar mecanismos com os SDKs 6.99.4 e 8.5.3 presentes no laboratório. Preservar versões como fontes separadas e não misturar semânticas.
