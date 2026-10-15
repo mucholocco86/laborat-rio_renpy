@@ -63,7 +63,7 @@ class CoreTests(unittest.TestCase):
                                runner=fake_runner)
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stdout, "ok")
-        self.assertEqual(result.output_path, self.project / "dialogue.tab")
+        self.assertEqual(result.output_path.resolve(), (self.project / "dialogue.tab").resolve())
         self.assertEqual(calls[0][0], result.command)
         self.assertEqual(calls[0][1]["cwd"], str(self.runtime.resolve()))
 
