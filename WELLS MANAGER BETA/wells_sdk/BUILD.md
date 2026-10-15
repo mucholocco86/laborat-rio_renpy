@@ -38,5 +38,5 @@ Saída esperada: `dist\Wells_Manager.exe`. O `.spec` integrado inclui o mesmo ru
 
 `wells_sdk/runtime/` contém o engine e bibliotecas Windows do Ren'Py 8.5.3 necessários para ler os projetos e executar `translate` e `dialogue`. Mantém o `LICENSE.txt` upstream e os avisos de dependências incluídos. Não copie para lá o launcher, os projetos de exemplo, a documentação ou ferramentas de build de outras plataformas.
 
-O runtime ainda precisa ser aberto e testado em Windows com uma cópia de jogo. A aprovação dos testes unitários não confirma equivalência real com o launcher, criação de arquivos ou funcionamento do `.exe`.
+Validação concluída: o GitHub Actions executou os seis testes unitários, comparou extração e geração do runtime embutido com o SDK 8.5.3 em `the_question` e construiu os executáveis individual e integrado. O usuário também confirmou que ambos funcionaram em seu Windows e relatou geração em jogos feitos com SDK 8.5.3 e 7.4.11, além de extração no Nephilim. Esses resultados comprovam os cenários testados, não compatibilidade universal. Detalhes e limitações estão em `README.md` e no [run 38649626606](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/38649626606).
 
