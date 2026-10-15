@@ -11,6 +11,14 @@ The same `core.py` is used by the standalone application and by Wells Manager. T
 
 The runtime directory is assembled from Ren'Py 8.5.3 files. Keep the runtime's upstream license and applicable third-party notices alongside the packaged files. The launcher, documentation, tutorial games, updater, mobile build tools, and other SDK workflows are not part of the Wells interface.
 
+## Current validation status
+
+Verified in GitHub Actions on Windows (`windows-latest`, Python 3.11): six Wells SDK unit tests pass; the embedded Ren'Py 8.5.3 runtime produces the same generated `.rpy` files and `dialogue.tab` as the full SDK on the bundled `the_question` fixture; original `.rpy` scripts remain unchanged; standalone and integrated executables build successfully.
+
+Manual Windows tests reported by the user: the integrated Wells Manager generated translation files for two games (one made with Ren'Py 8.5.3 and one with 7.4.11; the user did not specify which game used each version), extracted `dialogue.tab` and `dialogue.txt` from the Nephilim game, and the standalone `Wells_SDK.exe` also worked well. Extraction-option comparisons and selected-language extraction were also tested on the user's game.
+
+Status: the two interfaces and both operations are working in the cases tested. This is not a universal compatibility guarantee for every Ren'Py project/version. The latest Windows build and comparison are recorded in [GitHub Actions run 38649626606](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/38649626606).
+
 ## Development
 
 From `WELLS MANAGER BETA`:
