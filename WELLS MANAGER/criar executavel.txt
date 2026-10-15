@@ -1,0 +1,181 @@
+WELLS MANAGER BETA - GERAR EXECUTAVEL NO WINDOWS
+=================================================
+Atualizado em 12/10/2026 para o Wells Manager integrado atual.
+
+IMPORTANTE
+----------
+Use ESTE arquivo para gerar o Wells Manager completo.
+Os arquivos "gerar o executavel.txt" existentes dentro de módulos antigos
+(Wells_Translator e Wells_Revisor/dados_linguisticos) pertencem a builds
+isoladas/históricas e NÃO são o procedimento do Wells Manager integrado.
+
+O build atual usa:
+    Wells_Manager.spec
+
+Esse .spec já inclui os módulos:
+    Wells_Extractor
+    Wells_Translator
+    Wells_Revisor
+    Wells_Revisor_JSON
+    wells_sdk\
+e coleta a dependência python-docx.
+
+1) EXTRAIA O ZIP / REPOSITORIO
+------------------------------
+Entre na pasta:
+
+    WELLS MANAGER BETA
+
+Ela deve conter pelo menos:
+    main.py
+    Wells_Manager.spec
+    wells.ico
+    Wells_Extractor\
+    Wells_Translator\
+    Wells_Revisor\
+    Wells_Revisor_JSON\
+    wells_sdk\
+
+2) ABRA O CMD NESSA PASTA
+-------------------------
+No Explorador de Arquivos, abra "WELLS MANAGER BETA".
+Clique na barra de endereço, digite:
+
+    cmd
+
+e pressione ENTER.
+
+Não é necessário executar como Administrador para um build normal.
+
+3) OPCIONAL, MAS RECOMENDADO: CRIAR AMBIENTE VIRTUAL
+----------------------------------------------------
+No CMD:
+
+    py -3.11 -m venv .venv
+    .venv\Scripts\activate
+
+Se o comando "py -3.11" não existir, tente:
+
+    python -m venv .venv
+    .venv\Scripts\activate
+
+4) INSTALAR AS DEPENDENCIAS DE BUILD
+------------------------------------
+Com o ambiente virtual ativado:
+
+    python -m pip install --upgrade pip
+    python -m pip install python-docx pyinstaller
+
+5) RODAR OS TESTES ANTES DO BUILD
+---------------------------------
+Ainda dentro de "WELLS MANAGER BETA":
+
+    python -m unittest discover -s tests -p "test_*.py" -v
+    python -m unittest discover -s wells_sdk/tests -p "test_*.py" -v
+
+Somente prossiga se o final indicar OK.
+
+6) GERAR O EXECUTAVEL
+---------------------
+Use o spec oficial:
+
+    python -m PyInstaller --clean --noconfirm Wells_Manager.spec
+
+Saida esperada:
+
+    dist\Wells_Manager.exe
+
+As pastas "build" e "dist" podem ser recriadas pelo PyInstaller.
+O executavel principal e:
+
+    dist\Wells_Manager.exe
+
+7) TESTE MANUAL MINIMO
+----------------------
+Abra:
+
+    dist\Wells_Manager.exe
+
+Confira pelo menos:
+    - a janela principal abre sem erro;
+    - Wells Extractor abre;
+    - Revisor abre;
+    - os botoes de revisao TXT/DOCX aparecem;
+    - os botoes JSON/TXT e JSON/DOCX aparecem;
+    - Gerenciar blindagem JSON abre;
+    - o botão Ren'Py SDK abaixo de Revisar tradução abre um único painel;
+    - Gerar traduções aparece à esquerda e Extrair diálogos à direita;
+    - fechar e reabrir o programa nao produz erro.
+
+Para considerar uma funcao especifica validada no seu PC, execute tambem
+um arquivo de teste real/copia. Gerar o EXE sozinho nao prova todos os
+fluxos de interface.
+
+8) GERAR O EXECUTAVEL INDIVIDUAL WELLS SDK
+-----------------------------------------
+O Wells SDK individual usa o runtime Ren'Py 8.5.3 empacotado em
+    wells_sdk\runtime\
+e nao exige selecionar uma instalacao externa do SDK.
+
+Rode no mesmo ambiente virtual:
+
+    python -m PyInstaller --clean --noconfirm wells_sdk\Wells_SDK.spec
+
+Saida esperada:
+
+    dist\Wells_SDK.exe
+
+O procedimento detalhado e a lista de testes ficam em
+    wells_sdk\BUILD.md
+
+9) CRIAR UM ZIP LOCAL DE DISTRIBUICAO
+-------------------------------------
+O arquivo "blindagem.txt" e configuracao editavel do usuario e deve ficar
+ao lado do executavel na distribuicao.
+
+No CMD, ainda na pasta "WELLS MANAGER BETA", execute:
+
+    if exist Wells_Manager_Beta rmdir /s /q Wells_Manager_Beta
+    mkdir Wells_Manager_Beta
+    copy /y dist\Wells_Manager.exe Wells_Manager_Beta\Wells_Manager.exe
+    copy /y blindagem.txt Wells_Manager_Beta\blindagem.txt
+    powershell -NoProfile -Command "Compress-Archive -Path 'Wells_Manager_Beta\*' -DestinationPath 'Wells_Manager_Beta_Windows.zip' -Force"
+
+Resultado:
+
+    Wells_Manager_Beta_Windows.zip
+
+Conteudo esperado:
+    Wells_Manager.exe
+    blindagem.txt
+
+10) BUILD RAPIDO EM BUILDS FUTUROS
+---------------------------------
+Depois que Python, python-docx e PyInstaller ja estiverem instalados, o
+procedimento normalmente se reduz a:
+
+    python -m unittest discover -s tests -p "test_*.py" -v
+    python -m unittest discover -s wells_sdk/tests -p "test_*.py" -v
+    python -m PyInstaller --clean --noconfirm Wells_Manager.spec
+
+11) LIMPEZA OPCIONAL
+--------------------
+Para apagar somente saidas de build antes de recompilar:
+
+    if exist build rmdir /s /q build
+    if exist dist rmdir /s /q dist
+
+Depois rode novamente:
+
+    python -m PyInstaller --clean --noconfirm Wells_Manager.spec
+
+CHECKPOINT
+----------
+Este procedimento corresponde ao Wells Manager Beta integrado no repositorio:
+    mucholocco86/laborat-rio_renpy
+    branch main
+    pasta WELLS MANAGER BETA
+
+Antes de gerar uma versao considerada definitiva, confirme que o GitHub
+Actions do commit baixado esta verde e guarde o SHA/commit correspondente.
+
