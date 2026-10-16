@@ -235,3 +235,7 @@ A nova análise [11 — Menu, Choice Screen e integridade da seleção](11_MENU_
 O documento [15 — Validação no SDK 7.4.11: ChoiceReturn, checkpoint, store e rollback](15_VALIDACAO_SDK_CHOICERETURN_CHECKPOINT_ROLLBACK.md) confirma por inspeção estática o caminho Menu → valor estrutural → ChoiceReturn → checkpoint → deltas de StoreDict → restauração de estado e Context. Também localiza RollbackLog em renpy/python.py.
 
 A relação entre o relato de edição manual e o instante exato em que o rollback a desfaz continua pendente de runtime, assim como save/load e fixed rollback.
+
+## Continuação de 2026-10-16 — CodeView e edição de variáveis
+
+O documento [16 — CodeView, busca e edição de variáveis ligadas a Choices](16_CODEVIEW_BUSCA_EDICAO_VARIAVEIS.md) rastreia Choice.code → CodeView → hyperlink de variável → URM_modify_value → SetVarValue → store ativo. Registra os limites dos padrões regex e separa essa mutação dos metadados guardados em .urm.
