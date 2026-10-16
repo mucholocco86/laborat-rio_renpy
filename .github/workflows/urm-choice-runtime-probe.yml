@@ -109,3 +109,18 @@ jobs:
           result=$?
           echo "END ordinary multi-interaction rollback probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+      - name: Run native rollback key input probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START native rollback key probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_edit_native_key_rollback
+          result=$?
+          echo "END native rollback key probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
