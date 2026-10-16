@@ -67,3 +67,47 @@ testcase urm_force_condition_false:
     label urm_probe_done
     assert urm_probe_result == "forced-hidden"
     $ renpy.quit()
+
+
+default urm_rollback_value = 0
+
+init python:
+    def urm_probe_edit_value():
+        # Mimics a runtime store edit, isolated from the original URM.
+        renpy.store.urm_rollback_value = 99
+
+
+screen urm_edit_probe():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Apply manual edit":
+            action [
+                Hide("urm_edit_probe"),
+                Function(urm_probe_edit_value, _update_screens=False),
+            ]
+
+
+label urm_edit_rollback_start:
+    $ urm_rollback_value = 10
+    $ renpy.checkpoint("before-manual-edit")
+    show screen urm_edit_probe
+    pause 0.5
+    $ renpy.rollback(force=True, checkpoints=1, label="urm_edit_rollback_verify")
+
+
+label urm_edit_rollback_verify:
+    "Rollback restored value: [urm_rollback_value]."
+    return
+
+
+testcase urm_manual_edit_rollback:
+    run Jump("urm_edit_rollback_start")
+    "Apply manual edit"
+    label urm_edit_rollback_verify
+    assert urm_rollback_value == 10
+    $ renpy.quit()
