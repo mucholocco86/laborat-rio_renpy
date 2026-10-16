@@ -13,10 +13,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: urm-choice-runtime-probe
+  cancel-in-progress: true
+
 jobs:
   choice-runtime:
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     steps:
       - name: Check out laboratory
@@ -51,7 +55,7 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: |
           set -o pipefail
-          xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_native_visible_route
+          timeout 360s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_native_visible_route
 
       - name: Run forced false-condition choice probe
         shell: bash
