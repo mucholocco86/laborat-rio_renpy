@@ -216,3 +216,39 @@ A testcase terminou com exit=0 e verificou `urm_rollback_value == 99` depois do 
 ### Próxima etapa
 
 Manter separados os dois eixos que já têm prova escalar: rollback de gameplay restaura uma edição ao cruzar o checkpoint anterior; save/load nativo restaura o valor que estava presente no instante do save. A próxima extensão de runtime deve cobrir um objeto/container revertível e uma variável criada/editada pela ação correspondente do URM reduzido. Depois, investigar se o StoreMonitor solicita checkpoint antes/depois da escrita e testar as operações de variável congelada. Não generalizar a semântica para arquivos `.urm` ou para o URM integral sem testes específicos.
+
+
+## Resultado — mutação de lista revertível pela ação reduzida de adicionar item
+
+**OBSERVADO EM RUNTIME — run 38979672209, job 117237325776; fixture commit a50858a554c236a5f2c632f66d4e2614ba0cbcb8, workflow atualizado no commit 9a08953e91321f8fefc05116d35a4c58b9b7a313:** o novo testcase reproduziu o caminho da tela URM_add_item: SetVarValue → Var.setValue, com overruleVarType="int" e operator="append", sobre uma lista declarada por literal Ren'Py. O teste avançou por duas Choices e chamou rollback elegível (force=False). O log registrou:
+
+    CONTAINER_ROLLBACK_PRE [10, 20] 2
+    CONTAINER_ROLLBACK_AT_VERIFY [10] 0
+
+As asserções verificaram a lista restaurada para [10], a rota de volta a zero e o contexto de teste inicialmente sem rollback. A etapa terminou com exit=0.
+
+**CONFIRMADO NO SDK 7.4.11 por inspeção estática:** literais de lista compilados pelo Ren'Py são transformados pelos construtores especiais em RevertableList; os mutators guardam um estado limpo no log corrente e Rollback.rollback() chama _rollback dos objetos coletados. O resultado runtime é consistente com esse caminho e mostra que, no fixture, o append feito pela ação reduzida participou do histórico restaurável, apesar de a raiz urm_rollback_list não ter sido substituída.
+
+### Limites
+
+- O teste reproduz o circuito de URM_add_item e SetVarValue com classes reduzidas; não carrega screens/classes originais do URM integralmente.
+- O container é um literal compilado pelo Ren'Py. Não cobre listas/dicionários de biblioteca externa, objetos desserializados ou outras origens.
+- A chamada de rollback é programática pela API com force=False; não foi enviada tecla Page Up neste caso.
+- A prova cobre somente append de inteiro em lista. Chave de dicionário, edição/exclusão de índice, nested containers, objetos/atributos e containers congelados seguem pendentes.
+- Não prova que StoreMonitor notifique ou detecte a mutação interna; o mecanismo nativo de snapshot reversível pode atuar independentemente do monitor.
+
+### Classificação atualizada
+
+| Afirmação | Classificação |
+|---|---|
+| A ação reduzida de adicionar item mudou a lista de [10] para [10, 20] | **OBSERVADO EM RUNTIME**, run 38979672209 |
+| Rollback elegível restaurou a lista para [10] e a rota 2 para 0 | **OBSERVADO EM RUNTIME**, run 38979672209 |
+| Literais de lista compilados pelo Ren'Py 7.4.11 usam o mecanismo RevertableList | **CONFIRMADO NO SDK 7.4.11** |
+| A mutação interna da lista foi desfeita por snapshot de objeto, não por substituição da raiz | **INFERÊNCIA sustentada** pelo código de fixture e pelo mecanismo estático do SDK; o runtime comprova o resultado, mas não instrumentou o objeto/log diretamente |
+| Toda coleção encontrada pelo URM é revertível ou observada pelo StoreMonitor | **PENDENTE / não demonstrado** |
+
+O resultado fecha uma parte importante do circuito: tanto a atribuição de escalar raiz (10→99) quanto uma mutação interna de lista (append) puderam ser revertidas pela fixture, desde que a variável/objeto estivesse no estado Ren'Py revertível e o rollback atravessasse o checkpoint anterior. A evidência ainda é reduzida e não equivale a validar toda a implementação URM.
+
+### Continuação da matriz
+
+A próxima prioridade prática é testar a edição de chave/índice e exclusão de item, depois separar save/load de container do rollback. Em paralelo, investigar CreateVar para confirmar ou refutar em runtime a rejeição de valores falsy no código convertido. Em seguida, introduzir instrumentação isolada para medir quando o StoreMonitor observa uma edição de screen e se sua solicitação de checkpoint muda a contagem/destino do rollback.
