@@ -103,3 +103,33 @@ O rollback ainda é iniciado pelo script com `force=True`, e o contexto descart�
 | Persistência após save/load e efeitos de StoreMonitor/frozen | **PENDENTE** |
 
 Próximo passo: preparar uma sequência de gameplay na fixture com edição, avanço por mais de uma interação e rollback nativo não forçado, registrando em qual interação o valor reaparece. Em seguida testar save/load sem misturar o arquivo `.urm` com o save nativo.
+
+
+## Extensão — rollback elegível após duas interações de Choice
+
+**OBSERVADO EM RUNTIME — run 38973243038, job 117216599068, fixture commit `babf6425462521343f7e00504087e7a7a06f6ab5`:** o teste executou novamente a edição reduzida por `SetVarValue → Var.setValue`, avançou por duas interações nativas de menu, e chamou `renpy.rollback(force=False, checkpoints=3, label=...)`. Os registros do runner foram:
+
+- imediatamente antes do rollback: `ORDINARY_ROLLBACK_PRE 99 2`;
+- gates de rollback: `ORDINARY_ROLLBACK_GATES True True True` (`store._rollback`, `Context.rollback`, `config.rollback_enabled`);
+- depois do retorno ao label: `ORDINARY_ROLLBACK_AT_VERIFY 10 0`;
+- a etapa terminou com exit=0, incluindo asserções de que o valor editado voltou a 10 e o marcador alterado pelas duas Choices voltou a 0.
+
+Logo, nesta fixture, rollback pela API com `force=False` foi elegível e cruzou os dois checkpoints de menu até o checkpoint anterior à edição. A reversão abrangeu tanto a escrita escalar que reproduz o caminho URM quanto os efeitos de estado colocados nos blocos das duas Choices.
+
+**Limite de interpretação:** o teste chama a API `renpy.rollback` pelo script depois das duas escolhas; não simula o jogador acionando a tecla ou botão de rollback da interface. O contexto do test runner foi habilitado manualmente no ambiente descartável porque ele entra por um contexto de menu principal com rollback desativado. O número `checkpoints=3` foi escolhido para atravessar as duas interações e alcançar o checkpoint marcado antes da edição. Portanto, a prova não determina ainda a UX/contagem de passos de rollback manual, nem integra as classes e screens completas do URM.
+
+### Execução intermediária do workflow
+
+O run 38973224110, commit `2c9024f90f963d2091c8b9a6bb4d95bff8cb839b`, falhou apenas na nova etapa porque o commit adicionou a etapa ao workflow antes de a fixture conter o testcase; o log diz `Testcase urm_edit_ordinary_rollback was not found.` O run de validação 38973243038 usou o commit seguinte, com fixture e workflow juntos, e passou todas as etapas.
+
+### Classificação atualizada
+
+| Afirmação | Classificação |
+|---|---|
+| A edição reproduzida ficou em 99 após duas escolhas e a variável de rota chegou a 2 | **OBSERVADO EM RUNTIME**, run 38973243038 |
+| Com rollback elegível e `force=False`, o valor voltou a 10 e a rota voltou a 0 | **OBSERVADO EM RUNTIME**, run 38973243038 |
+| A chamada cruzou duas interações de Choice até checkpoint anterior à edição | **OBSERVADO EM RUNTIME** na fixture; compatível com seleção de checkpoints do SDK |
+| A tecla/botão nativo do jogador produz a mesma contagem/posição em qualquer jogo | **PENDENTE** de teste de interação manual |
+| O URM completo integrado tem o mesmo resultado, incluindo StoreMonitor e variáveis complexas | **PENDENTE** |
+
+Próxima etapa: testar a interface de rollback nativa do Ren'Py via harness de entrada, ou construir uma sequência de rollback interativo que registre cada passo e o valor após cada retorno. Depois disso, a próxima dimensão da matriz é save/load nativo após edição, separando raízes de StoreDict, snapshots de containers revertíveis e metadados do arquivo .urm.
