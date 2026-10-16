@@ -319,3 +319,54 @@ testcase urm_edit_native_key_rollback:
     assert urm_key_route == 0
     assert urm_key_context_before is False
     $ renpy.quit()
+
+
+# Save/load test: save the URM-style scalar edit, mutate it, then reload the
+# native Ren'Py save. The module marker is harness instrumentation outside the
+# serialized game store so the post-load path cannot loop.
+init python in urm_probe_urm:
+    save_load_reentered = False
+
+default urm_save_load_context_before = None
+
+label urm_edit_save_load_start:
+    if urm_probe_urm.save_load_reentered:
+        jump urm_edit_save_load_verify
+
+    $ urm_save_load_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ urm_rollback_value = 10
+    $ renpy.checkpoint("before-save-load-edit")
+
+    if renpy.can_load("urm-probe-edit-roundtrip"):
+        $ renpy.unlink_save("urm-probe-edit-roundtrip")
+
+    show screen urm_edit_probe
+    pause 0.5
+
+    $ print("SAVELOAD_BEFORE_SAVE", urm_rollback_value)
+    $ renpy.save("urm-probe-edit-roundtrip")
+
+    if urm_probe_urm.save_load_reentered:
+        jump urm_edit_save_load_verify
+
+    $ urm_probe_urm.save_load_reentered = True
+    $ urm_rollback_value = 123
+    $ print("SAVELOAD_BEFORE_LOAD", urm_rollback_value)
+    $ renpy.load("urm-probe-edit-roundtrip")
+
+
+label urm_edit_save_load_verify:
+    $ print("SAVELOAD_AFTER_LOAD", urm_rollback_value)
+    "Save/load restored value: [urm_rollback_value]."
+    return
+
+
+testcase urm_edit_save_load_roundtrip:
+    run Jump("urm_edit_save_load_start")
+    "Apply manual edit"
+    label urm_edit_save_load_verify
+    assert urm_rollback_value == 99
+    assert urm_save_load_context_before is False
+    assert urm_probe_urm.save_load_reentered is True
+    $ renpy.quit()
