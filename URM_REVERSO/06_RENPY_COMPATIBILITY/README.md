@@ -13,3 +13,8 @@ Esta área registra a futura validação direta contra o SDK completo existente 
 7. patches de compatibilidade do URM (`StoreDict.get_changes`, `RollbackLog.complete`, SetField e callbacks de Say).
 
 Cada diferença deverá ser confrontada com o código real do SDK e registrada com evidência.
+
+
+## Validação estática concluída em 2026-10-16
+
+O documento [02 — Save/load do SDK e persistência própria do URM](02_SDK_SAVELOAD_URM_PERSISTENCIA.md) registra a inspeção de RollbackLog.freeze/unfreeze, save/load nativo, callbacks de nós Python e URMFiles.autoLoad. A execução runtime, fixed rollback e os ciclos completos de persistent/settings continuam pendentes.
