@@ -2,6 +2,16 @@ name: URM Reverse Engineering Inventory
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'URM_REVERSO/01_MATERIAL_URM/2_URM_X52_CONVERTIDO/**/*.rpy'
+      - 'URM_REVERSO/tools/urm_static_inventory.py'
+      - 'renpy-7.4.11-sdk/renpy/**/*.py'
+      - 'renpy-7.4.11-sdk/renpy/**/*.pyx'
+      - 'renpy-7.4.11-sdk/renpy/**/*.pxd'
+      - '.github/workflows/urm-reverse-inventory.yml'
 
 permissions:
   contents: read
