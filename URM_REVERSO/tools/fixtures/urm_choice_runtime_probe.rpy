@@ -226,3 +226,50 @@ testcase urm_manual_edit_rollback:
     assert urm_rollback_value == 10
     assert urm_rollback_context_before is False
     $ renpy.quit()
+
+
+# Normal rollback test: same reduced URM edit action, followed by two native
+# menu interactions. This uses force=False and restores across both choices.
+default urm_ordinary_route = 0
+default urm_ordinary_context_before = None
+
+label urm_edit_ordinary_rollback_start:
+    # The test harness enters from the main menu. Enable gameplay rollback
+    # only in this disposable fixture, matching the prior probe.
+    $ urm_ordinary_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ urm_ordinary_route = 0
+    $ renpy.checkpoint("before-ordinary-edit")
+
+    show screen urm_edit_probe
+    pause 0.5
+
+    menu:
+        "Advance once":
+            $ urm_ordinary_route = 1
+
+    menu:
+        "Advance twice":
+            $ urm_ordinary_route = 2
+
+    $ print("ORDINARY_ROLLBACK_PRE", urm_rollback_value, urm_ordinary_route)
+    $ print("ORDINARY_ROLLBACK_GATES", renpy.store._rollback, renpy.game.context().rollback, renpy.config.rollback_enabled)
+    $ renpy.rollback(force=False, checkpoints=3, label="urm_edit_ordinary_rollback_verify")
+
+
+label urm_edit_ordinary_rollback_verify:
+    $ print("ORDINARY_ROLLBACK_AT_VERIFY", urm_rollback_value, urm_ordinary_route)
+    "Ordinary rollback restored value: [urm_rollback_value]."
+    return
+
+
+testcase urm_edit_ordinary_rollback:
+    run Jump("urm_edit_ordinary_rollback_start")
+    "Apply manual edit"
+    "Advance once"
+    "Advance twice"
+    label urm_edit_ordinary_rollback_verify
+    assert urm_rollback_value == 10
+    assert urm_ordinary_route == 0
+    assert urm_ordinary_context_before is False
+    $ renpy.quit()
