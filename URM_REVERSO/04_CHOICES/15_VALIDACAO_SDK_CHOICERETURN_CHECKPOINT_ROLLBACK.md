@@ -128,3 +128,8 @@ Executar em fixture isolado de Ren'Py 7.4.11, sem alterar SDK ou Wells:
 7. Testar fixed rollback com e sem a atribuição URM rollback_is_fixed = False, registrando sensibilidade e resultado.
 
 Até esses testes, não atribuir um checkpoint específico à edição feita durante a interação, nem declarar concluído o circuito de save/load.
+
+
+## Continuação — inspeção estática de save/load (2026-10-16)
+
+O fluxo nativo de serialização e restauração do RollbackLog foi examinado em seguida, junto ao callback de Python do SDK e ao autoLoad dos arquivos URM. Consulte [02 — Save/load do SDK e persistência própria do URM](../06_RENPY_COMPATIBILITY/02_SDK_SAVELOAD_URM_PERSISTENCIA.md). A distinção entre save nativo e arquivo .urm está documentada; testes runtime e o ciclo completo de persistent/settings continuam pendentes.
