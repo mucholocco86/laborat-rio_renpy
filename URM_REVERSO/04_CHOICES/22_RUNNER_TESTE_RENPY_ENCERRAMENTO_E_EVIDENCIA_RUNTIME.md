@@ -63,5 +63,5 @@ Nenhuma dessas execuções foi classificada como OBSERVADA EM RUNTIME para a sel
 | O término da testcase não encerra por si só o processo no runner | **CONFIRMADO NO SDK 7.4.11** |
 | renpy.quit() encerra via QuitException com status padrão zero | **CONFIRMADO NO SDK 7.4.11** |
 | O índice retornado localiza o bloco em Menu.execute | **CONFIRMADO NO SDK 7.4.11** |
-| Baseline do menu nativo seleciona bloco visível e termina com sucesso | **OBSERVADO EM RUNTIME** no run 38946325518 |\n| A ação da fixture executa bloco de alternativa com condição falsa | **PENDENTE DE RUNTIME**; execução anterior travou no seletor de abertura antes de chamar a ação |
+| Baseline do menu nativo seleciona bloco visível e termina com sucesso | **OBSERVADO EM RUNTIME** no run 38946325518 |\n| A ação da fixture executa bloco de alternativa com condição falsa | **PENDENTE DE RUNTIME**; duas execuções pararam esperando foco nos botões, antes de chamar a ação |
 | A fixture representa integralmente a integração URM | **NÃO DEMONSTRADO**; reproduz apenas o contrato estreito de ChoiceReturn |
