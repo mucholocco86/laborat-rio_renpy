@@ -64,6 +64,33 @@ def _encode_record(value: str, quoted: bool):
              .replace("\n", "\\n")
     ) + '"'
 
+
+def _decode_transport_record(value: str) -> str:
+    """Decode the plain Wells OLD/NEW record escape layer."""
+    value = str(value)
+    out = []
+    i = 0
+    while i < len(value):
+        if value[i] != "\\" or i + 1 >= len(value):
+            out.append(value[i])
+            i += 1
+            continue
+        nxt = value[i + 1]
+        decoded = {"\\": "\\", "n": "\n", "r": "\r", "t": "\t"}.get(nxt)
+        if decoded is None:
+            out.extend(("\\", nxt))
+        else:
+            out.append(decoded)
+        i += 2
+    return "".join(out)
+
+
+def _encode_transport_record(value: str) -> str:
+    return (str(value).replace("\\", "\\\\")
+            .replace("\r", "\\r")
+            .replace("\n", "\\n")
+            .replace("\t", "\\t"))
+
 def _protect_renpy(text: str):
     """
     Usa o isolador baseado na fronteira do Ren'Py e substitui SOMENTE os
@@ -417,7 +444,8 @@ def _make_docx(records):
 def _write_docx(path: Path, records):
     path.write_bytes(_make_docx(records))
 
-def review_file(path: Path, base_dir: Path, progress=None, native_path=None, blindagem_path=None):
+def review_file(path: Path, base_dir: Path, progress=None, native_path=None, blindagem_path=None,
+                plain_records=None):
     path = Path(path).resolve()
     if path.suffix.lower() not in (".txt", ".docx"):
         raise ValueError("Selecione um arquivo TXT ou DOCX.")
@@ -434,6 +462,11 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
     else:
         records = _read_docx(path)
 
+    if plain_records is None:
+        is_pair_name = bool(re.fullmatch(r"(?:old|new)(?:_\d+)?", path.stem, re.IGNORECASE))
+        plain_records = is_pair_name and (path.parent / "wells_translation_map.json").is_file()
+    plain_records = bool(plain_records)
+
     natives = None
     lists = None
     if native_path is not None:
@@ -445,16 +478,17 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
         if len(natives) != len(records):
             raise ValueError("Par OLD/NEW desalinhado. Nada foi alterado.")
         # Valida todos os registros antes de qualquer gravação.
-        for label, values in (("OLD", natives), ("NEW", records)):
-            for index, value in enumerate(values, 1):
-                if not _QUOTED.fullmatch(value):
-                    raise ValueError(f"Registro {index} inválido no {label}; mantenha as aspas.")
-                try:
-                    decoded = ast.literal_eval(value.strip())
-                except Exception as exc:
-                    raise ValueError(f"Registro {index} inválido no {label}.") from exc
-                if not isinstance(decoded, str):
-                    raise ValueError(f"Registro {index} não textual no {label}.")
+        if not plain_records:
+            for label, values in (("OLD", natives), ("NEW", records)):
+                for index, value in enumerate(values, 1):
+                    if not _QUOTED.fullmatch(value):
+                        raise ValueError(f"Registro {index} inválido no {label}; mantenha as aspas.")
+                    try:
+                        decoded = ast.literal_eval(value.strip())
+                    except Exception as exc:
+                        raise ValueError(f"Registro {index} inválido no {label}.") from exc
+                    if not isinstance(decoded, str):
+                        raise ValueError(f"Registro {index} não textual no {label}.")
         lists = carregar_listas(blindagem_path) if blindagem_path else {"NOMES_BLINDADOS": [], "NOMES_TRADUZIVEIS": []}
 
     total = len(records)
@@ -483,14 +517,18 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
     first_temp = True
 
     for idx, record in enumerate(records, 1):
-        text, quoted = _decode_record(record)
+        if plain_records:
+            text, quoted = _decode_transport_record(record), False
+        else:
+            text, quoted = _decode_record(record)
         for issue in diagnosticar_texto(text):
             linguistic_issues.append({"record": idx, **issue, "text": text})
         if natives is None:
             reviewed, count, tokens = review_text(text, dictionary=dictionary, base_linguistica=base_linguistica)
         else:
             from wells_blindagem_review import revisar_com_blindagem
-            native = ast.literal_eval(natives[idx - 1].strip())
+            native = (_decode_transport_record(natives[idx - 1]) if plain_records
+                      else ast.literal_eval(natives[idx - 1].strip()))
             reviewed, count, tokens, stats = revisar_com_blindagem(
                 native, text, lists,
                 lambda value: review_text(value, dictionary=dictionary, base_linguistica=base_linguistica),
@@ -501,7 +539,7 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
             unresolved_names.extend({"record": idx, "term": term, "native": native, "translated": text}
                                     for term in stats["missing"])
 
-        encoded = _encode_record(reviewed, quoted)
+        encoded = _encode_transport_record(reviewed) if plain_records else _encode_record(reviewed, quoted)
 
         item = analisar_registro(idx, text, reviewed, tokens)
         if not first_temp:
@@ -559,4 +597,5 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
         "native_unchanged": str(native_path) if native_path is not None else None,
         "dictionary": str(dictionary_path) if dictionary_path else None,
     }
+
 
