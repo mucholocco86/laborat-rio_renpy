@@ -133,3 +133,17 @@ O run 38973224110, commit `2c9024f90f963d2091c8b9a6bb4d95bff8cb839b`, falhou ape
 | O URM completo integrado tem o mesmo resultado, incluindo StoreMonitor e variáveis complexas | **PENDENTE** |
 
 Próxima etapa: testar a interface de rollback nativa do Ren'Py via harness de entrada, ou construir uma sequência de rollback interativo que registre cada passo e o valor após cada retorno. Depois disso, a próxima dimensão da matriz é save/load nativo após edição, separando raízes de StoreDict, snapshots de containers revertíveis e metadados do arquivo .urm.
+
+
+## Inspeção do harness para rollback por tecla
+
+Após o run de rollback pela API, foi verificado se o test runner do SDK permite injetar a entrada nativa usada pelo jogador.
+
+**CONFIRMADO NO SDK 7.4.11:**
+
+- `renpy/test/testparser.py`, blob `dcade9a19bbf1abaad136d30820f0b96ee3301b3`, `parse_clause`: o testcase aceita a instrução `type` seguida por um keysym.
+- `renpy/test/testast.py`, blob `fe2a5e93d408e11ff70dea96858297ebaf412173`, `Type.perform`: a instrução chama `renpy.test.testkey.down/up` para sintetizar as teclas.
+- `renpy/test/testkey.py`, blob `fd5fd33444bdf2839919dcb52ef35da8e9bc8343`, `get_keycode`, `down`, `up`: o keysym `K_PAGEUP` é convertido em eventos SDL keydown/keyup.
+- `renpy/common/00keymap.rpy`, blob `7806011325fa1942e6bdd65e802c4a59e1ba0921`: o mapa padrão associa `rollback` a `K_PAGEUP` (além de outras entradas).
+
+Isso torna possível construir um próximo teste de entrada real pelo harness, sem chamar `renpy.rollback()` no script. Ainda é necessário provar runtime que a tecla sintética é entregue na interação correta, que o rollback é aceito no estado de menu/dialogue escolhido e quantos eventos são necessários para cruzar a edição. Nenhum resultado foi inferido apenas desta disponibilidade do mecanismo de teste.
