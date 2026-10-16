@@ -81,3 +81,25 @@ A fixture foi ajustada para:
 | Relação dessa edição com save/load nativo e arquivo .urm | **PENDENTE** de matriz específica |
 
 Próxima prioridade: reproduzir em fixture a semântica exata de Var.setValue/SetVarValue e depois executar edição → avanço por menu/dialogue → rollback nativo, sem usar force=True quando o cenário permitir. Em seguida, testar salvar/carregar após a edição.
+
+## Extensão — reprodução reduzida de Var.setValue e SetVarValue
+
+**OBSERVADO EM RUNTIME — run 38950917699, job 117141762569, commit da fixture `2152010526df150214c230b41dc96e18cd81c981`:** as três etapas do workflow terminaram com sucesso: baseline nativo, seleção da alternativa com condição falsa e edição/rollback.
+
+A fixture agora contém uma reprodução mínima do caminho escalar inteiro observado em `classes/vars.rpy`: a ação `SetVarValue.__call__` chama `Var.setValue`; para o caso inteiro raiz, o método valida o tipo e executa uma atribuição ao nome em `renpy.store`. Após o valor inicial 10, a ação gravou 99; depois de avançar pela interação e executar rollback forçado para o checkpoint, o log apresentou `ROLLBACK_VALUE_AT_VERIFY 10`, e a asserção terminou com exit=0.
+
+Isso é evidência de que a semântica reproduzida de edição escalar do URM participa do estado reversível do Ren'Py no contexto de teste. Não é ainda um teste de integração do módulo URM: a fixture copia o trecho relevante do código convertido, usa stubs para dependências (incluindo VarsStore/Search) e simplifica a construção do objeto Var. O caso cobre somente uma variável inteira raiz, editável e não congelada. Não cobre tipos/containers, variável filha, CreateVar, StoreMonitor, save/load ou gesto manual de rollback.
+
+O rollback ainda é iniciado pelo script com `force=True`, e o contexto descartável habilita `Context.rollback` devido à limitação do runner de testes. Portanto o resultado não estabelece quando o rollback manual do jogador cruza a edição em uma sequência normal de menus.
+
+### Classificação atualizada
+
+| Afirmação | Classificação |
+|---|---|
+| O fluxo reproduzido `SetVarValue → Var.setValue` alterou 10 para 99 no store | **OBSERVADO EM RUNTIME**, run 38950917699 |
+| O rollback do checkpoint restaurou esse inteiro para 10 | **OBSERVADO EM RUNTIME**, run 38950917699 |
+| O módulo original convertido do URM, carregado integralmente, tem o mesmo resultado em jogo real | **PENDENTE** de integração |
+| Edição seguida de várias interações e rollback manual do jogador | **PENDENTE** |
+| Persistência após save/load e efeitos de StoreMonitor/frozen | **PENDENTE** |
+
+Próximo passo: preparar uma sequência de gameplay na fixture com edição, avanço por mais de uma interação e rollback nativo não forçado, registrando em qual interação o valor reaparece. Em seguida testar save/load sem misturar o arquivo `.urm` com o save nativo.
