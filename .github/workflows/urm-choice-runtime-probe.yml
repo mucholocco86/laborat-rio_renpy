@@ -94,3 +94,18 @@ jobs:
           result=$?
           echo "END manual edit rollback probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+      - name: Run ordinary rollback after two interactions
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START ordinary multi-interaction rollback probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_edit_ordinary_rollback
+          result=$?
+          echo "END ordinary multi-interaction rollback probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
