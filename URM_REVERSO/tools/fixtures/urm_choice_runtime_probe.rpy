@@ -273,3 +273,49 @@ testcase urm_edit_ordinary_rollback:
     assert urm_ordinary_route == 0
     assert urm_ordinary_context_before is False
     $ renpy.quit()
+
+
+# Native input test: K_PAGEUP is sent by the Ren'Py test harness while the
+# game is in an ordinary say interaction. The SDK underlay maps rollback to
+# renpy.rollback with its default force=False.
+default urm_key_route = 0
+default urm_key_context_before = None
+
+label urm_edit_key_rollback_start:
+    $ urm_key_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ urm_key_route = 0
+    $ renpy.checkpoint("before-key-rollback-edit")
+
+    show screen urm_edit_probe
+    pause 0.5
+
+    menu:
+        "Key route once":
+            $ urm_key_route = 1
+
+    menu:
+        "Key route twice":
+            $ urm_key_route = 2
+
+    $ print("NATIVE_KEY_BEFORE", urm_rollback_value, urm_key_route)
+    "Reached the state after two choices."
+    return
+
+
+testcase urm_edit_native_key_rollback:
+    run Jump("urm_edit_key_rollback_start")
+    "Apply manual edit"
+    "Key route once"
+    "Key route twice"
+    "Reached the state after two choices."
+    type K_PAGEUP
+    $ print("NATIVE_KEY_AFTER_1", urm_rollback_value, urm_key_route)
+    type K_PAGEUP
+    $ print("NATIVE_KEY_AFTER_2", urm_rollback_value, urm_key_route)
+    type K_PAGEUP
+    $ print("NATIVE_KEY_AFTER_3", urm_rollback_value, urm_key_route)
+    assert urm_rollback_value == 10
+    assert urm_key_route == 0
+    assert urm_key_context_before is False
+    $ renpy.quit()
