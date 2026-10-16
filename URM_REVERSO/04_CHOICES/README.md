@@ -249,3 +249,8 @@ O documento [17 — Edição de itens, mutações de objetos e rollback](17_EDIC
 ## Continuação de 2026-10-16 — callback Python e checkpoints
 
 O documento [18 — Callback Python, construtores revertíveis e edição pela screen](18_CALLBACK_PYTHON_E_CHECKPOINTS_URM.md) localiza a chamada de python_callbacks em ast.Python.execute(), rastreia a transferência adiada de Context.force_checkpoint ao RollbackLog e confirma em minstore.py que os nomes especiais são ligados a RevertableList/RevertableDict. A mutação interna de container depende do log de objetos; o delta de StoreDict não é um snapshot do conteúdo.
+
+
+## Continuação de 2026-10-16 — fechamento do estado antes do rollback
+
+O documento [19 — Fechamento do estado corrente antes do rollback](19_FECHAMENTO_ESTADO_ANTES_ROLLBACK.md) confirma que exports.rollback() chama RollbackLog.complete() imediatamente antes da restauração. O log então coleta deltas do StoreDict e snapshots dos objetos mutados. Também esclarece que o checkpoint solicitado pelo StoreMonitor é soft (hard=False), não uma barreira rígida ao rollback. A aplicação exata a ações do URM segue pendente de runtime.
