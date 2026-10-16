@@ -309,11 +309,11 @@ testcase urm_edit_native_key_rollback:
     "Key route once"
     "Key route twice"
     "Reached the state after two choices."
-    type K_PAGEUP
+    type PAGEUP
     $ print("NATIVE_KEY_AFTER_1", urm_rollback_value, urm_key_route)
-    type K_PAGEUP
+    type PAGEUP
     $ print("NATIVE_KEY_AFTER_2", urm_rollback_value, urm_key_route)
-    type K_PAGEUP
+    type PAGEUP
     $ print("NATIVE_KEY_AFTER_3", urm_rollback_value, urm_key_route)
     assert urm_rollback_value == 10
     assert urm_key_route == 0
