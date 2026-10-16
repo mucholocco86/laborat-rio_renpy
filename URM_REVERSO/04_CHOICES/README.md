@@ -244,3 +244,8 @@ O documento [16 — CodeView, busca e edição de variáveis ligadas a Choices](
 ## Continuação de 2026-10-16 — mutações de variáveis e objetos revertíveis
 
 O documento [17 — Edição de itens, mutações de objetos e rollback](17_EDICAO_ITENS_MUTACOES_OBJETOS_ROLLBACK.md) cruza `Var.setValue`, `CreateVar`, exclusão de variáveis e edição de itens de listas/dicionários com `RevertableList`/`RevertableDict` e `RollbackLog.complete()/rollback()` do SDK 7.4.11. A evidência é estática. Permanecem pendentes testes de runtime do URM e o alcance do `StoreMonitor` em mutações aninhadas.
+
+
+## Continuação de 2026-10-16 — callback Python e checkpoints
+
+O documento [18 — Callback Python, construtores revertíveis e edição pela screen](18_CALLBACK_PYTHON_E_CHECKPOINTS_URM.md) localiza a chamada de python_callbacks em ast.Python.execute(): depois do bytecode e fora da fase init. Isso separa a notificação do StoreMonitor da ação de edição disparada pela screen. Também registra que a associação completa dos nomes especiais __renpy__list__/__renpy__dict__ aos construtores ainda precisa ser localizada no SDK.
