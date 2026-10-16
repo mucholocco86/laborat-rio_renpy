@@ -21,11 +21,13 @@ Repositório mucholocco86/laborat-rio_renpy, branch main, consultado em 2026-10-
 
 ## Diagnóstico do runner
 
-**CONFIRMADO NO SDK 7.4.11:** uma testcase pode terminar com node = None. Nesse estado, testexecution.execute() limpa o estado do mouse e retorna. Esse trecho não chama renpy.quit() nem encerra o processo.
+**CONFIRMADO NO SDK 7.4.11:** uma testcase pode terminar com node = None. Nesse estado, testexecution.execute() limpa o estado do mouse e retorna; esse trecho não encerra o processo. A fixture chama renpy.quit() depois de cada asserção, o que encerra o Ren'Py por QuitException com status padrão zero.
 
-Isso explica por que o passo do workflow podia continuar ativo depois de a testcase possivelmente ter completado suas verificações. Sem saída final ou logs, não se pode afirmar que as asserções passaram. O diagnóstico explica a falta de encerramento; não prova sucesso.
+A primeira execução limpa mostrou baseline exit=0 e falha do teste forçado antes da ação, esperando “Open URM probe”. A segunda também passou no baseline, mas esperou “Select hidden route” após show_screen ser chamado dentro da testcase. Ambas pararam antes de executar a ação.
 
-A fixture agora termina explicitamente cada testcase com $ renpy.quit(). **CONFIRMADO NO SDK 7.4.11:** a chamada encerra o Ren'Py via QuitException, com status zero por padrão. O workflow atualizado também limita cada invocação a 120 segundos e imprime marcadores UTC de início e fim.
+Na terceira configuração, a screen modal é mostrada pelo script imediatamente antes de entrar no menu. **OBSERVADO EM RUNTIME:** baseline nativo e teste forçado encerraram com exit=0. A testcase forçada só chama renpy.quit() depois da asserção urm_probe_result == "forced-hidden"; logo, nessa fixture o índice devolvido pela ação fez Menu.execute alcançar e executar o bloco AST da alternativa cujo menu declara if False.
+
+Esse resultado comprova o contrato estreito de ChoiceReturn com screen modal na interação ativa. Não comprova a integração integral da screen real do URM, nem o comportamento de edição manual e rollback.
 
 ## Circuito nativo confirmado por leitura
 
@@ -39,14 +41,14 @@ A cadeia estrutural do índice está **CONFIRMADA NO SDK**. Ela não comprova, s
 
 ## Execuções e artefatos
 
-- Fixture criada em 2fc71d411ce2266132d342ef61c121216ca078b7; encerramento explícito em 379d150512d7832fd9c61b59d8231f67a1c38585; substituição do seletor launcher por abertura direta da tela durante o menu em cb1294d1e72f65ed52864dc500c3c031f9429197.
-- Workflow criado em 99eed0a8a55c340f46a1bb523900ef804efb0c42; limites e marcadores adicionados em 958db3d04671eb459b6c1f0915df8788d94bd9b5.
-- Run 38945163460: ativo na consulta de 2026-10-16; o passo era o baseline. Iniciado antes dos limites atuais.
-- Run 38945788113: cancelado após entrar execução mais recente no controle de concorrência.
-- Run 38946285401: aguardava concorrência e depois foi cancelado.
-- Run 38946325518: pendente na última consulta, com fixture atualizada.
+- Fixture criada em commit 2fc71d411ce2266132d342ef61c121216ca078b7; encerramento após asserções em 379d150512d7832fd9c61b59d8231f67a1c38585; fixture final validada em e103cbc5669523609b65a036628e73f67647059a.
+- Workflow criado em 99eed0a8a55c340f46a1bb523900ef804efb0c42; limites de 120 segundos e marcadores UTC em 958db3d04671eb459b6c1f0915df8788d94bd9b5.
+- Runs 38945163460, 38945788113 e 38946285401: execuções iniciais canceladas ou substituídas durante o diagnóstico do runner.
+- Run 38946325518: baseline passou; fixture inicial do teste forçado falhou esperando o botão de abertura, antes da ação.
+- Run 38946752504: baseline passou; segunda fixture falhou aguardando foco no botão modal, antes da ação.
+- Run 38946951166: **SUCCESS**. Job 117128365515. Baseline: exit=0. Teste forçado de condição falsa: exit=0. A asserção forced-hidden foi executada antes da chamada de encerramento.
 
-Nenhuma dessas execuções foi classificada como OBSERVADA EM RUNTIME para a seleção oculta. Os logs da execução corrigida precisam ser lidos quando terminar.
+A evidência runtime aplica-se à fixture sintética, não a uma carga integral do URM. Ela confirma que, nessa configuração e versão, um valor ChoiceReturn devolvido por ação de screen modal pode selecionar um item estrutural cujo menu tinha condição falsa.
 
 ## Próxima verificação
 
@@ -63,5 +65,8 @@ Nenhuma dessas execuções foi classificada como OBSERVADA EM RUNTIME para a sel
 | O término da testcase não encerra por si só o processo no runner | **CONFIRMADO NO SDK 7.4.11** |
 | renpy.quit() encerra via QuitException com status padrão zero | **CONFIRMADO NO SDK 7.4.11** |
 | O índice retornado localiza o bloco em Menu.execute | **CONFIRMADO NO SDK 7.4.11** |
-| Baseline do menu nativo seleciona bloco visível e termina com sucesso | **OBSERVADO EM RUNTIME** no run 38946325518 |\n| A ação da fixture executa bloco de alternativa com condição falsa | **OBSERVADO EM RUNTIME** no run 38946951166; fixture sintética, sem URM integral |
-| A fixture representa integralmente a integração URM | **NÃO DEMONSTRADO**; reproduz apenas o contrato estreito de ChoiceReturn |
+| Baseline nativo seleciona bloco visível e termina com sucesso | **OBSERVADO EM RUNTIME** no run 38946951166 |
+| A ação da fixture executa bloco de alternativa com condição falsa | **OBSERVADO EM RUNTIME** no run 38946951166; fixture sintética |
+| A screen original do URM, sem simplificação, seleciona condição falsa | **PENDENTE** de integração runtime da fonte convertida |
+| A fixture representa integralmente a integração URM | **NÃO DEMONSTRADO**; reproduz o contrato estreito de ChoiceReturn |
+| O efeito da seleção ou de edição manual sobre rollback/save-load | **PENDENTE** de testes separados |
