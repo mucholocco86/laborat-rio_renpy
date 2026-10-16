@@ -254,3 +254,8 @@ O documento [18 — Callback Python, construtores revertíveis e edição pela s
 ## Continuação de 2026-10-16 — fechamento do estado antes do rollback
 
 O documento [19 — Fechamento do estado corrente antes do rollback](19_FECHAMENTO_ESTADO_ANTES_ROLLBACK.md) confirma que exports.rollback() chama RollbackLog.complete() imediatamente antes da restauração. O log então coleta deltas do StoreDict e snapshots dos objetos mutados. Também esclarece que o checkpoint solicitado pelo StoreMonitor é soft (hard=False), não uma barreira rígida ao rollback. A aplicação exata a ações do URM segue pendente de runtime.
+
+
+## Continuação de 2026-10-16 — edição manual e save nativo
+
+O documento [20 — Edição manual e save nativo: raízes e ciclos do StoreDict](20_EDICAO_MANUAL_SAVE_NATIVO_E_ROOTS.md) detalha loadsave.save → RollbackLog.freeze → complete(False) → roots/log serializados. get_roots usa ever_been_changed, atualizado em ciclos cycle=True. Isso identifica casos que precisam ser testados ao salvar imediatamente após editar/criar variável pela screen; não conclui que haja perda de dados. O arquivo .urm permanece separado do save nativo.
