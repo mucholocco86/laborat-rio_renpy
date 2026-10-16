@@ -1072,14 +1072,26 @@ class WellsManager(tk.Tk):
         self._log(f"Documento: {path}")
         def worker():
             if native_path is not None:
-                from Wells_Translator.wells_translator_core import scan_tl, _collect_txt_pair, _collect_docx_pair
-                _, entries = scan_tl(tl_root)
+                from Wells_Translator.wells_translator_core import (
+                    MAP_FILENAME, scan_tl, validate_translation_map,
+                    _collect_txt_pair, _collect_docx_pair,
+                )
                 collector = _collect_txt_pair if fmt == "txt" else _collect_docx_pair
                 olds, news, _ = collector(translated_path.parent)
-                if olds != [entry["original_token"] for entry in entries] or len(news) != len(olds):
-                    raise ValueError("OLD/NEW não correspondem à pasta TL selecionada. Nada foi alterado.")
+                plain_records = (translated_path.parent / MAP_FILENAME).is_file()
+                if plain_records:
+                    validate_translation_map(tl_root, translated_path.parent, old_records=olds)
+                    if len(news) != len(olds):
+                        raise ValueError("OLD/NEW não correspondem ao mapa da extração. Nada foi alterado.")
+                else:
+                    _, entries = scan_tl(tl_root)
+                    if olds != [entry["original_token"] for entry in entries] or len(news) != len(olds):
+                        raise ValueError("OLD/NEW não correspondem à pasta TL selecionada. Nada foi alterado.")
+            else:
+                plain_records = None
             return review_file(translated_path, REVISOR_DIR, progress=self._revisor_progress,
-                               native_path=native_path, blindagem_path=self._blindagem_path())
+                               native_path=native_path, blindagem_path=self._blindagem_path(),
+                               plain_records=plain_records)
         def done(result):
             self.progress["value"] = 100; self.status_var.set(f"Status: {result['records']} linhas revisadas.")
             self._log(f"[OK] Revisão concluída: {result['records']} linhas.")
@@ -1206,5 +1218,6 @@ class WellsManager(tk.Tk):
 
 if __name__ == "__main__":
     WellsManager().mainloop()
+
 
 
