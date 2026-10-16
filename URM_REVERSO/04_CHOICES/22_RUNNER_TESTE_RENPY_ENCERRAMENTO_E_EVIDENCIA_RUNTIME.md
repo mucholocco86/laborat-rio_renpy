@@ -179,3 +179,40 @@ Na primeira tentativa, o testcase usou `type K_PAGEUP`; o parser acrescenta `K_`
 | O URM integrado, incluindo StoreMonitor e suas screens, segue o mesmo circuito | **PENDENTE** |
 
 Com isso, a hipótese de que uma edição do store pode permanecer ativa durante o avanço e ser desfeita pelo rollback do jogador recebeu uma reprodução próxima do gesto nativo no SDK 7.4.11, ainda em fixture reduzida. A próxima prova prioritária passa a ser save/load nativo após a edição, incluindo variável-raiz e container revertível, mantendo o arquivo `.urm` separado.
+
+
+## Resultado — save/load nativo após edição manual reduzida
+
+**OBSERVADO EM RUNTIME — run 38979502224, job 117236768906; fixture/workflow commit `f230c151d7efd8c27aa2853f813c844e66e4fb3e`:** a reprodução reduzida de `SetVarValue → Var.setValue` editou `urm_rollback_value` de 10 para 99. O save nativo foi gravado nesse estado; depois o teste alterou o valor em memória para 123 e chamou `renpy.load("urm-probe-edit-roundtrip")`. O log do runner registrou:
+
+```text
+SAVELOAD_BEFORE_SAVE 99
+SAVELOAD_BEFORE_LOAD 123
+SAVELOAD_AFTER_LOAD 99
+```
+
+A testcase terminou com exit=0 e verificou `urm_rollback_value == 99` depois do load. Portanto, nesse cenário controlado, o save nativo conservou a edição manual já presente no estado salvo; carregar o slot substituiu o valor posterior 123 pelo valor salvo 99. Isso complementa — sem contradizer — a prova de rollback: a edição 10→99 pôde ser desfeita ao voltar a um checkpoint anterior, mas ficou incluída no estado quando o save foi feito após a edição.
+
+**CONFIRMADO NO SDK 7.4.11 por inspeção estática:** `renpy.save` congela/serializa raízes do store junto com o RollbackLog; `renpy.load` restaura esses dados e chama `RollbackLog.unfreeze`, que reinicia o contexto do jogo. O resultado de runtime acima é consistente com esse caminho. A fixture usa um marcador de reentrada no módulo do test runner, fora dos stores serializados, para detectar que a continuação veio do load; isso impede a repetição da mutação 123 e evita o falso loop da primeira tentativa.
+
+### Limites
+
+- O teste usa uma variável inteira raiz e uma reprodução reduzida do código convertido, com stubs para dependências do URM; não carrega o módulo URM integral.
+- O save é feito pelo script de teste após a ação sintética da screen. Não valida todos os instantes possíveis em que o usuário pode salvar durante uma interação real.
+- A prova não cobre variáveis criadas, atributos/itens aninhados, containers revertíveis, variáveis congeladas, StoreMonitor nem alterações nos metadados próprios do arquivo `.urm`.
+- O resultado não significa persistência fora do slot nativo: prova somente que a edição faz parte do estado serializado por esse save/load.
+- O run anterior 38979350434 falhou por um marcador guardado no store do jogo, que também era restaurado pelo load e causava reentrada repetida. Esse run é falha do harness e não evidência contra a semântica de save/load.
+
+### Classificação atualizada
+
+| Afirmação | Classificação |
+|---|---|
+| O save nativo guardou o valor 99 já editado, e o load restaurou 99 após uma mutação posterior para 123 | **OBSERVADO EM RUNTIME**, run 38979502224 |
+| No SDK 7.4.11, save/load envolve raízes do store e RollbackLog | **CONFIRMADO NO SDK 7.4.11** |
+| A alteração escalar reduzida do URM pode ser desfeita por rollback anterior e também incluída em save posterior à alteração | **OBSERVADO EM RUNTIME** nas fixtures de rollback (runs 38973243038/38978993727) e save/load (run 38979502224) |
+| `.urm` armazena o estado completo da partida ou substitui o save nativo | **NÃO DEMONSTRADO**; os mecanismos são separados e essa conclusão não pode ser inferida |
+| Criação de variáveis, mutações aninhadas, containers, frozen/monitor e URM integral têm o mesmo resultado | **PENDENTE** |
+
+### Próxima etapa
+
+Manter separados os dois eixos que já têm prova escalar: rollback de gameplay restaura uma edição ao cruzar o checkpoint anterior; save/load nativo restaura o valor que estava presente no instante do save. A próxima extensão de runtime deve cobrir um objeto/container revertível e uma variável criada/editada pela ação correspondente do URM reduzido. Depois, investigar se o StoreMonitor solicita checkpoint antes/depois da escrita e testar as operações de variável congelada. Não generalizar a semântica para arquivos `.urm` ou para o URM integral sem testes específicos.
