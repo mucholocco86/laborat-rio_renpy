@@ -79,3 +79,18 @@ jobs:
           result=$?
           echo "END forced false-condition probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+      - name: Run manual variable edit rollback probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START manual edit rollback probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_manual_edit_rollback
+          result=$?
+          echo "END manual edit rollback probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
