@@ -8,7 +8,9 @@ Não cria TL, não altera idioma e não usa manifesto/JSON para o modo manual.
 from __future__ import annotations
 
 import ast
+import hashlib
 import io
+import json
 import zipfile
 from xml.sax.saxutils import escape
 import xml.etree.ElementTree as ET
@@ -22,6 +24,9 @@ FULL_OLD_TXT = "old.txt"
 FULL_NEW_TXT = "new.txt"
 FULL_OLD_DOCX = "old.docx"
 FULL_NEW_DOCX = "new.docx"
+MAP_FILENAME = "wells_translation_map.json"
+MAP_SCHEMA = "wells-rpy-translation-map"
+MAP_VERSION = 1
 
 _QUOTED = re.compile(r'"((?:\\.|[^"\\])*)"')
 _TRANSLATE = re.compile(
@@ -29,6 +34,113 @@ _TRANSLATE = re.compile(
 )
 _OLD = re.compile(r'^\s*old\s+(".*")\s*$')
 _NEW = re.compile(r'^\s*new\s+(".*")\s*$')
+
+
+def encode_transport_text(value: str) -> str:
+    """Encode one clean record without Ren'Py quote delimiters."""
+    return (str(value).replace("\\", "\\\\")
+            .replace("\r", "\\r")
+            .replace("\n", "\\n")
+            .replace("\t", "\\t"))
+
+
+def decode_transport_text(value: str) -> str:
+    """Reverse the transport escapes while preserving unknown escapes."""
+    value = str(value)
+    out = []
+    i = 0
+    while i < len(value):
+        if value[i] != "\\" or i + 1 >= len(value):
+            out.append(value[i])
+            i += 1
+            continue
+        nxt = value[i + 1]
+        decoded = {"\\": "\\", "n": "\n", "r": "\r", "t": "\t"}.get(nxt)
+        if decoded is None:
+            out.extend(("\\", nxt))
+        else:
+            out.append(decoded)
+        i += 2
+    return "".join(out)
+
+
+def _canonical_relative(path) -> str:
+    return str(path).replace("\\", "/")
+
+
+def _source_file_hashes(root: Path):
+    return [
+        {
+            "path": _canonical_relative(path.relative_to(root)),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }
+        for path in list_rpy(root)
+    ]
+
+
+def _map_record(index, entry):
+    return {
+        "id": f"W{index:08d}",
+        "kind": entry["kind"],
+        "file": _canonical_relative(entry["relative"]),
+        "source_line": int(entry["source_line"]) + 1,
+        "target_line": int(entry["target_line"]) + 1,
+        "original_sha256": hashlib.sha256(entry["original"].encode("utf-8")).hexdigest(),
+    }
+
+
+def _write_translation_map(output_dir: Path, root: Path, entries):
+    output_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema": MAP_SCHEMA,
+        "version": MAP_VERSION,
+        "record_encoding": "wells-plain-v1",
+        "source_tl": root.name,
+        "record_count": len(entries),
+        "source_files": _source_file_hashes(root),
+        "records": [_map_record(index, entry) for index, entry in enumerate(entries, 1)],
+    }
+    target = output_dir / MAP_FILENAME
+    temporary = target.with_suffix(target.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(target)
+    return target
+
+
+def validate_translation_map(tl_dir, output_dir, old_records=None):
+    """Validate the saved map against the current TL and optional OLD rows."""
+    root = Path(tl_dir).resolve()
+    map_path = Path(output_dir).resolve() / MAP_FILENAME
+    try:
+        payload = json.loads(map_path.read_text(encoding="utf-8-sig"))
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Mapa da extração não encontrado: {map_path.name}")
+    except Exception as exc:
+        raise ValueError(f"Mapa da extração inválido: {exc}") from exc
+
+    if payload.get("schema") != MAP_SCHEMA or payload.get("version") != MAP_VERSION:
+        raise ValueError("Versão do mapa Wells desconhecida. Faça uma nova extração.")
+    if payload.get("record_encoding") != "wells-plain-v1":
+        raise ValueError("Codificação do mapa Wells incompatível. Faça uma nova extração.")
+
+    root, entries = scan_tl(root)
+    if payload.get("source_files") != _source_file_hashes(root):
+        raise ValueError("A pasta TL mudou desde a extração ou não corresponde ao mapa. Nada foi alterado.")
+    mapped = payload.get("records")
+    if not isinstance(mapped, list) or payload.get("record_count") != len(entries) or len(mapped) != len(entries):
+        raise ValueError("A quantidade de registros não corresponde ao mapa da extração. Nada foi alterado.")
+
+    for index, (record, entry) in enumerate(zip(mapped, entries), 1):
+        if record != _map_record(index, entry):
+            raise ValueError(f"O mapa diverge da pasta TL no registro {index}. Nada foi alterado.")
+
+    if old_records is not None:
+        if len(old_records) != len(entries):
+            raise ValueError("OLD desalinhado com o mapa da extração. Nada foi alterado.")
+        for index, (record, entry) in enumerate(zip(old_records, entries), 1):
+            if record != encode_transport_text(entry["original"]):
+                raise ValueError(f"OLD divergente no registro {index}; mapa e extração não correspondem.")
+    return root, entries
 
 
 def _notify(progress, value, text=None):
@@ -80,7 +192,13 @@ def _replace_last_string(line: str, new_text: str) -> str:
 
 def list_rpy(tl_dir):
     root = Path(tl_dir).resolve()
-    return sorted(p for p in root.rglob("*.rpy") if p.is_file())
+    # Keep entry order identical on Windows (case-insensitive paths) and
+    # POSIX. This order is serialized in the translation map and must survive
+    # moving the extraction between platforms.
+    return sorted(
+        (p for p in root.rglob("*.rpy") if p.is_file()),
+        key=lambda p: (str(p).casefold(), str(p)),
+    )
 
 
 def scan_file(path: Path, root: Path):
@@ -214,6 +332,7 @@ def _read_txt_records(path: Path):
 
 
 def _clean_txt_outputs(output_dir: Path):
+    (output_dir / MAP_FILENAME).unlink(missing_ok=True)
     for name in (FULL_OLD_TXT, FULL_NEW_TXT):
         p = output_dir / name
         if p.exists():
@@ -230,9 +349,10 @@ def export_full(tl_dir, output_dir, return_session=False, progress=None):
     _clean_txt_outputs(output_dir)
 
     _notify(progress, 82, "Gravando old.txt...")
-    _write_txt_records(output_dir / FULL_OLD_TXT, [e["original_token"] for e in entries])
+    _write_txt_records(output_dir / FULL_OLD_TXT, [encode_transport_text(e["original"]) for e in entries])
     _notify(progress, 94, "Gravando new.txt...")
-    _write_txt_records(output_dir / FULL_NEW_TXT, [e["current_token"] for e in entries])
+    _write_txt_records(output_dir / FULL_NEW_TXT, [encode_transport_text(e["current"]) for e in entries])
+    _write_translation_map(output_dir, root, entries)
     _notify(progress, 100, "TXT completo concluído.")
 
     session = {"root": root, "entries": entries, "format": "txt"}
@@ -251,7 +371,7 @@ def export_blocks(tl_dir, output_dir, max_bytes=200 * 1024, return_session=False
     current_bytes = 0
 
     for entry in entries:
-        size = len((entry["original_token"] + "\n").encode("utf-8"))
+        size = len((encode_transport_text(entry["original"]) + "\n").encode("utf-8"))
         if current and current_bytes + size > max_bytes:
             blocks.append(current)
             current = []
@@ -263,9 +383,11 @@ def export_blocks(tl_dir, output_dir, max_bytes=200 * 1024, return_session=False
 
     total_blocks = max(1, len(blocks))
     for idx, block in enumerate(blocks, 1):
-        _write_txt_records(output_dir / f"old_{idx}.txt", [e["original_token"] for e in block])
-        _write_txt_records(output_dir / f"new_{idx}.txt", [e["current_token"] for e in block])
+        _write_txt_records(output_dir / f"old_{idx}.txt", [encode_transport_text(e["original"]) for e in block])
+        _write_txt_records(output_dir / f"new_{idx}.txt", [encode_transport_text(e["current"]) for e in block])
         _notify(progress, 70 + 30 * idx / total_blocks, f"Gravando blocos TXT: {idx}/{len(blocks)}")
+
+    _write_translation_map(output_dir, root, entries)
 
     session = {"root": root, "entries": entries, "format": "txt"}
     if return_session:
@@ -312,6 +434,7 @@ def _collect_txt_pair(output_dir: Path):
 # ---------------- DOCX ----------------
 
 def _clean_docx_outputs(output_dir: Path):
+    (output_dir / MAP_FILENAME).unlink(missing_ok=True)
     for name in (FULL_OLD_DOCX, FULL_NEW_DOCX):
         p = output_dir / name
         if p.exists():
@@ -413,9 +536,10 @@ def export_full_docx(tl_dir, output_dir, return_session=False, progress=None):
     _clean_docx_outputs(output_dir)
 
     _notify(progress, 80, "Criando old.docx...")
-    _write_docx_records(output_dir / FULL_OLD_DOCX, [e["original_token"] for e in entries])
+    _write_docx_records(output_dir / FULL_OLD_DOCX, [encode_transport_text(e["original"]) for e in entries])
     _notify(progress, 94, "Criando new.docx...")
-    _write_docx_records(output_dir / FULL_NEW_DOCX, [e["current_token"] for e in entries])
+    _write_docx_records(output_dir / FULL_NEW_DOCX, [encode_transport_text(e["current"]) for e in entries])
+    _write_translation_map(output_dir, root, entries)
     _notify(progress, 100, "DOCX completo concluído.")
 
     session = {"root": root, "entries": entries, "format": "docx"}
@@ -438,8 +562,8 @@ def _fit_docx_blocks(entries, max_file_bytes, progress=None):
     for entry in entries:
         # OLD e NEW entram no cálculo para que ambos os arquivos gerados caibam.
         size = max(
-            len((entry["original_token"] + "\n").encode("utf-8")),
-            len((entry["current_token"] + "\n").encode("utf-8")),
+            len((encode_transport_text(entry["original"]) + "\n").encode("utf-8")),
+            len((encode_transport_text(entry["current"]) + "\n").encode("utf-8")),
         )
         if current and current_bytes + size > approx_limit:
             rough.append(current)
@@ -453,8 +577,8 @@ def _fit_docx_blocks(entries, max_file_bytes, progress=None):
     fitted = []
 
     def split_until_fit(block):
-        old_bytes = _make_docx_bytes([e["original_token"] for e in block])
-        new_bytes = _make_docx_bytes([e["current_token"] for e in block])
+        old_bytes = _make_docx_bytes([encode_transport_text(e["original"]) for e in block])
+        new_bytes = _make_docx_bytes([encode_transport_text(e["current"]) for e in block])
         if max(len(old_bytes), len(new_bytes)) <= max_file_bytes or len(block) <= 1:
             fitted.append((block, old_bytes, new_bytes))
             return
@@ -487,6 +611,8 @@ def export_blocks_docx(
         (output_dir / f"old_{idx}.docx").write_bytes(old_bytes)
         (output_dir / f"new_{idx}.docx").write_bytes(new_bytes)
         _notify(progress, 82 + 18 * idx / total, f"Gravando blocos DOCX: {idx}/{len(fitted)}")
+
+    _write_translation_map(output_dir, root, entries)
 
     session = {"root": root, "entries": entries, "format": "docx"}
     if return_session:
@@ -546,14 +672,19 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
     root = Path(tl_dir).resolve()
 
     _notify(progress, 2, "Preparando injeção...")
-    if session is not None and Path(session.get("root", "")).resolve() == root:
+    old_records, new_records, mode = collector(output_dir)
+    plain_mode = (output_dir / MAP_FILENAME).is_file()
+    if plain_mode:
+        # O mapa persistente é a autoridade mesmo após fechar/reabrir o app.
+        root, entries = validate_translation_map(root, output_dir, old_records=old_records)
+        _notify(progress, 15, "Mapa da extração validado...")
+    elif session is not None and Path(session.get("root", "")).resolve() == root:
         entries = session["entries"]
         _notify(progress, 15, "Usando mapa da extração atual...")
     else:
-        # Se o programa foi reaberto, reconstrói o mapa com segurança.
+        # Compatibilidade com extrações antigas sem wells_translation_map.json.
         root, entries = scan_tl(root, progress=lambda v, t=None: _notify(progress, 5 + v * 0.45, t))
 
-    old_records, new_records, mode = collector(output_dir)
     _notify(progress, 55, "Validando OLD/NEW...")
 
     expected = len(entries)
@@ -567,7 +698,8 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
         )
 
     for idx, (entry, old_line) in enumerate(zip(entries, old_records), 1):
-        if old_line != entry["original_token"]:
+        expected_old = encode_transport_text(entry["original"]) if plain_mode else entry["original_token"]
+        if old_line != expected_old:
             raise ValueError(
                 f"O OLD não corresponde à pasta TL no registro {idx}. "
                 "Selecione a mesma pasta usada na extração ou faça uma nova extração. Nada foi alterado."
@@ -577,7 +709,7 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
 
     per_file = {}
     for idx, (entry, new_line) in enumerate(zip(entries, new_records), 1):
-        translated = _validate_token(new_line, idx, label="NEW")
+        translated = decode_transport_text(new_line) if plain_mode else _validate_token(new_line, idx, label="NEW")
         per_file.setdefault(entry["file"], []).append((entry, translated))
 
     prepared = {}
@@ -621,3 +753,4 @@ def inject_translations(tl_dir, output_dir, session=None, progress=None):
 
 def inject_docx_translations(tl_dir, output_dir, session=None, progress=None):
     return _inject_common(tl_dir, output_dir, _collect_docx_pair, session=session, progress=progress)
+
