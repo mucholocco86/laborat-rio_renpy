@@ -39,7 +39,7 @@ A cadeia estrutural do índice está **CONFIRMADA NO SDK**. Ela não comprova, s
 
 ## Execuções e artefatos
 
-- Fixture criada em 2fc71d411ce2266132d342ef61c121216ca078b7; encerramento explícito em 379d150512d7832fd9c61b59d8231f67a1c38585.
+- Fixture criada em 2fc71d411ce2266132d342ef61c121216ca078b7; encerramento explícito em 379d150512d7832fd9c61b59d8231f67a1c38585; substituição do seletor launcher por abertura direta da tela durante o menu em cb1294d1e72f65ed52864dc500c3c031f9429197.
 - Workflow criado em 99eed0a8a55c340f46a1bb523900ef804efb0c42; limites e marcadores adicionados em 958db3d04671eb459b6c1f0915df8788d94bd9b5.
 - Run 38945163460: ativo na consulta de 2026-10-16; o passo era o baseline. Iniciado antes dos limites atuais.
 - Run 38945788113: cancelado após entrar execução mais recente no controle de concorrência.
@@ -63,5 +63,5 @@ Nenhuma dessas execuções foi classificada como OBSERVADA EM RUNTIME para a sel
 | O término da testcase não encerra por si só o processo no runner | **CONFIRMADO NO SDK 7.4.11** |
 | renpy.quit() encerra via QuitException com status padrão zero | **CONFIRMADO NO SDK 7.4.11** |
 | O índice retornado localiza o bloco em Menu.execute | **CONFIRMADO NO SDK 7.4.11** |
-| A fixture executa bloco de alternativa com condição falsa | **PENDENTE DE RUNTIME** |
+| Baseline do menu nativo seleciona bloco visível e termina com sucesso | **OBSERVADO EM RUNTIME** no run 38946325518 |\n| A ação da fixture executa bloco de alternativa com condição falsa | **PENDENTE DE RUNTIME**; execução anterior travou no seletor de abertura antes de chamar a ação |
 | A fixture representa integralmente a integração URM | **NÃO DEMONSTRADO**; reproduz apenas o contrato estreito de ChoiceReturn |
