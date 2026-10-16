@@ -1,0 +1,64 @@
+name: URM Choice runtime probe
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'URM_REVERSO/tools/fixtures/urm_choice_runtime_probe.rpy'
+      - '.github/workflows/urm-choice-runtime-probe.yml'
+      - 'renpy-7.4.11-sdk/renpy/**'
+      - 'renpy-7.4.11-sdk/the_question/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  choice-runtime:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out laboratory
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes             xvfb xauth             libgl1 libglu1-mesa             libx11-6 libxext6 libxrender1             libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1             libasound2
+
+      - name: Prepare disposable game copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_root="${RUNNER_TEMP}/urm-choice-runtime-probe"
+          rm -rf "$probe_root"
+          cp -a renpy-7.4.11-sdk/the_question "$probe_root"
+          cp URM_REVERSO/tools/fixtures/urm_choice_runtime_probe.rpy "$probe_root/game/zz_urm_choice_runtime_probe.rpy"
+
+          # The SDK files are read-only fixtures in Git. Make the copied
+          # Linux launcher and engine executable only inside this job.
+          chmod +x renpy-7.4.11-sdk/renpy.sh
+          chmod +x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+
+      - name: Run native visible-choice baseline
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_native_visible_route
+
+      - name: Run forced false-condition choice probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_force_condition_false
