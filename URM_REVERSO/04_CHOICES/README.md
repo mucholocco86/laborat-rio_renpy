@@ -259,3 +259,8 @@ O documento [19 — Fechamento do estado corrente antes do rollback](19_FECHAMEN
 ## Continuação de 2026-10-16 — edição manual e save nativo
 
 O documento [20 — Edição manual e save nativo: raízes e ciclos do StoreDict](20_EDICAO_MANUAL_SAVE_NATIVO_E_ROOTS.md) detalha loadsave.save → RollbackLog.freeze → complete(False) → roots/log serializados. get_roots usa ever_been_changed, atualizado em ciclos cycle=True. Isso identifica casos que precisam ser testados ao salvar imediatamente após editar/criar variável pela screen; não conclui que haja perda de dados. O arquivo .urm permanece separado do save nativo.
+
+
+## Continuação de 2026-10-16 — retorno da ação URM e condições do Menu
+
+O documento [21 — Propagação da ação do URM e condições do Menu](21_PROPAGACAO_ACAO_URM_E_CONDICOES_MENU.md) acompanha o retorno não-None da ação Select pela interação Ren'Py até o índice estrutural consumido por `Menu.execute`. A análise estática indica uma possível seleção de alternativa cuja condição é falsa, pois não encontrou revalidação do índice após a interação; a integração de tela e o comportamento ponta a ponta continuam pendentes de teste runtime.
