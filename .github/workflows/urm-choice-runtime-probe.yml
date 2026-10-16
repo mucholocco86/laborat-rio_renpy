@@ -20,7 +20,7 @@ concurrency:
 jobs:
   choice-runtime:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Check out laboratory
@@ -31,7 +31,7 @@ jobs:
       - name: Install display dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --yes             xvfb xauth             libgl1 libglu1-mesa             libx11-6 libxext6 libxrender1             libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1             libasound2
+          sudo apt-get install --yes xvfb xauth libgl1 libglu1-mesa libx11-6 libxext6 libxrender1 libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1 libasound2
 
       - name: Prepare disposable game copy
         shell: bash
@@ -42,10 +42,13 @@ jobs:
           cp -a renpy-7.4.11-sdk/the_question "$probe_root"
           cp URM_REVERSO/tools/fixtures/urm_choice_runtime_probe.rpy "$probe_root/game/zz_urm_choice_runtime_probe.rpy"
 
-          # The SDK files are read-only fixtures in Git. Make the copied
-          # Linux launcher and engine executable only inside this job.
+          # Make the copied SDK launcher and engine executable only in this job.
           chmod +x renpy-7.4.11-sdk/renpy.sh
           chmod +x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+
+          echo "Prepared disposable game: $probe_root"
+          test -f "$probe_root/game/zz_urm_choice_runtime_probe.rpy"
+          test -x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
 
       - name: Run native visible-choice baseline
         shell: bash
@@ -54,8 +57,13 @@ jobs:
           SDL_VIDEODRIVER: x11
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: |
-          set -o pipefail
-          timeout 360s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_native_visible_route
+          set -u
+          echo "START native baseline: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_native_visible_route
+          result=$?
+          echo "END native baseline: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
 
       - name: Run forced false-condition choice probe
         shell: bash
@@ -64,5 +72,10 @@ jobs:
           SDL_VIDEODRIVER: x11
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: |
-          set -o pipefail
-          xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_force_condition_false
+          set -u
+          echo "START forced false-condition probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_force_condition_false
+          result=$?
+          echo "END forced false-condition probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
