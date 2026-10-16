@@ -272,3 +272,6 @@ O documento [22 — Runner de teste Ren'Py 7.4.11: encerramento e limite da evid
 
 
 A extensão mais recente de [22](22_RUNNER_TESTE_RENPY_ENCERRAMENTO_E_EVIDENCIA_RUNTIME.md) passou no run **38979502224**: depois de gravar save nativo com a variável editada em 99, o fixture mudou o valor para 123 e carregou o slot; o runtime observou 99 novamente. Isso comprova somente, para o caso escalar raiz reduzido, que a edição já existente no instante do save entrou no estado nativo serializado. O marcador do harness foi movido para o módulo do runner após a primeira tentativa ter sido reiniciada pelo próprio load. Containers, variáveis criadas, StoreMonitor, variáveis congeladas e URM integral seguem pendentes.
+
+
+A validação de container também passou no run **38979672209**: a ação reduzida de URM_add_item acrescentou 20 a uma lista Ren'Py ([10] → [10, 20]); depois de duas Choices e rollback com force=False, a lista voltou a [10] e a rota a 0. A evidência cobre o caso de lista revertível compilada pelo Ren'Py e não demonstra reversibilidade de qualquer objeto/container nem notificação pelo StoreMonitor. Detalhes e limites no documento 22.
