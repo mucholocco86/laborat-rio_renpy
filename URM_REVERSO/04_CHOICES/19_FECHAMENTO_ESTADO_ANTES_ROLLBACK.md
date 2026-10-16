@@ -18,6 +18,7 @@ Isso fornece uma explicação estática coerente para uma edição feita pelo UR
   - RollbackLog.begin, aproximadamente 1535–1610;
   - RollbackLog.complete, aproximadamente 1707–1760;
   - RollbackLog.checkpoint, aproximadamente 1822 em diante;
+  - seleção do destino em RollbackLog.rollback, aproximadamente linhas 1930–1995.
   - blob SHA c5eb2819a3e4ee096dbf01130d70a77f9b623484.
 - SDK 7.4.11: renpy-7.4.11-sdk/renpy/execution.py, Context.run, linhas 475–550, blob SHA 547f73b26dad0fe08fda6333e5f4b60c97cf8772.
 - URM convertido: URM_REVERSO/01_MATERIAL_URM/2_URM_X52_CONVERTIDO/classes/vars.rpy, SetVarValue/Var.setValue e StoreMonitorClass, blob SHA 57482937e14f215dac0ecb22a62da8ad160cba58.
@@ -52,7 +53,7 @@ Assim, o registro corrente é atualizado imediatamente antes de o log restaurar 
 
 O StoreMonitor do URM define context().force_checkpoint = True em seu python callback. O SDK Context.run() transfere essa solicitação para RollbackLog.force_checkpoint em uma passagem posterior, quando a execução do nó satisfaz as condições para iniciar/atualizar rollback.
 
-RollbackLog.complete() consome a flag interna chamando checkpoint(hard=False). Pelo SDK, esse é um checkpoint soft: marca o registro como checkpoint, mas não como hard_checkpoint. A API rollback pode percorrer checkpoints soft; hard=False não cria uma fronteira intransponível.
+RollbackLog.complete() consome a flag interna chamando checkpoint(hard=False). Pelo SDK, esse é um checkpoint soft: marca o registro como checkpoint, mas não como hard_checkpoint. Na seleção de destino de RollbackLog.rollback, a contagem checkpoints é decrementada por hard_checkpoint; checkpoint soft só é contado no ramo on_load. Em rollback interativo normal, o log pode portanto percorrer registros que tenham apenas checkpoint soft até encontrar um hard checkpoint/estado de parada válido. hard=False não cria uma fronteira intransponível nem conta como uma chamada hard para o limite interativo.
 
 Duas distinções:
 
@@ -65,7 +66,7 @@ Ainda assim, quando a operação nativa de rollback é efetivamente chamada, exp
 
 - **CONFIRMADO NO SDK 7.4.11:** a API renpy.rollback fecha o registro corrente com complete() imediatamente antes da restauração.
 - **CONFIRMADO NO SDK 7.4.11:** complete coleta deltas de StoreDict e snapshots de objetos mutados; rollback reaplica esses estados anteriores.
-- **CONFIRMADO NO SDK 7.4.11:** o checkpoint solicitado pelo StoreMonitor é soft, quando a flag chega ao RollbackLog e é consumida.
+- **CONFIRMADO NO SDK 7.4.11:** o checkpoint solicitado pelo StoreMonitor é soft, quando a flag chega ao RollbackLog e é consumida; a seleção de rollback interativo conta hard checkpoints, não checkpoints soft.
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** edição pela screen chama ações próprias de edição e não a callback python_callbacks por meio de ast.Python.execute.
 - **RELATADO PELO USUÁRIO:** após editar uma variável, avançar e voltar antes da edição, o valor pode retornar ao valor original.
 - **HIPÓTESE MECÂNICA:** o relatório do usuário é consistente com a coleta final de deltas/snapshots antes do rollback.
