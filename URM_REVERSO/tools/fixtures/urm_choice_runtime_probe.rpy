@@ -11,18 +11,6 @@ init python:
         renpy.game.log.rollback_is_fixed = False
         return renpy.ui.ChoiceReturn(label, index)()
 
-    config.overlay_screens.append("urm_probe_launcher")
-
-
-screen urm_probe_launcher():
-    zorder 190
-
-    textbutton "Open URM probe":
-        action Show("urm_probe")
-        xalign 0.98
-        yalign 0.02
-
-
 screen urm_probe():
     modal True
     zorder 200
@@ -70,7 +58,7 @@ testcase urm_native_visible_route:
 
 testcase urm_force_condition_false:
     run Jump("urm_probe_start")
-    "Open URM probe"
+    $ renpy.show_screen("urm_probe")
     "Select hidden route"
     label urm_probe_done
     assert urm_probe_result == "forced-hidden"
