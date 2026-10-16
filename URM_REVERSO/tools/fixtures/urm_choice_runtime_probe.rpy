@@ -3,6 +3,7 @@
 # modifying URM source files, Wells files, or the SDK.
 
 default urm_probe_result = None
+default urm_probe_enabled = False
 
 init python:
     def urm_probe_select(label, index):
@@ -33,6 +34,9 @@ screen urm_probe():
 label urm_probe_start:
     $ urm_probe_result = None
 
+    if urm_probe_enabled:
+        show screen urm_probe
+
     menu:
         "Native visible route":
             $ urm_probe_result = "native-visible"
@@ -57,8 +61,8 @@ testcase urm_native_visible_route:
 
 
 testcase urm_force_condition_false:
+    $ urm_probe_enabled = True
     run Jump("urm_probe_start")
-    $ renpy.show_screen("urm_probe")
     "Select hidden route"
     label urm_probe_done
     assert urm_probe_result == "forced-hidden"
