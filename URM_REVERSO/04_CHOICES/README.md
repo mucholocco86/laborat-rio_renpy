@@ -264,3 +264,8 @@ O documento [20 — Edição manual e save nativo: raízes e ciclos do StoreDict
 ## Continuação de 2026-10-16 — retorno da ação URM e condições do Menu
 
 O documento [21 — Propagação da ação do URM e condições do Menu](21_PROPAGACAO_ACAO_URM_E_CONDICOES_MENU.md) acompanha o retorno não-None da ação Select pela interação Ren'Py até o índice estrutural consumido por `Menu.execute`. A análise estática indica uma possível seleção de alternativa cuja condição é falsa, pois não encontrou revalidação do índice após a interação; a integração de tela e o comportamento ponta a ponta continuam pendentes de teste runtime.
+
+
+## Continuação de 2026-10-16 — runner e limites da validação runtime
+
+O documento [22 — Runner de teste Ren'Py 7.4.11: encerramento e limite da evidência runtime](22_RUNNER_TESTE_RENPY_ENCERRAMENTO_E_EVIDENCIA_RUNTIME.md) registra que o runner deixa o processo ativo quando a testcase termina com node vazio. A fixture passou a encerrar explicitamente o engine depois das asserções, e o workflow agora limita ambos os comandos. A seleção da alternativa com condição falsa permanece **pendente de runtime** até o job corrigido concluir.
