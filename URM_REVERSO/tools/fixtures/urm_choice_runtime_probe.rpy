@@ -72,10 +72,119 @@ testcase urm_force_condition_false:
 default urm_rollback_value = 10
 default urm_rollback_context_before = None
 
-init python:
-    def urm_probe_edit_value():
-        # Mimics a runtime store edit, isolated from the original URM.
-        renpy.store.urm_rollback_value = 99
+init python in urm_probe_urm:
+    class VarsStore:
+        @staticmethod
+        def isFrozen(varName):
+            return False
+
+        @staticmethod
+        def unfreeze(varName):
+            pass
+
+        @staticmethod
+        def freeze(varName):
+            pass
+
+    class SearchClass:
+        def isInt(self, value):
+            try:
+                int(value)
+                return True
+            except:
+                return False
+
+        def isFloat(self, value):
+            try:
+                float(value)
+                return True
+            except:
+                return False
+
+    Search = SearchClass()
+
+    class Var:
+        def __init__(self, varName, storeDict=None):
+            self._m1_vars__varName = varName
+            self._m1_vars__storeDict = storeDict
+
+        @property
+        def name(self):
+            return self._m1_vars__varName
+
+        @property
+        def isEditable(self):
+            return not bool(self._m1_vars__storeDict)
+
+        @property
+        def varType(self):
+            value = getattr(renpy.store, self.name)
+            if isinstance(value, bool):
+                return 'boolean'
+            elif isinstance(value, int):
+                return 'int'
+            elif isinstance(value, float):
+                return 'float'
+            elif isinstance(value, basestring):
+                return 'string'
+            return 'unknown'
+
+        def getChild(self, childVarName):
+            return Var(self.name + '.' + str(childVarName))
+
+        def setValue(self, newValue, overruleVarType=None, operator='=', varChildKey=None):
+            if not self.isEditable: return False
+            if callable(newValue): newValue = newValue()
+            if callable(overruleVarType): overruleVarType = overruleVarType()
+            if callable(operator): operator = operator()
+            if callable(varChildKey): varChildKey = varChildKey()
+
+            settableVar = self if not varChildKey else self.getChild(varChildKey)
+
+            varType = overruleVarType or settableVar.varType
+            isFrozen = VarsStore.isFrozen(self._m1_vars__varName)
+            try:
+                settableValue = None
+                if varType == 'string':
+                    settableValue = '"""'+newValue+'"""'
+                elif varType == 'boolean':
+                    settableValue = str(bool(newValue))
+                elif varType == 'int' and Search.isInt(newValue):
+                    settableValue = str(int(newValue))
+                elif varType == 'float' and Search.isFloat(newValue):
+                    settableValue = str(float(newValue))
+
+                if settableValue:
+                    if isFrozen: VarsStore.unfreeze(self._m1_vars__varName)
+
+                    if operator == 'append':
+                        exec('renpy.store.'+settableVar.name+'.append('+settableValue+')')
+                    else:
+                        exec('renpy.store.'+settableVar.name+operator+settableValue)
+                    return True
+                else:
+                    print("0x52: No valid value for {} (varType: {})".format(settableVar.name, varType))
+            except Exception as e:
+                print("0x52: Couldn't set value for "+settableVar.name+'. '+str(e))
+                pass
+            finally:
+                if isFrozen: VarsStore.freeze(self._m1_vars__varName)
+            return False
+
+    class SetVarValue:
+        def __init__(self, var, onSuccess, screenErrorVariable, *args, **kwargs):
+            self.var = var
+            self.onSuccess = onSuccess
+            self.screenErrorVariable = screenErrorVariable
+            self.args = args
+            self.kwargs = kwargs
+
+        def __call__(self):
+            if self.var.setValue(*self.args, **self.kwargs):
+                if callable(self.onSuccess):
+                    self.onSuccess()
+            elif self.screenErrorVariable:
+                renpy.store.SetScreenVariable(self.screenErrorVariable, 'Unable to set variable, the value is probably invalid')()
 
 
 screen urm_edit_probe():
@@ -89,7 +198,7 @@ screen urm_edit_probe():
         textbutton "Apply manual edit":
             action [
                 Hide("urm_edit_probe"),
-                Function(urm_probe_edit_value, _update_screens=False),
+                urm_probe_urm.SetVarValue(urm_probe_urm.Var("urm_rollback_value"), None, None, "99"),
             ]
 
 
