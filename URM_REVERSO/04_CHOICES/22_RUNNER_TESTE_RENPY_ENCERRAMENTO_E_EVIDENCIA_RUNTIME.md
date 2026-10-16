@@ -147,3 +147,35 @@ Após o run de rollback pela API, foi verificado se o test runner do SDK permite
 - `renpy/common/00keymap.rpy`, blob `7806011325fa1942e6bdd65e802c4a59e1ba0921`: o mapa padrão associa `rollback` a `K_PAGEUP` (além de outras entradas).
 
 Isso torna possível construir um próximo teste de entrada real pelo harness, sem chamar `renpy.rollback()` no script. Ainda é necessário provar runtime que a tecla sintética é entregue na interação correta, que o rollback é aceito no estado de menu/dialogue escolhido e quantos eventos são necessários para cruzar a edição. Nenhum resultado foi inferido apenas desta disponibilidade do mecanismo de teste.
+
+
+## Resultado — tecla nativa de rollback via evento do harness
+
+**OBSERVADO EM RUNTIME — run 38978993727, job 117235153584; fixture commit `30de2fa3d3d09e4e0d96301b354f618c647775c7`:** o testcase usou `type PAGEUP` enquanto o jogo estava na interação de diálogo após duas Choices. O test runner emitiu os eventos SDL da tecla Page Up; a underlay padrão do SDK associa o evento `rollback` a `renpy.rollback`, cujo argumento `force` padrão é False. Não houve chamada de rollback no script nessa prova.
+
+Sequência registrada:
+
+| Momento | Variável editada | Rota das duas Choices |
+|---|---:|---:|
+| Antes da primeira tecla | 99 | 2 |
+| Depois de 1 evento Page Up | 99 | 2 |
+| Depois de 2 eventos Page Up | 99 | 1 |
+| Depois de 3 eventos Page Up | 10 | 0 |
+
+A asserção final verificou valor 10, rota 0 e contexto de teste originalmente com rollback desativado; o testcase habilitou rollback no contexto descartável antes de iniciar a sequência. A etapa terminou com exit=0.
+
+**Interpretação limitada:** o evento de rollback real do SDK foi exercitado pela entrada de teclado sintética do runner, e o estado observado voltou progressivamente através da sequência. O primeiro evento deixou os valores medidos iguais; os seguintes reverteram a rota e então cruzaram a edição. A sequência é compatível com checkpoints/estado de interação distintos, mas não atribuímos um destino interno específico ao primeiro evento sem instrumentação do log. Isso ainda não é um teste com teclado físico nem uma integração com as screens completas do URM.
+
+Na primeira tentativa, o testcase usou `type K_PAGEUP`; o parser acrescenta `K_` ao nome informado e procurou `K_K_PAGEUP`. A falha foi somente de sintaxe do keysym. A forma correta no DSL é `type PAGEUP`; a repetição corrigida passou.
+
+### Classificação atualizada
+
+| Afirmação | Classificação |
+|---|---|
+| O SDK 7.4.11 associa a tecla Page Up ao evento rollback pela underlay padrão, que chama `renpy.rollback` sem forçar | **CONFIRMADO NO SDK 7.4.11** |
+| Após edição e duas Choices, eventos Page Up resultaram na sequência observada 99/2 → 99/2 → 99/1 → 10/0 | **OBSERVADO EM RUNTIME**, run 38978993727 |
+| A entrada nativa sintética cruzou o estado de uma Choice por evento após o primeiro retorno observado | **OBSERVADO EM RUNTIME** nesta fixture; não generalizar a contagem |
+| O teclado físico e as preferências/configurações de qualquer jogo produzem a mesma sequência | **PENDENTE** |
+| O URM integrado, incluindo StoreMonitor e suas screens, segue o mesmo circuito | **PENDENTE** |
+
+Com isso, a hipótese de que uma edição do store pode permanecer ativa durante o avanço e ser desfeita pelo rollback do jogador recebeu uma reprodução próxima do gesto nativo no SDK 7.4.11, ainda em fixture reduzida. A próxima prova prioritária passa a ser save/load nativo após a edição, incluindo variável-raiz e container revertível, mantendo o arquivo `.urm` separado.
