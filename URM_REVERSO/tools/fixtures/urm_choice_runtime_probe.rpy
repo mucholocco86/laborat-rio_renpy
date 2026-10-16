@@ -65,6 +65,7 @@ testcase urm_native_visible_route:
     "Native visible route"
     label urm_probe_done
     assert urm_probe_result == "native-visible"
+    $ renpy.quit()
 
 
 testcase urm_force_condition_false:
@@ -73,3 +74,4 @@ testcase urm_force_condition_false:
     "Select hidden route"
     label urm_probe_done
     assert urm_probe_result == "forced-hidden"
+    $ renpy.quit()
