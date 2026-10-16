@@ -228,3 +228,10 @@ O objetivo continua sendo completar a árvore do URM antes de decidir o que ser�
 A nova análise [11 — Menu, Choice Screen e integridade da seleção](11_MENU_CHOICE_SCREEN_CORRELACAO_E_INTEGRIDADE_DA_SELECAO.md) aprofunda o documento 10: a posição original `i` de `Menu.items` é preservada em `URMChoice` e é o valor usado pela seleção nativa para resolver o bloco AST. A interface visual pode omitir/transformar entradas; não se deve tratar seu índice visual ou texto exibido como identificador estrutural universal.
 
 **Questões pendentes:** menus com `condition=False`, legendas, alternativas com rótulos duplicados, `set`, tradução, argumentos por item e testes após rollback. Essas questões devem ser investigadas por leitura e experimentação controlada, preservando a separação entre observação, hipótese e prova.
+
+
+## Continuação de 2026-10-16 — validação SDK e rollback
+
+O documento [15 — Validação no SDK 7.4.11: ChoiceReturn, checkpoint, store e rollback](15_VALIDACAO_SDK_CHOICERETURN_CHECKPOINT_ROLLBACK.md) confirma por inspeção estática o caminho Menu → valor estrutural → ChoiceReturn → checkpoint → deltas de StoreDict → restauração de estado e Context. Também localiza RollbackLog em renpy/python.py.
+
+A relação entre o relato de edição manual e o instante exato em que o rollback a desfaz continua pendente de runtime, assim como save/load e fixed rollback.
