@@ -15,7 +15,10 @@ Assim, não se pode dizer que uma edição feita na interface URM aciona imediat
 ## Fontes
 
 - SDK: renpy-7.4.11-sdk/renpy/ast.py, blob SHA d81ffc13f28f0b7442ba6905f1745ee838f7b185, classe Python, aproximadamente linhas 865–925.
-- SDK: renpy-7.4.11-sdk/renpy/python.py, blob SHA c5eb2819a3e4ee096dbf01130d70a77f9b623484, StoreDict e compilador/WrapNode, aproximadamente linhas 80–180 e 440–570.
+- SDK: renpy-7.4.11-sdk/renpy/python.py, blob SHA c5eb2819a3e4ee096dbf01130d70a77f9b623484, StoreDict (80–180), WrapNode (453–500), mutator/RevertableList/RevertableDict (862–1100), Rollback.rollback (1504–1535) e RollbackLog.complete (1707 em diante).
+- SDK: renpy-7.4.11-sdk/renpy/minstore.py, blob SHA 5dd44affc52aeb10a9c28433baee0b9948d3f759, registro dos construtores especiais nas linhas 37–42.
+- SDK: renpy-7.4.11-sdk/renpy/pydict.pyx, blob SHA 24fcb4d701afe6f3042aef6cd7e1f8f934ffc761, DictItems e find_changes nas linhas 84–160.
+- SDK: renpy-7.4.11-sdk/renpy/execution.py, blob SHA 547f73b26dad0fe08fda6333e5f4b60c97cf8772, Context.run e transferência da flag de checkpoint, linhas 475–550.
 - SDK: renpy-7.4.11-sdk/renpy/python.py, RevertableList/Dict e RollbackLog, aproximadamente linhas 820–1230 e 1480–1760.
 - URM convertido: URM_REVERSO/01_MATERIAL_URM/2_URM_X52_CONVERTIDO/classes/vars.rpy, blob SHA 57482937e14f215dac0ecb22a62da8ad160cba58, Var.setValue e StoreMonitorClass.
 - URM convertido: URM_REVERSO/01_MATERIAL_URM/2_URM_X52_CONVERTIDO/screens/vars.rpy, blob SHA 7959b2c0e6249df0edbb9ebe683481d46e4537e1, ações de modificação/criação/exclusão.
@@ -44,7 +47,7 @@ O callback do URM faz duas coisas relevantes:
 
 O código do SDK de StoreDict mostra que get_changes(False) calcula deltas em relação ao início do período sem ciclar a referência anterior. Portanto, a observação no callback não consome o delta. O RollbackLog.complete() posteriormente coleta as mudanças dos StoreDicts, registra os objetos mutados e lida com a solicitação de checkpoint do log.
 
-A passagem de Context.force_checkpoint até o checkpoint do RollbackLog depende do ciclo de Context.run(), detalhado na documentação anterior da área. Isso não autoriza dizer que o checkpoint ocorre sincronamente dentro da ação da screen ou no instante em que o callback chama a função. A posição temporal exata entre a ação do URM, a interação visual e a conclusão do log permanece uma pergunta de runtime.
+A ordem estática em Context.run() é específica: no início do processamento de um nó, quando rollback está ativo e o caminho de atualização de rollback é tomado, o executor chama RollbackLog.begin(...); em seguida, se Context.force_checkpoint estiver verdadeiro, copia a solicitação para RollbackLog.force_checkpoint e limpa a flag do Context. RollbackLog.begin() completa o registro anterior antes de abrir o novo; como a solicitação foi transferida depois desse begin, ela será consumida por uma chamada posterior a complete() — por exemplo, no próximo begin que completar um registro, ou antes de save/rollback. A chamada complete() verifica force_checkpoint, cria um checkpoint não-hard e depois coleta as mudanças de store e objetos. Isso não equivale a checkpoint síncrono dentro da ação da screen nem no instante em que o callback define a flag. A inclusão da edição específica no registro que será restaurado ainda deve ser confirmada por runtime, considerando interações e ramos em que update_rollback não ocorre.
 
 ### O que se pode afirmar sobre edição pela tela
 
@@ -60,7 +63,11 @@ A classe WrapNode, usada por py_compile, transforma nós AST de lista/dicionári
 
 RevertableList e RevertableDict implementam os métodos de mutação por wrappers mutator. Esse wrapper cria um snapshot limpo na primeira mutação do objeto dentro do log corrente. RollbackLog.complete() transfere snapshots vivos para o registro corrente, e Rollback.rollback() chama _rollback no objeto.
 
-**Limite da evidência:** neste cruzamento não foi localizado o ponto de registro dos nomes __renpy__list__/__renpy__dict__ no store. A transformação do AST e a existência das classes revertíveis foram confirmadas, mas a associação integral do nome de construtor ao tipo concreto requer localizar o registro em outra parte do SDK. Não inferir que todo objeto lista/dicionário alcançado pelo URM tem tipo revertível.
+**Limite da evidência:** isso prova o tipo usado pelo compilador para os literais transformados e os built-ins do store; não prova que qualquer container recebido de código externo, biblioteca Python, extensão ou objeto desserializado seja automaticamente revertível. Não generalizar a partir do caso de literais compilados.
+
+
+
+Além disso, StoreDict.get_changes usa DictItems/find_changes: os valores são retidos como referências e as entradas comuns são comparadas por igualdade. Quando um container mutável permanece no mesmo nome raiz, a comparação do store não constitui um snapshot do conteúdo interno; a reversão da mutação depende do mecanismo de objetos Revertable e do RollbackLog.
 
 ## Modelo separado: rollback e monitoramento
 
