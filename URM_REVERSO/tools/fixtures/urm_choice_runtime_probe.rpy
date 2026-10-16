@@ -125,6 +125,10 @@ init python in urm_probe_urm:
                 return 'int'
             elif isinstance(value, float):
                 return 'float'
+            elif isinstance(value, list):
+                return 'list'
+            elif isinstance(value, dict):
+                return 'dict'
             elif isinstance(value, basestring):
                 return 'string'
             return 'unknown'
@@ -367,4 +371,69 @@ testcase urm_edit_save_load_roundtrip:
     assert urm_rollback_value == 99
     assert urm_save_load_context_before is False
     assert renpy.test.testexecution.urm_probe_save_load_reentered is True
+    $ renpy.quit()
+
+
+# Container probe models URM_add_item -> SetVarValue -> Var.setValue(append)
+# using a Ren'Py-compiled list, which should be a RevertableList.
+default urm_rollback_list = [10]
+default urm_list_context_before = None
+default urm_list_route = 0
+
+screen urm_list_edit_probe():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Append item via reduced URM action":
+            action [
+                Hide("urm_list_edit_probe"),
+                urm_probe_urm.SetVarValue(
+                    urm_probe_urm.Var("urm_rollback_list"),
+                    None,
+                    None,
+                    "20",
+                    overruleVarType="int",
+                    operator="append",
+                ),
+            ]
+
+label urm_edit_container_rollback_start:
+    $ urm_list_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ urm_list_route = 0
+    $ urm_rollback_list = [10]
+    $ renpy.checkpoint("before-container-edit")
+
+    show screen urm_list_edit_probe
+    pause 0.5
+
+    menu:
+        "Container route once":
+            $ urm_list_route = 1
+
+    menu:
+        "Container route twice":
+            $ urm_list_route = 2
+
+    $ print("CONTAINER_ROLLBACK_PRE", list(urm_rollback_list), urm_list_route)
+    $ renpy.rollback(force=False, checkpoints=3, label="urm_edit_container_rollback_verify")
+
+label urm_edit_container_rollback_verify:
+    $ print("CONTAINER_ROLLBACK_AT_VERIFY", list(urm_rollback_list), urm_list_route)
+    "Container rollback restored list: [urm_rollback_list]."
+    return
+
+testcase urm_edit_container_rollback:
+    run Jump("urm_edit_container_rollback_start")
+    "Append item via reduced URM action"
+    "Container route once"
+    "Container route twice"
+    label urm_edit_container_rollback_verify
+    assert list(urm_rollback_list) == [10]
+    assert urm_list_route == 0
+    assert urm_list_context_before is False
     $ renpy.quit()
