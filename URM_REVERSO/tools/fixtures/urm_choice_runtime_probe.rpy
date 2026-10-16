@@ -69,7 +69,7 @@ testcase urm_force_condition_false:
     $ renpy.quit()
 
 
-default urm_rollback_value = 0
+default urm_rollback_value = 10
 default urm_rollback_context_before = None
 
 init python:
@@ -98,7 +98,6 @@ label urm_edit_rollback_start:
     # Enable it only in this disposable fixture to model gameplay.
     $ urm_rollback_context_before = renpy.game.context().rollback
     $ renpy.game.context().rollback = True
-    $ urm_rollback_value = 10
     $ renpy.checkpoint("before-manual-edit")
     show screen urm_edit_probe
     pause 0.5
@@ -106,6 +105,7 @@ label urm_edit_rollback_start:
 
 
 label urm_edit_rollback_verify:
+    $ print("ROLLBACK_VALUE_AT_VERIFY", urm_rollback_value)
     "Rollback restored value: [urm_rollback_value]."
     return
 
