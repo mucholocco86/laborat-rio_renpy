@@ -239,3 +239,8 @@ A relação entre o relato de edição manual e o instante exato em que o rollba
 ## Continuação de 2026-10-16 — CodeView e edição de variáveis
 
 O documento [16 — CodeView, busca e edição de variáveis ligadas a Choices](16_CODEVIEW_BUSCA_EDICAO_VARIAVEIS.md) rastreia Choice.code → CodeView → hyperlink de variável → URM_modify_value → SetVarValue → store ativo. Registra os limites dos padrões regex e separa essa mutação dos metadados guardados em .urm.
+
+
+## Continuação de 2026-10-16 — mutações de variáveis e objetos revertíveis
+
+O documento [17 — Edição de itens, mutações de objetos e rollback](17_EDICAO_ITENS_MUTACOES_OBJETOS_ROLLBACK.md) cruza `Var.setValue`, `CreateVar`, exclusão de variáveis e edição de itens de listas/dicionários com `RevertableList`/`RevertableDict` e `RollbackLog.complete()/rollback()` do SDK 7.4.11. A evidência é estática. Permanecem pendentes testes de runtime do URM e o alcance do `StoreMonitor` em mutações aninhadas.
