@@ -2,7 +2,7 @@
 
 **Data:** 2026-10-16  
 **Escopo:** diagnóstico do teste isolado da propagação de ChoiceReturn no contexto de um menu.  
-**Estado:** mecanismo de encerramento explicado estaticamente; a seleção segue sem resultado runtime conclusivo.  
+**Estado:** propagação de ChoiceReturn para alternativa com condição falsa observada em fixture sintética; teste de edição de variável seguida por rollback nativo está em execução.  
 **Proteções:** a fixture é copiada para pasta temporária; Wells, SDK e fontes originais do URM não foram alterados.
 
 ## Fontes inspecionadas
@@ -16,7 +16,7 @@ Repositório mucholocco86/laborat-rio_renpy, branch main, consultado em 2026-10-
 | renpy-7.4.11-sdk/renpy/exports.py | quit(); aproximadamente linha 1638 | renpy.quit() levanta QuitException com status padrão zero. |
 | renpy-7.4.11-sdk/renpy/ast.py | Menu.execute(), linhas 1639–1697 | O resultado não-None é usado como índice estrutural do bloco. |
 | renpy-7.4.11-sdk/renpy/exports.py | display_menu(), linhas 1127–1319 | O valor da interação é registrado por checkpoint(rv) e devolvido ao chamador. |
-| renpy-7.4.11-sdk/renpy/ui.py | ChoiceReturn.__call__(), aproximadamente linhas 749–755 | Marca a opção escolhida quando há estado chosen e retorna self.value. |
+| renpy-7.4.11-sdk/renpy/ui.py | ChoiceReturn.__call__(), aproximadamente linhas 749–755 | Marca a opção escolhida quando há estado chosen e retorna self.value. |\n| renpy-7.4.11-sdk/renpy/exports.py | checkpoint(), linha 267; rollback(), linha 1690 | checkpoint() delega ao log; rollback() fecha deltas, verifica flags (a menos que force) e chama RollbackLog.rollback(). |\n| renpy-7.4.11-sdk/renpy/python.py | RollbackLog, linha 1550; complete(), linha 1707; rollback(), linha 1945 | complete() coleta alterações do StoreDict e objetos mutados; rollback() restaura entradas e contexto. |
 | URM_REVERSO/tools/fixtures/urm_choice_runtime_probe.rpy | urm_probe_select, duas testcases | Fixture reduzida; cada testcase termina agora com renpy.quit() após a asserção. |
 
 ## Diagnóstico do runner
@@ -38,6 +38,14 @@ Esse resultado comprova o contrato estreito de ChoiceReturn com screen modal na 
 5. O Ren'Py executa o bloco AST correspondente.
 
 A cadeia estrutural do índice está **CONFIRMADA NO SDK**. Ela não comprova, sozinha, que a ação modal da fixture devolve esse resultado à interação do menu nem que uma alternativa falsa será executada.
+
+## Rollback e edição: circuito que a próxima fixture isola
+
+**CONFIRMADO NO SDK 7.4.11:** renpy.exports.rollback(force=False, checkpoints=1, ...) retorna sem agir quando rollback está desativado em store/context/config. Com force=True, esses três bloqueios são ignorados. Antes de restaurar, a função chama RollbackLog.complete() para fechar as mudanças pendentes.
+
+RollbackLog.complete() coleta deltas do StoreDict e snapshots de objetos revertíveis. RollbackLog.rollback() percorre os registros até a fronteira de checkpoint solicitada, chama rb.rollback() para cada entrada desfeita, restaura o contexto e reinicia a execução por RestartContext/RestartTopContext.
+
+A fixture nova cria valor inicial 10, chama checkpoint(), mostra uma tela que altera o store para 99 e, após uma pausa de interação, solicita rollback forçado de um checkpoint com retorno pelo label de verificação. A asserção espera 10. Isso testa atribuição de store e restauração nativa em runtime; não reproduz Var.setValue do URM nem monitoramento/congelamento do StoreMonitor.
 
 ## Execuções e artefatos
 
