@@ -70,6 +70,7 @@ testcase urm_force_condition_false:
 
 
 default urm_rollback_value = 0
+default urm_rollback_context_before = None
 
 init python:
     def urm_probe_edit_value():
@@ -93,6 +94,10 @@ screen urm_edit_probe():
 
 
 label urm_edit_rollback_start:
+    # The Ren'Py test runner uses a main-menu context with rollback disabled.
+    # Enable it only in this disposable fixture to model gameplay.
+    $ urm_rollback_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
     $ urm_rollback_value = 10
     $ renpy.checkpoint("before-manual-edit")
     show screen urm_edit_probe
@@ -110,4 +115,5 @@ testcase urm_manual_edit_rollback:
     "Apply manual edit"
     label urm_edit_rollback_verify
     assert urm_rollback_value == 10
+    assert urm_rollback_context_before is False
     $ renpy.quit()
