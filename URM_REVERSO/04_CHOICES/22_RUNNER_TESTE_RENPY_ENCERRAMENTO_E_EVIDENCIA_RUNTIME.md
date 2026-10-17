@@ -278,3 +278,40 @@ Com as provas dos runs 38979672209 e 39013297447, a matriz de runtime cobre agor
 ### Próxima etapa
 
 Testar remoção de item (del em lista e del de chave em dicionário) pela semântica de Var.delete, depois save/load de lista/dicionário. Em paralelo, avaliar CreateVar, incluindo a hipótese estática de rejeição de valores falsy, e planejar um teste isolado do instante em que StoreMonitor coleta deltas e solicita checkpoint.
+
+
+## Resultado — exclusão de índice de lista e chave de dicionário
+
+**OBSERVADO EM RUNTIME — run 39013412540, job 117340518148; fixture commit ee19f952238c3da6f60e0a60505c25028df0b4da, workflow commit 22025181fea6c2714133912ee41e8997e9ff4509:** a fixture adicionou uma reprodução limitada de Var.delete para caminhos filhos e executou a exclusão de um índice de lista e de uma chave de dicionário por ações de screen. Após duas Choices, antes do rollback o estado observado foi lista [20], dicionário com a chave b e rota 2. Depois de rollback force=False, o estado voltou à lista [10, 20], ao dicionário com as chaves a e b, e rota 0:
+
+    DELETE_ROLLBACK_PRE [20] {u'b': 20} 2
+    DELETE_ROLLBACK_AT_VERIFY [10, 20] {u'a': 10, u'b': 20} 0
+
+As asserções passaram e a etapa terminou com exit=0.
+
+**CONFIRMADO NA FONTE URM convertida:** Var.delete percorre o caminho da variável e, para itens de lista/dicionário, usa del sobre o container.  
+**CONFIRMADO NO SDK 7.4.11:** os tipos revertíveis envolvem delitem com mutator e o rollback restaura snapshots dos objetos mutados.  
+**OBSERVADO EM RUNTIME:** esta reprodução de exclusão de dois filhos foi desfeita quando o rollback cruzou o checkpoint anterior.
+
+### Limites
+
+- A classe Var.delete na fixture é uma reprodução simplificada para caminhos com uma raiz e um único índice/chave. Não cobre a lógica completa de parsing, objetos e stores múltiplos do URM.
+- Os containers são literais compilados pelo Ren'Py; o resultado não se estende automaticamente a containers externos.
+- A prova não instrumenta o RollbackLog nem o tipo concreto em execução; associa o resultado runtime ao mecanismo de objetos revertíveis por meio da fonte e da implementação SDK.
+- O rollback foi chamado pela API com force=False depois de duas Choices. Este caso não usa tecla Page Up.
+- Continua pendente validar a classe Var.delete original integrada, condições de frozen/monitor e save/load de containers após exclusão.
+
+### Matriz runtime atualizada
+
+| Mutação reduzida | Estado antes da mutação | Estado após rollback | Evidência |
+|---|---|---|---|
+| Atribuição escalar raiz | 10 → 99 | 10 | runs 38973243038 e 38978993727 |
+| Append em lista | [10] → [10, 20] | [10] | run 38979672209 |
+| Edição de chave dict | a: 10 → 20 | a: 10 | run 39013297447 |
+| Exclusão de índice e chave | lista [10,20]/dict {a,b} → lista [20]/dict {b} | lista [10,20]/dict {a,b} | run 39013412540 |
+
+Esses casos demonstram reversibilidade de quatro operações na fixture reduzida: atribuição de raiz, append, sobrescrita de chave e exclusão de itens. Não estabelecem a reversibilidade de qualquer objeto ou de todos os caminhos de dados do URM.
+
+### Próxima etapa
+
+A sequência agora deve avançar em duas dimensões separadas: (1) save/load nativo com lista e dicionário mutados, para verificar se os containers atuais entram nas raízes serializadas; (2) CreateVar para testar runtime da rejeição de valores falsy deduzida da fonte convertida. Depois, construir uma instrumentação que observe StoreMonitor sem confundir seus checkpoints solicitados com os snapshots nativos que já demonstraram reversão.
