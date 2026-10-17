@@ -684,15 +684,72 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
 
     reader = _read_txt if native_path.suffix.lower() == ".txt" else _read_docx
     writer = _write_txt if translated_path.suffix.lower() == ".txt" else _write_docx
-    natives = reader(native_path)
-    translated = reader(translated_path)
-    if len(natives) != len(translated):
+    native_rows = reader(native_path)
+    translated_rows = reader(translated_path)
+    if len(native_rows) != len(translated_rows):
         raise ValueError(
-            f"Par desalinhado: {len(natives)} registros nativos e "
-            f"{len(translated)} traduzidos."
+            f"Par desalinhado: {len(native_rows)} registros nativos e "
+            f"{len(translated_rows)} traduzidos."
         )
-    if not natives:
+    if not native_rows:
         raise ValueError("O par não possui registros para revisar.")
+
+    # Um mapa JSON Wells identifica a exportação limpa. Ele ancora a ordem,
+    # valida o lado nativo e permite revisar textos sem aspas JSON externas.
+    map_path = native_path.parent / "wells_json_translation_map.json"
+    clean_meta = None
+    clean_offset = 0
+    if map_path.is_file():
+        try:
+            map_payload = json.loads(map_path.read_text(encoding="utf-8-sig"))
+        except Exception as exc:
+            raise ValueError(f"Mapa JSON Wells inválido: {exc}") from exc
+        if (map_payload.get("schema") != "wells-json-translation-map"
+                or map_payload.get("version") != 1
+                or map_payload.get("record_encoding") != "wells-json-clean-v1"):
+            raise ValueError("Mapa JSON incompatível com esta revisão.")
+        mapped = map_payload.get("records")
+        blocks = map_payload.get("blocks")
+        if not isinstance(mapped, list) or not isinstance(blocks, list):
+            raise ValueError("Mapa JSON sem registros/blocos válidos.")
+        match = re.search(r"_(\d+)$", native_path.stem)
+        block_number = int(match.group(1)) if match else 0
+        block = next((item for item in blocks if item.get("number") == block_number), None)
+        if block is None:
+            raise ValueError(f"Bloco {block_number or 'completo'} não consta no mapa JSON.")
+        clean_offset = int(block.get("start", -1))
+        clean_count = int(block.get("count", -1))
+        if clean_offset < 0 or clean_count != len(native_rows) or clean_count != len(translated_rows):
+            raise ValueError("Par nativo/traduzido não corresponde ao bloco registrado no mapa.")
+        clean_meta = mapped[clean_offset:clean_offset + clean_count]
+        if len(clean_meta) != clean_count:
+            raise ValueError("Faixa do bloco excede o mapa JSON.")
+        translator_dir = Path(__file__).resolve().parents[1] / "Wells_Translator"
+        if str(translator_dir) not in __import__("sys").path:
+            __import__("sys").path.insert(0, str(translator_dir))
+        from wells_json_transport import restore_transport, encode_transport, sha256_text
+        natives, translated = [], []
+        for local_idx, (meta, native_row, translated_row) in enumerate(
+                zip(clean_meta, native_rows, translated_rows), 1):
+            global_idx = clean_offset + local_idx
+            if not isinstance(meta, dict) or meta.get("id") != f"J{global_idx:08d}":
+                raise ValueError(f"Ordem/ID divergente no mapa JSON, registro {global_idx}.")
+            native = restore_transport(
+                native_row, meta.get("native_protected", []),
+                meta.get("native_quotes", 0), global_idx, "nativo"
+            )
+            if sha256_text(native) != meta.get("native_sha256"):
+                raise ValueError(f"Nativo divergente do mapa JSON no registro {global_idx}.")
+            value = restore_transport(
+                translated_row, meta.get("translated_protected", []),
+                meta.get("translated_quotes", 0), global_idx, "traduzido"
+            )
+            natives.append(native)
+            translated.append(value)
+    else:
+        # Compatibilidade com o formato antigo de strings JSON delimitadas.
+        natives = native_rows
+        translated = translated_rows
 
     lists = carregar_listas(blindagem_path) if blindagem_path else {
         LISTA_BLINDADOS: [], LISTA_TRADUZIVEIS: []
@@ -718,8 +775,11 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
     total = len(natives)
 
     for idx, (native_record, translated_record) in enumerate(zip(natives, translated), 1):
-        native, _native_quoted = _decode_record(native_record)
-        text, quoted = _decode_record(translated_record)
+        if clean_meta is not None:
+            native, text, quoted = native_record, translated_record, False
+        else:
+            native, _native_quoted = _decode_record(native_record)
+            text, quoted = _decode_record(translated_record)
 
         for issue in diagnosticar_par_linguistico(native, text):
             linguistic_issues.append({"record": idx, **issue, "native": native, "translated": text})
@@ -783,7 +843,16 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
             protected_names += len(manual_tokens)
         reconstructed_names += len(reconstructed)
 
-        encoded = _encode_record(reviewed, quoted)
+        if clean_meta is not None:
+            meta = clean_meta[idx - 1]
+            clean_encoded, protected_after, quotes_after = encode_transport(reviewed)
+            if protected_after != meta.get("translated_protected", []) or quotes_after != meta.get("translated_quotes", 0):
+                raise ValueError(
+                    f"A revisão alteraria tags Ren'Py ou aspas protegidas no registro {clean_offset + idx}."
+                )
+            encoded = clean_encoded
+        else:
+            encoded = _encode_record(reviewed, quoted)
         if encoded != translated_record:
             changed += 1
         token_count += tokens

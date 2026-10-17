@@ -516,8 +516,10 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
     else:
         records = _read_docx(path)
 
-    pair_name = bool(re.fullmatch(r"(?:old|new)(?:_\d+)?", path.stem, re.IGNORECASE))
-    plain_records = pair_name and (path.parent / "wells_translation_map.json").is_file()
+    # A sidecar map identifies a clean Wells export. The export format is
+    # determined by the map, not by the user's filename (which may be renamed
+    # by a document service or by the user).
+    plain_records = (path.parent / "wells_translation_map.json").is_file()
 
     natives = None
     lists = None

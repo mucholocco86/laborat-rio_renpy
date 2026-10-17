@@ -988,6 +988,7 @@ class WellsManager(tk.Tk):
                 self._log(f"[OK] Extração JSON {fmt.upper()} completa: {count} registros.")
                 self._log(f"[OK] Arquivos: {output / ('nativo.' + fmt)}")
                 self._log(f"[OK] Arquivos: {output / ('traduzido.' + fmt)}")
+            self._log(f"[OK] Mapa JSON para revisão e reinjeção: {output / 'wells_json_translation_map.json'}")
 
         self._run_background(worker, done, f"Status: Erro na extração JSON {fmt.upper()}.")
 

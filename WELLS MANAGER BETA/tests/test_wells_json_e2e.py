@@ -28,6 +28,7 @@ class WellsJsonEndToEndTests(unittest.TestCase):
         ("Commander Gaius", "Comandante Go"),
         ("Commander Gaius arrives", "Comandante Go chega"),
         ("Commander [player] Gaius {b}", "Comandante [player] gaius {b}"),
+        ('She said "hello" [player] {b}', 'Ela disse "olá" [player] {b}'),
         ("Plain line", "Linha normal"),
     ]
 
@@ -71,6 +72,17 @@ class WellsJsonEndToEndTests(unittest.TestCase):
         translated_files = sorted(work.glob(f"traduzido*.{fmt}"))
         self.assertEqual(len(native_files), len(translated_files))
         self.assertGreater(len(native_files), 0)
+        map_path = work / "wells_json_translation_map.json"
+        self.assertTrue(map_path.is_file())
+        map_data = json.loads(map_path.read_text(encoding="utf-8"))
+        self.assertEqual(map_data["record_encoding"], "wells-json-clean-v1")
+        # As linhas de transporte são texto simples, sem o invólucro "..."
+        # da sintaxe JSON. Aspas internas e tags seguem protegidas no mapa.
+        first_native = (native_files[0].read_text(encoding="utf-8").splitlines()[0]
+                        if fmt == "txt" else None)
+        if first_native is not None:
+            self.assertFalse(first_native.startswith('"') and first_native.endswith('"'))
+        self.assertEqual(map_data["record_count"], len(self.PAIRS))
         if blocks:
             self.assertGreater(len(native_files), 1)
 
@@ -109,6 +121,7 @@ class WellsJsonEndToEndTests(unittest.TestCase):
             "Comandante Gaius",
             "Comandante Go chega",
             "Comandante [player] Gaius {b}",
+            'Ela disse "olá" [player] {b}',
             "Linha normal",
         ]
         self.assertEqual([v for _, v in final_pairs], expected_values)
@@ -128,6 +141,23 @@ class WellsJsonEndToEndTests(unittest.TestCase):
 
     def test_e2e_docx_blocos(self):
         self._run_pipeline("docx", True)
+
+    def test_json_limpo_rejeita_marcador_renpy_removido_sem_gravar(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            source = root / "strings.json"
+            work = root / "work"
+            work.mkdir()
+            source.write_text('{"Hello [player]": "Olá [player]"}\n', encoding="utf-8")
+            export_json_full_txt(source, work)
+            translated = work / "traduzido.txt"
+            row = translated.read_text(encoding="utf-8")
+            self.assertIn("[[WELLS_P_000000]]", row)
+            translated.write_text(row.replace("[[WELLS_P_000000]]", ""), encoding="utf-8")
+            before = source.read_bytes()
+            with self.assertRaisesRegex(ValueError, "Marcadores Ren'Py alterados"):
+                inject_json_translations(source, work, "txt")
+            self.assertEqual(source.read_bytes(), before)
 
 
 if __name__ == "__main__":

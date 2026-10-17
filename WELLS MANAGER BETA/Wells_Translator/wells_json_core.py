@@ -11,6 +11,7 @@ As chaves nativas são a âncora estrutural e nunca são alteradas.
 from __future__ import annotations
 
 import ast
+import hashlib
 import io
 import json
 import os
@@ -21,6 +22,10 @@ from xml.sax.saxutils import escape
 import xml.etree.ElementTree as ET
 
 from docx import Document
+from wells_json_transport import (
+    MAP_FILENAME, MAP_SCHEMA, MAP_VERSION, encode_transport, restore_transport,
+    sha256_text,
+)
 
 
 FULL_NATIVE_TXT = "nativo.txt"
@@ -69,9 +74,9 @@ def _load_json(path):
 
 
 def _encode_record(value):
-    # Um registro por linha/parágrafo. json.dumps mantém \n, aspas e barras
-    # escapados, evitando quebrar o alinhamento nativo/traduzido.
-    return json.dumps(value, ensure_ascii=False)
+    # O texto exportado não leva as aspas sintáticas externas do JSON.
+    # Aspas internas e marcadores Ren'Py viajam como sentinelas reversíveis.
+    return encode_transport(value)[0]
 
 
 def _decode_record(token, number, label):
@@ -102,6 +107,43 @@ def _records(data):
     ]
 
 
+def _write_translation_map(output_dir, source, data, style, block_ranges):
+    records = []
+    for index, (native, translated) in enumerate(data, 1):
+        _native_row, native_protected, native_quotes = encode_transport(native)
+        _translated_row, translated_protected, translated_quotes = encode_transport(translated)
+        records.append({
+            "id": f"J{index:08d}",
+            "native_sha256": sha256_text(native),
+            "native_protected": native_protected,
+            "native_quotes": native_quotes,
+            "translated_protected": translated_protected,
+            "translated_quotes": translated_quotes,
+        })
+    payload = {
+        "schema": MAP_SCHEMA,
+        "version": MAP_VERSION,
+        "record_encoding": "wells-json-clean-v1",
+        "source_path": str(Path(source).resolve()),
+        "source_sha256_at_extraction": hashlib.sha256(Path(source).read_bytes()).hexdigest(),
+        "record_count": len(records),
+        "style": style,
+        "blocks": block_ranges,
+        "records": records,
+    }
+    path = Path(output_dir) / MAP_FILENAME
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def _ranges(blocks):
+    result, start = [], 0
+    for number, block in enumerate(blocks, 1):
+        result.append({"number": number, "start": start, "count": len(block)})
+        start += len(block)
+    return result
+
+
 # ---------------- TXT ----------------
 
 def _write_txt(path, values):
@@ -115,6 +157,9 @@ def _read_txt(path):
 
 
 def _clean_txt(output_dir):
+    map_path = output_dir / MAP_FILENAME
+    if map_path.exists():
+        map_path.unlink()
     for name in (FULL_NATIVE_TXT, FULL_TRANSLATED_TXT):
         p = output_dir / name
         if p.exists():
@@ -135,9 +180,12 @@ def export_json_full_txt(json_path, output_dir, return_session=False, progress=N
     _write_txt(output_dir / FULL_NATIVE_TXT, [e["native"] for e in entries])
     _notify(progress, 75, "Gravando traduzido.txt...")
     _write_txt(output_dir / FULL_TRANSLATED_TXT, [e["translated"] for e in entries])
+    map_path = _write_translation_map(
+        output_dir, source, data, style, [{"number": 0, "start": 0, "count": len(entries)}]
+    )
     _notify(progress, 100, "JSON → TXT concluído.")
 
-    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "txt"}
+    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "txt", "map": map_path}
     result = (output_dir, len(entries), session)
     return result if return_session else result[:2]
 
@@ -174,7 +222,9 @@ def export_json_blocks_txt(json_path, output_dir, max_bytes=200 * 1024, return_s
         _write_txt(output_dir / f"traduzido_{idx}.txt", [e["translated"] for e in block])
         _notify(progress, 100 * idx / total, f"Gravando blocos TXT: {idx}/{len(blocks)}")
 
-    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "txt"}
+    map_path = _write_translation_map(output_dir, source, data, style, _ranges(blocks))
+
+    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "txt", "map": map_path}
     result = (output_dir, len(entries), len(blocks), session)
     return result if return_session else result[:3]
 
@@ -236,6 +286,9 @@ def _read_docx(path):
 
 
 def _clean_docx(output_dir):
+    map_path = output_dir / MAP_FILENAME
+    if map_path.exists():
+        map_path.unlink()
     for name in (FULL_NATIVE_DOCX, FULL_TRANSLATED_DOCX):
         p = output_dir / name
         if p.exists():
@@ -256,9 +309,12 @@ def export_json_full_docx(json_path, output_dir, return_session=False, progress=
     _write_docx(output_dir / FULL_NATIVE_DOCX, [e["native"] for e in entries])
     _notify(progress, 70, "Criando traduzido.docx...")
     _write_docx(output_dir / FULL_TRANSLATED_DOCX, [e["translated"] for e in entries])
+    map_path = _write_translation_map(
+        output_dir, source, data, style, [{"number": 0, "start": 0, "count": len(entries)}]
+    )
     _notify(progress, 100, "JSON → DOCX concluído.")
 
-    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "docx"}
+    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "docx", "map": map_path}
     result = (output_dir, len(entries), session)
     return result if return_session else result[:2]
 
@@ -297,7 +353,9 @@ def export_json_blocks_docx(json_path, output_dir, max_file_bytes=190 * 1024, re
         (output_dir / f"traduzido_{idx}.docx").write_bytes(translated_bytes)
         _notify(progress, 60 + 40 * idx / total, f"Gravando blocos DOCX: {idx}/{len(fitted)}")
 
-    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "docx"}
+    map_path = _write_translation_map(output_dir, source, data, style, _ranges([item[0] for item in fitted]))
+
+    session = {"json": source, "keys": [e["native"] for e in entries], "style": style, "format": "docx", "map": map_path}
     result = (output_dir, len(entries), len(fitted), session)
     return result if return_session else result[:3]
 
@@ -379,7 +437,8 @@ def _serialize_json(data, style):
 def inject_json_translations(json_path, output_dir, fmt, session=None, progress=None):
     source, data, detected_style = _load_json(json_path)
     _notify(progress, 10, "Validando pares nativo/traduzido...")
-    native_records, translated_records, mode = _collect_pair(Path(output_dir), fmt)
+    output_dir = Path(output_dir).resolve()
+    native_records, translated_records, mode = _collect_pair(output_dir, fmt)
 
     if len(native_records) != len(translated_records):
         raise ValueError(
@@ -387,8 +446,42 @@ def inject_json_translations(json_path, output_dir, fmt, session=None, progress=
             f"{len(translated_records)} traduzidos."
         )
 
-    natives = [_decode_record(v, i, "nativo") for i, v in enumerate(native_records, 1)]
-    translated = [_decode_record(v, i, "traduzido") for i, v in enumerate(translated_records, 1)]
+    map_path = output_dir / MAP_FILENAME
+    map_payload = None
+    if map_path.is_file():
+        try:
+            map_payload = json.loads(map_path.read_text(encoding="utf-8-sig"))
+        except Exception as exc:
+            raise ValueError(f"Mapa JSON Wells inválido: {exc}") from exc
+        if (map_payload.get("schema") != MAP_SCHEMA
+                or map_payload.get("version") != MAP_VERSION
+                or map_payload.get("record_encoding") != "wells-json-clean-v1"):
+            raise ValueError("Mapa JSON incompatível com esta versão do Wells.")
+        mapped = map_payload.get("records")
+        if not isinstance(mapped, list) or len(mapped) != len(native_records):
+            raise ValueError("Quantidade de registros diferente do mapa JSON. Nada foi alterado.")
+        natives, translated = [], []
+        for idx, (meta, native_row, translated_row) in enumerate(
+                zip(mapped, native_records, translated_records), 1):
+            if not isinstance(meta, dict) or meta.get("id") != f"J{idx:08d}":
+                raise ValueError(f"Ordem/ID divergente no mapa JSON, registro {idx}.")
+            native = restore_transport(
+                native_row, meta.get("native_protected", []),
+                meta.get("native_quotes", 0), idx, "nativo"
+            )
+            if sha256_text(native) != meta.get("native_sha256"):
+                raise ValueError(f"Texto nativo divergente do mapa JSON no registro {idx}.")
+            value = restore_transport(
+                translated_row, meta.get("translated_protected", []),
+                meta.get("translated_quotes", 0), idx, "traduzido"
+            )
+            natives.append(native)
+            translated.append(value)
+    else:
+        # Compatibilidade com extrações anteriores que usavam strings JSON
+        # entre aspas nos documentos intermediários.
+        natives = [_decode_record(v, i, "nativo") for i, v in enumerate(native_records, 1)]
+        translated = [_decode_record(v, i, "traduzido") for i, v in enumerate(translated_records, 1)]
 
     if session is not None:
         session_path = Path(session.get("json", "")).resolve()
@@ -431,7 +524,11 @@ def inject_json_translations(json_path, output_dir, fmt, session=None, progress=
         if idx == 1 or idx % 500 == 0 or idx == len(natives):
             _notify(progress, 15 + 70 * idx / total, f"Preparando reinjeção: {idx}/{len(natives)}")
 
-    style = session.get("style", detected_style) if session else detected_style
+    style = (session.get("style") if session and session.get("style") else None)
+    if style is None and map_payload is not None:
+        style = map_payload.get("style")
+    if style is None:
+        style = detected_style
     raw = _serialize_json(updated, style)
 
     # Escrita atômica: o original só é substituído depois de toda validação.

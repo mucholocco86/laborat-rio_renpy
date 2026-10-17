@@ -21,6 +21,7 @@ a = Analysis(
         'Wells_Extractor.main',
         'Wells_Translator.wells_translator_core',
         'Wells_Translator.wells_json_core',
+        'Wells_Translator.wells_json_transport',
         'Wells_Revisor.wells_revisor_core',
         'Wells_Revisor_JSON.wells_revisor_json_core',
         'wells_sdk.core', 'wells_sdk.ui',
