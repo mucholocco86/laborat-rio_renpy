@@ -252,3 +252,29 @@ O resultado fecha uma parte importante do circuito: tanto a atribuição de esca
 ### Continuação da matriz
 
 A próxima prioridade prática é testar a edição de chave/índice e exclusão de item, depois separar save/load de container do rollback. Em paralelo, investigar CreateVar para confirmar ou refutar em runtime a rejeição de valores falsy no código convertido. Em seguida, introduzir instrumentação isolada para medir quando o StoreMonitor observa uma edição de screen e se sua solicitação de checkpoint muda a contagem/destino do rollback.
+
+
+## Resultado — edição de item de dicionário e rollback
+
+**OBSERVADO EM RUNTIME — run 39013297447, job 117340165072; fixture final commit 6664efa6a611b7d38277ae54875f58de4222f9ce; workflow commit 8a3735791f08213957f5008072caa73a01f66cb0:** o fixture estendeu a reprodução reduzida de Var.getChild para resolver uma chave de dicionário e aplicou SetVarValue com overruleVarType="int" sobre o item "a". Depois de editar de 10 para 20 e avançar por duas Choices, o rollback elegível com force=False restaurou o item a 10 e a rota a 0. Os logs:
+
+    DICT_ROLLBACK_PRE {u'a': 20} 2
+    DICT_ROLLBACK_AT_VERIFY {u'a': 10} 0
+
+A etapa terminou com exit=0 e asserções sobre o conteúdo do dicionário, a rota e o estado inicial do contexto passaram.
+
+**CONFIRMADO NO SDK 7.4.11 por inspeção estática:** literais dict transformados pelo compilador usam RevertableDict. A atribuição a uma chave é mutação do objeto; o log de rollback registra e restaura os objetos mutáveis alcançáveis. O runtime observado é consistente com esse mecanismo.
+
+### Limites e classificação
+
+- **OBSERVADO EM RUNTIME:** no fixture, o item "a" mudou de 10 para 20 e voltou a 10 ao cruzar o checkpoint anterior; a rota 2 voltou a 0.
+- **CONFIRMADO NO SDK 7.4.11:** o compilador transforma literais de dicionário para o mecanismo RevertableDict.
+- **INFERÊNCIA sustentada:** a restauração ocorreu pelo snapshot do objeto revertível; o fixture não instrumentou Rollback.objects nem registrou type(obj) durante a mutação.
+- O teste cobre apenas um dicionário de literal Ren'Py, chave string simples e valor inteiro. Chaves complexas, containers externos, objetos filhos, exclusão de chave e integração com StoreMonitor continuam pendentes.
+- A ação e classes continuam sendo reprodução reduzida; não se carregaram as screens/classes originais completas do URM.
+
+Com as provas dos runs 38979672209 e 39013297447, a matriz de runtime cobre agora três tipos de mutação editável pela via reduzida do URM: atribuição de escalar raiz, append em lista e substituição de valor em chave de dicionário. Nos três casos, rollback elegível depois de duas Choices restaurou o estado anterior e também desfez os marcadores de rota das Choices. Isso não prova uniformidade para todos os tipos ou para qualquer estado encontrado pelo pesquisador do URM.
+
+### Próxima etapa
+
+Testar remoção de item (del em lista e del de chave em dicionário) pela semântica de Var.delete, depois save/load de lista/dicionário. Em paralelo, avaliar CreateVar, incluindo a hipótese estática de rejeição de valores falsy, e planejar um teste isolado do instante em que StoreMonitor coleta deltas e solicita checkpoint.
