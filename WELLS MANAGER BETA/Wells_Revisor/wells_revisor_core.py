@@ -133,6 +133,7 @@ def _validate_translation_map_pair(map_path: Path, native_records, translated_re
         restored_old = old
         for marker, token in zip(expected_old_markers, original_tokens):
             restored_old = restored_old.replace(marker, token)
+        restored_old = _decode_transport_record(restored_old)
         digest = hashlib.sha256(restored_old.encode("utf-8")).hexdigest()
         if digest != record.get("original_sha256"):
             return False
