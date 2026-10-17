@@ -201,6 +201,51 @@ init python in urm_probe_urm:
             elif self.screenErrorVariable:
                 renpy.store.SetScreenVariable(self.screenErrorVariable, 'Unable to set variable, the value is probably invalid')()
 
+    class CreateVar:
+        def __init__(self, varName, varVal, varType, onSuccess, screenErrorVariable, overwrite=False):
+            self.varName = varName
+            self.varVal = varVal
+            self.varType = varType
+            self.onSuccess = onSuccess
+            self.screenErrorVariable = screenErrorVariable
+            self.overwrite = overwrite
+
+        def __call__(self):
+            varName = self.varName() if callable(self.varName) else self.varName
+            varVal = self.varVal() if callable(self.varVal) else self.varVal
+            varType = self.varType() if callable(self.varType) else self.varType
+            overwrite = self.overwrite() if callable(self.overwrite) else self.overwrite
+
+            if not overwrite and hasattr(renpy.store, varName):
+                renpy.store.SetScreenVariable(self.screenErrorVariable, 'A variable with this name already exists')()
+                return
+
+            isFrozen = VarsStore.isFrozen(varName)
+            try:
+                settableValue = None
+                if varType == 'string':
+                    settableValue = varVal
+                elif varType == 'boolean':
+                    settableValue = bool(varVal)
+                elif varType == 'int' and Search.isInt(varVal):
+                    settableValue = int(varVal)
+                elif varType == 'float' and Search.isFloat(varVal):
+                    settableValue = float(varVal)
+
+                if settableValue:
+                    if isFrozen: VarsStore.unfreeze(varName)
+                    setattr(renpy.store, varName, settableValue)
+                    self.onSuccess()
+                else:
+                    print("0x52: No valid value for {} (varType: {})".format(varName, varType))
+                    renpy.store.SetScreenVariable(self.screenErrorVariable, 'Invalid value for variable type')()
+            except Exception as e:
+                print('0x52: Couldn\'t set value for "{}". {}'.format(varName, e))
+                renpy.store.SetScreenVariable(self.screenErrorVariable, 'Failed to set variable. Check log for details')()
+            finally:
+                if isFrozen: VarsStore.freeze(varName)
+
+
 
 screen urm_edit_probe():
     modal True
@@ -572,4 +617,60 @@ testcase urm_delete_container_items_rollback:
     assert dict(urm_delete_dict) == {"a": 10, "b": 20}
     assert urm_delete_route == 0
     assert urm_delete_context_before is False
+    $ renpy.quit()
+
+
+# CreateVar probe mirrors the converted class's typed conversion and
+# truthiness gate. The modal screen captures its native SetScreenVariable errors.
+default urm_create_context_before = None
+
+screen urm_createvar_probe():
+    modal True
+    zorder 200
+    default errorMessage = None
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        vbox:
+            spacing 8
+            text "CreateVar falsy-value probe"
+            text "[errorMessage]" if errorMessage
+            textbutton "Create integer zero":
+                action urm_probe_urm.CreateVar("urm_created_zero", "0", "int", Hide("urm_createvar_probe"), "errorMessage")
+            textbutton "Create boolean false":
+                action urm_probe_urm.CreateVar("urm_created_false", False, "boolean", Hide("urm_createvar_probe"), "errorMessage")
+            textbutton "Create empty string":
+                action urm_probe_urm.CreateVar("urm_created_empty", "", "string", Hide("urm_createvar_probe"), "errorMessage")
+            textbutton "Create integer seven":
+                action urm_probe_urm.CreateVar("urm_created_seven", "7", "int", Hide("urm_createvar_probe"), "errorMessage")
+
+label urm_createvar_probe_start:
+    $ urm_create_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ renpy.store.__dict__.pop("urm_created_zero", None)
+    $ renpy.store.__dict__.pop("urm_created_false", None)
+    $ renpy.store.__dict__.pop("urm_created_empty", None)
+    $ renpy.store.__dict__.pop("urm_created_seven", None)
+    $ renpy.checkpoint("before-createvar-falsy-probe")
+    show screen urm_createvar_probe
+    pause 0.5
+
+label urm_createvar_probe_done:
+    "CreateVar probe completed."
+    return
+
+testcase urm_createvar_falsy_runtime:
+    run Jump("urm_createvar_probe_start")
+    "Create integer zero"
+    assert not hasattr(renpy.store, "urm_created_zero")
+    "Create boolean false"
+    assert not hasattr(renpy.store, "urm_created_false")
+    "Create empty string"
+    assert not hasattr(renpy.store, "urm_created_empty")
+    "Create integer seven"
+    label urm_createvar_probe_done
+    assert urm_created_seven == 7
+    assert urm_create_context_before is False
     $ renpy.quit()
