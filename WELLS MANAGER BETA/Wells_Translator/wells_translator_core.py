@@ -106,6 +106,15 @@ def _restore_protected(value: str, protected_values, record_number: int):
     return value
 
 
+def _validate_legacy_protected(value: str, protected_values, record_number: int):
+    if _protected_values(value) != list(protected_values):
+        raise ValueError(
+            f"Marcadores Ren'Py alterados no registro {record_number} da extração antiga. "
+            "Corrija o NEW antes da injeção. Nada foi gravado."
+        )
+    return value
+
+
 def _encode_transport_raw(value: str) -> str:
     return (str(value).replace("\\", "\\\\")
             .replace("\r", "\\r")
@@ -194,9 +203,11 @@ def validate_translation_map(tl_dir, output_dir, old_records=None):
     except Exception as exc:
         raise ValueError(f"Mapa da extração inválido: {exc}") from exc
 
-    if payload.get("schema") != MAP_SCHEMA or payload.get("version") != MAP_VERSION:
+    map_version = payload.get("version")
+    if payload.get("schema") != MAP_SCHEMA or map_version not in (1, MAP_VERSION):
         raise ValueError("Versão do mapa Wells desconhecida. Faça uma nova extração.")
-    if payload.get("record_encoding") != "wells-masked-v2":
+    expected_encoding = "wells-masked-v2" if map_version == 2 else "wells-plain-v1"
+    if payload.get("record_encoding") != expected_encoding:
         raise ValueError("Codificação do mapa Wells incompatível. Faça uma nova extração.")
 
     root, entries = scan_tl(root)
@@ -207,16 +218,27 @@ def validate_translation_map(tl_dir, output_dir, old_records=None):
         raise ValueError("A quantidade de registros não corresponde ao mapa da extração. Nada foi alterado.")
 
     for index, (record, entry) in enumerate(zip(mapped, entries), 1):
-        if record != _map_record(index, entry):
+        expected_record = _map_record(index, entry)
+        if map_version == 1:
+            expected_record = {
+                key: value for key, value in expected_record.items()
+                if key not in ("original_protected", "current_protected")
+            }
+        if record != expected_record:
             raise ValueError(f"O mapa diverge da pasta TL no registro {index}. Nada foi alterado.")
 
     if old_records is not None:
         if len(old_records) != len(entries):
             raise ValueError("OLD desalinhado com o mapa da extração. Nada foi alterado.")
         for index, (record, entry) in enumerate(zip(old_records, entries), 1):
-            if record != encode_transport_text(entry["original"]):
+            expected_old = (
+                encode_transport_text(entry["original"])
+                if map_version == 2
+                else _encode_transport_raw(entry["original"])
+            )
+            if record != expected_old:
                 raise ValueError(f"OLD divergente no registro {index}; mapa e extração não correspondem.")
-    return root, entries
+    return root, entries, map_version
 
 
 def _notify(progress, value, text=None):
@@ -752,14 +774,16 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
     plain_mode = (output_dir / MAP_FILENAME).is_file()
     if plain_mode:
         # O mapa persistente é a autoridade mesmo após fechar/reabrir o app.
-        root, entries = validate_translation_map(root, output_dir, old_records=old_records)
+        root, entries, map_version = validate_translation_map(root, output_dir, old_records=old_records)
         _notify(progress, 15, "Mapa da extração validado...")
     elif session is not None and Path(session.get("root", "")).resolve() == root:
         entries = session["entries"]
+        map_version = 0
         _notify(progress, 15, "Usando mapa da extração atual...")
     else:
         # Compatibilidade com extrações antigas sem wells_translation_map.json.
         root, entries = scan_tl(root, progress=lambda v, t=None: _notify(progress, 5 + v * 0.45, t))
+        map_version = 0
 
     _notify(progress, 55, "Validando OLD/NEW...")
 
@@ -799,11 +823,8 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
             )
 
     for idx, (entry, old_line) in enumerate(zip(entries, old_records), 1):
-        expected_old = (
-            encode_transport_text(entry["original"])
-            if plain_mode and (output_dir / MAP_FILENAME).is_file()
-            else _encode_transport_raw(entry["original"]) if plain_mode
-            else entry["original_token"]
+        expected_old = encode_transport_text(entry["original"]) if plain_mode and map_version == 2 else (
+            _encode_transport_raw(entry["original"]) if plain_mode else entry["original_token"]
         )
         if old_line != expected_old:
             raise ValueError(
@@ -816,8 +837,12 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
     per_file = {}
     for idx, (entry, new_line) in enumerate(zip(entries, new_records), 1):
         translated = decode_transport_text(new_line) if plain_mode else _validate_token(new_line, idx, label="NEW")
-        if plain_mode and (output_dir / MAP_FILENAME).is_file():
+        if plain_mode and map_version == 2:
             translated = _restore_protected(
+                translated, _protected_values(entry["current"]), idx
+            )
+        elif plain_mode and map_version == 1:
+            translated = _validate_legacy_protected(
                 translated, _protected_values(entry["current"]), idx
             )
         per_file.setdefault(entry["file"], []).append((entry, translated))
