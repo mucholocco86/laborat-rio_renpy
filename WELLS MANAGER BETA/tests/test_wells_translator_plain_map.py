@@ -64,6 +64,27 @@ class WellsTranslatorPlainMapTests(unittest.TestCase):
             self.assertIn(r'e "Ele disse, \"vá\" para [player]!"', result)
             self.assertEqual(len(scan_tl(tl)[1]), 2)
 
+    def test_plain_records_inject_without_sidecar_map(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            _, tl, source = self.make_project(root)
+            out = root / "work"
+            out.mkdir()
+            export_full(tl, out)
+            (out / MAP_FILENAME).unlink()
+
+            old, new, _ = _collect_txt_pair(out)
+            self.assertFalse(old[0].startswith('"'))
+            new[0] = r'Bem-vindo, "Viajante"! [name] e \\n'
+            new[1] = 'Ele disse, "vá" para [player]!'
+            _write_txt_records(out / "new.txt", new)
+
+            count, _ = inject_translations(tl, out)
+            self.assertEqual(count, 2)
+            result = source.read_text(encoding="utf-8")
+            self.assertIn(r'new "Bem-vindo, \\"Viajante\\"! [name] e \\\\n"', result)
+            self.assertIn(r'e "Ele disse, \\"vá\\" para [player]!"', result)
+
     def test_docx_blocks_and_txt_blocks_share_the_same_plain_records(self):
         for exporter, collector, injector in (
             (export_blocks, _collect_txt_pair, inject_translations),
