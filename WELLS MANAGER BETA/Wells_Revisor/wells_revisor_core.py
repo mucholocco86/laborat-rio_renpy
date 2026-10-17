@@ -10,6 +10,7 @@ from xml.sax.saxutils import escape
 import io
 import tempfile
 import json
+import hashlib
 from docx import Document
 from wells_guia_ptbr import validar_revisao, analisar_registro
 from wells_isolador_renpy import segmentar
@@ -90,6 +91,53 @@ def _encode_transport_record(value: str) -> str:
             .replace("\r", "\\r")
             .replace("\n", "\\n")
             .replace("\t", "\\t"))
+
+def _validate_translation_map_pair(map_path: Path, native_records, translated_records):
+    """Use the extraction map as the OLD/NEW anchor without opening the game TL."""
+    try:
+        payload = json.loads(Path(map_path).read_text(encoding="utf-8-sig"))
+    except Exception as exc:
+        raise ValueError(f"Mapa Wells ausente ou inválido: {exc}") from exc
+
+    if (payload.get("schema") != "wells-rpy-translation-map"
+            or payload.get("version") != 2
+            or payload.get("record_encoding") != "wells-masked-v2"):
+        raise ValueError("Mapa incompatível com esta revisão. Faça uma nova extração.")
+
+    mapped = payload.get("records")
+    if not isinstance(mapped, list) or len(mapped) != len(native_records) or len(mapped) != len(translated_records):
+        raise ValueError("OLD/NEW não corresponde à quantidade de registros do mapa.")
+
+    for index, (record, old, new) in enumerate(zip(mapped, native_records, translated_records), 1):
+        expected_id = f"W{index:08d}"
+        if record.get("id") != expected_id:
+            raise ValueError(f"Ordem/ID divergente no mapa Wells, registro {index}.")
+
+        original_tokens = record.get("original_protected")
+        current_tokens = record.get("current_protected")
+        if not isinstance(original_tokens, list) or not isinstance(current_tokens, list):
+            raise ValueError(f"Mapa sem dados de proteção no registro {index}.")
+
+        expected_old_markers = [f"[[WELLS_P_{i:06d}]]" for i in range(len(original_tokens))]
+        found_old_markers = re.findall(r"\[\[WELLS_P_\d{6}\]\]", old)
+        if found_old_markers != expected_old_markers:
+            raise ValueError(f"OLD com marcadores divergentes no registro {index}.")
+
+        restored_old = old
+        for marker, token in zip(expected_old_markers, original_tokens):
+            restored_old = restored_old.replace(marker, token)
+        digest = hashlib.sha256(restored_old.encode("utf-8")).hexdigest()
+        if digest != record.get("original_sha256"):
+            raise ValueError(f"OLD divergente do mapa Wells no registro {index}.")
+
+        expected_new_markers = [f"[[WELLS_P_{i:06d}]]" for i in range(len(current_tokens))]
+        found_new_markers = re.findall(r"\[\[WELLS_P_\d{6}\]\]", new)
+        if found_new_markers != expected_new_markers:
+            raise ValueError(
+                f"Marcadores Ren'Py alterados no NEW, registro {index}. "
+                "Corrija os sentinelas antes de injetar."
+            )
+
 
 def _protect_renpy(text: str):
     """
@@ -489,6 +537,10 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
                         raise ValueError(f"Registro {index} inválido no {label}.") from exc
                     if not isinstance(decoded, str):
                         raise ValueError(f"Registro {index} não textual no {label}.")
+        if plain_records:
+            _validate_translation_map_pair(
+                path.parent / "wells_translation_map.json", natives, records
+            )
         lists = carregar_listas(blindagem_path) if blindagem_path else {"NOMES_BLINDADOS": [], "NOMES_TRADUZIVEIS": []}
 
     total = len(records)
