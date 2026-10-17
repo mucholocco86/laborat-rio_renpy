@@ -275,3 +275,6 @@ A extensão mais recente de [22](22_RUNNER_TESTE_RENPY_ENCERRAMENTO_E_EVIDENCIA_
 
 
 A validação de container também passou no run **38979672209**: a ação reduzida de URM_add_item acrescentou 20 a uma lista Ren'Py ([10] → [10, 20]); depois de duas Choices e rollback com force=False, a lista voltou a [10] e a rota a 0. A evidência cobre o caso de lista revertível compilada pelo Ren'Py e não demonstra reversibilidade de qualquer objeto/container nem notificação pelo StoreMonitor. Detalhes e limites no documento 22.
+
+
+A edição de item em dicionário também passou no run **39013297447**: a ação reduzida baseada em Var.getChild/SetVarValue mudou a chave a de 10 para 20; após duas Choices e rollback com force=False, o runtime observou o valor 10 e a rota voltou a 0. O teste usa um dict literal Ren'Py e não instrumenta o objeto/log diretamente; veja os limites no documento 22. A matriz reduzida cobre agora escalar raiz, append em lista e edição de chave em dicionário.
