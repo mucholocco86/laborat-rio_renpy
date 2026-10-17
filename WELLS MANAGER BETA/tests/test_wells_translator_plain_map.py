@@ -20,8 +20,8 @@ from wells_revisor_core import review_file
 
 
 SOURCE = '''translate brazil strings:
-    old "Welcome, \\"Traveler\\"! [name]\\nNext line"
-    new "Bem-vindo, \\"Viajante\\"! [name]\\nPróxima linha"
+    old "Welcome, \\"Traveler\\"! [name]\nNext line"
+    new "Bem-vindo, \\"Viajante\\"! [name]\nPróxima linha"
 
 translate brazil dialogue_001:
     # e "He said, \\"go\\", [player]!"
@@ -34,7 +34,7 @@ class WellsTranslatorPlainMapTests(unittest.TestCase):
         game = root / "game"
         tl = game / "tl" / "brazil"
         tl.mkdir(parents=True)
-        (game / "script.rpy").write_text('label start:\\n    "untouched"\\n', encoding="utf-8")
+        (game / "script.rpy").write_text('label start:\n    "untouched"\n', encoding="utf-8")
         source = tl / "common.rpy"
         source.write_text(SOURCE, encoding="utf-8")
         return game, tl, source
@@ -50,9 +50,9 @@ class WellsTranslatorPlainMapTests(unittest.TestCase):
             self.assertTrue((out / MAP_FILENAME).is_file())
             old, new, _ = _collect_txt_pair(out)
             self.assertEqual(len(old), 2)
-            self.assertEqual(old[0], r'Welcome, "Traveler"! [[WELLS_P_000000]]\\nNext line')
+            self.assertEqual(old[0], r'Welcome, "Traveler"! [[WELLS_P_000000]]\nNext line')
             self.assertFalse(old[0].startswith('"'))
-            new[0] = r'Bem-vindo, "Viajante"! [[WELLS_P_000000]]\\nLinha final'
+            new[0] = r'Bem-vindo, "Viajante"! [[WELLS_P_000000]]\nLinha final'
             new[1] = 'Ele disse, "vá" para [[WELLS_P_000000]]!'
             _write_txt_records(out / "new.txt", new)
 
@@ -131,7 +131,7 @@ class WellsTranslatorPlainMapTests(unittest.TestCase):
             old[0] = old[0].replace(" adulterado", "")
             _write_txt_records(out / "old.txt", old)
             before = source.read_bytes()
-            source.write_text(SOURCE + "# changed\\n", encoding="utf-8")
+            source.write_text(SOURCE + "# changed\n", encoding="utf-8")
             changed = source.read_bytes()
             with self.assertRaisesRegex(ValueError, "mudou desde a extração"):
                 inject_translations(tl, out)
