@@ -118,7 +118,7 @@ init python in urm_probe_urm:
 
         @property
         def varType(self):
-            value = getattr(renpy.store, self.name)
+            value = renpy.python.py_eval(self.name, renpy.store.__dict__)
             if isinstance(value, bool):
                 return 'boolean'
             elif isinstance(value, int):
@@ -134,6 +134,11 @@ init python in urm_probe_urm:
             return 'unknown'
 
         def getChild(self, childVarName):
+            parentValue = renpy.python.py_eval(self.name, renpy.store.__dict__)
+            if isinstance(parentValue, list) and isinstance(childVarName, int):
+                return Var(self.name + '[' + str(childVarName) + ']')
+            elif isinstance(parentValue, dict):
+                return Var(self.name + '[' + repr(childVarName) + ']')
             return Var(self.name + '.' + str(childVarName))
 
         def setValue(self, newValue, overruleVarType=None, operator='=', varChildKey=None):
@@ -436,4 +441,68 @@ testcase urm_edit_container_rollback:
     assert list(urm_rollback_list) == [10]
     assert urm_list_route == 0
     assert urm_list_context_before is False
+    $ renpy.quit()
+
+
+# Dictionary child probe models Var.getChild + SetVarValue editing an item.
+default urm_rollback_dict = {"a": 10}
+default urm_dict_context_before = None
+default urm_dict_route = 0
+
+screen urm_dict_edit_probe():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Edit dictionary item via reduced URM action":
+            action [
+                Hide("urm_dict_edit_probe"),
+                urm_probe_urm.SetVarValue(
+                    urm_probe_urm.Var("urm_rollback_dict"),
+                    None,
+                    None,
+                    "20",
+                    overruleVarType="int",
+                    varChildKey="a",
+                ),
+            ]
+
+label urm_edit_dict_rollback_start:
+    $ urm_dict_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ urm_dict_route = 0
+    $ urm_rollback_dict = {"a": 10}
+    $ renpy.checkpoint("before-dictionary-edit")
+
+    show screen urm_dict_edit_probe
+    pause 0.5
+
+    menu:
+        "Dictionary route once":
+            $ urm_dict_route = 1
+
+    menu:
+        "Dictionary route twice":
+            $ urm_dict_route = 2
+
+    $ print("DICT_ROLLBACK_PRE", dict(urm_rollback_dict), urm_dict_route)
+    $ renpy.rollback(force=False, checkpoints=3, label="urm_edit_dict_rollback_verify")
+
+label urm_edit_dict_rollback_verify:
+    $ print("DICT_ROLLBACK_AT_VERIFY", dict(urm_rollback_dict), urm_dict_route)
+    "Dictionary rollback restored item: [urm_rollback_dict['a']]."
+    return
+
+testcase urm_edit_dict_rollback:
+    run Jump("urm_edit_dict_rollback_start")
+    "Edit dictionary item via reduced URM action"
+    "Dictionary route once"
+    "Dictionary route twice"
+    label urm_edit_dict_rollback_verify
+    assert dict(urm_rollback_dict) == {"a": 10}
+    assert urm_dict_route == 0
+    assert urm_dict_context_before is False
     $ renpy.quit()
