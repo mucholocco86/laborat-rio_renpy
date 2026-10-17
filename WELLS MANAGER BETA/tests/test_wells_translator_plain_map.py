@@ -20,8 +20,8 @@ from wells_revisor_core import review_file
 
 
 SOURCE = '''translate brazil strings:
-    old "Welcome, \\"Traveler\\"! [name]\nNext line"
-    new "Bem-vindo, \\"Viajante\\"! [name]\nPróxima linha"
+    old "Welcome, \\"Traveler\\"! [name]\\nNext line"
+    new "Bem-vindo, \\"Viajante\\"! [name]\\nPróxima linha"
 
 translate brazil dialogue_001:
     # e "He said, \\"go\\", [player]!"

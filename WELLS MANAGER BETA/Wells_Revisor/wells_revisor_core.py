@@ -93,7 +93,7 @@ def _encode_transport_record(value: str) -> str:
             .replace("\t", "\\t"))
 
 def _validate_translation_map_pair(map_path: Path, native_records, translated_records):
-    """Use the extraction map as the OLD/NEW anchor without opening the game TL."""
+    """Anchor a full export or one contiguous block to the saved extraction map."""
     try:
         payload = json.loads(Path(map_path).read_text(encoding="utf-8-sig"))
     except Exception as exc:
@@ -107,45 +107,55 @@ def _validate_translation_map_pair(map_path: Path, native_records, translated_re
         raise ValueError("Mapa incompatível com esta revisão. Faça uma nova extração.")
 
     mapped = payload.get("records")
-    if not isinstance(mapped, list) or len(mapped) != len(native_records) or len(mapped) != len(translated_records):
-        raise ValueError("OLD/NEW não corresponde à quantidade de registros do mapa.")
+    if not isinstance(mapped, list):
+        raise ValueError("Mapa Wells sem registros válidos.")
+    if not native_records or len(native_records) != len(translated_records):
+        raise ValueError("OLD/NEW desalinhados. Nada foi alterado.")
+    if len(native_records) > len(mapped):
+        raise ValueError("OLD/NEW excedem a quantidade de registros do mapa.")
 
-    for index, (record, old, new) in enumerate(zip(mapped, native_records, translated_records), 1):
-        expected_id = f"W{index:08d}"
-        if record.get("id") != expected_id:
-            raise ValueError(f"Ordem/ID divergente no mapa Wells, registro {index}.")
-
+    def matches_record(record, old, new, global_index):
+        if record.get("id") != f"W{global_index:08d}":
+            return False
         if map_version == 1:
             restored_old = _decode_transport_record(old)
             digest = hashlib.sha256(restored_old.encode("utf-8")).hexdigest()
-            if digest != record.get("original_sha256"):
-                raise ValueError(f"OLD divergente do mapa Wells no registro {index}.")
-            continue
+            return digest == record.get("original_sha256")
 
         original_tokens = record.get("original_protected")
         current_tokens = record.get("current_protected")
         if not isinstance(original_tokens, list) or not isinstance(current_tokens, list):
-            raise ValueError(f"Mapa sem dados de proteção no registro {index}.")
+            return False
 
         expected_old_markers = [f"[[WELLS_P_{i:06d}]]" for i in range(len(original_tokens))]
-        found_old_markers = re.findall(r"\[\[WELLS_P_\d{6}\]\]", old)
-        if found_old_markers != expected_old_markers:
-            raise ValueError(f"OLD com marcadores divergentes no registro {index}.")
-
+        if re.findall(r"\[\[WELLS_P_\d{6}\]\]", old) != expected_old_markers:
+            return False
         restored_old = old
         for marker, token in zip(expected_old_markers, original_tokens):
             restored_old = restored_old.replace(marker, token)
         digest = hashlib.sha256(restored_old.encode("utf-8")).hexdigest()
         if digest != record.get("original_sha256"):
-            raise ValueError(f"OLD divergente do mapa Wells no registro {index}.")
+            return False
 
         expected_new_markers = [f"[[WELLS_P_{i:06d}]]" for i in range(len(current_tokens))]
-        found_new_markers = re.findall(r"\[\[WELLS_P_\d{6}\]\]", new)
-        if found_new_markers != expected_new_markers:
-            raise ValueError(
-                f"Marcadores Ren'Py alterados no NEW, registro {index}. "
-                "Corrija os sentinelas antes de injetar."
+        return re.findall(r"\[\[WELLS_P_\d{6}\]\]", new) == expected_new_markers
+
+    width = len(native_records)
+    starts = []
+    for start in range(len(mapped) - width + 1):
+        if all(
+            matches_record(record, old, new, start + offset + 1)
+            for offset, (record, old, new) in enumerate(
+                zip(mapped[start:start + width], native_records, translated_records)
             )
+        ):
+            starts.append(start)
+
+    if not starts:
+        raise ValueError(
+            "OLD/NEW não corresponde a uma sequência contínua do mapa Wells. "
+            "Selecione o par correto ou faça uma nova extração."
+        )
 
 
 def _protect_renpy(text: str):
