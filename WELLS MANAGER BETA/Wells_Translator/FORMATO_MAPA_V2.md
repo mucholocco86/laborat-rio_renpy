@@ -16,4 +16,4 @@ O mapa registra IDs ordenados, tipo de entrada, arquivo e linhas de origem/desti
 
 A sequência recomendada é: extrair OLD/NEW e o mapa; traduzir o NEW; revisar o NEW com o OLD correspondente e a blindagem; injetar. O usuário pode revisar nomes e títulos antes de confirmar a injeção.
 
-Mapas de versão anterior exigem uma nova extração para usar o fluxo v2. Arquivos antigos sem mapa seguem apenas pelo caminho legado compatível quando os registros correspondem ao formato anterior.
+Mapas v1 e documentos antigos continuam aceitos se OLD corresponder ao hash registrado e os marcadores Ren'Py do NEW coincidirem com o arquivo TL atual. Se o tradutor alterou uma tag, o injetor bloqueia a gravação. Para obter os marcadores opacos e a validação completa do mapa v2, faça uma nova extração. Arquivos antigos sem mapa também seguem pelo caminho legado quando os registros correspondem ao formato anterior.
