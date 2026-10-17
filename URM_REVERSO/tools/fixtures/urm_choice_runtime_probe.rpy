@@ -675,3 +675,81 @@ testcase urm_createvar_falsy_runtime:
     assert urm_created_seven == 7
     assert urm_create_context_before is False
     $ renpy.quit()
+
+
+# Save/load probe for mutated RevertableList and RevertableDict objects.
+default urm_save_container_list = [10]
+default urm_save_container_dict = {"a": 10}
+default urm_save_container_context_before = None
+
+screen urm_save_container_probe():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Apply list and dictionary edits":
+            action [
+                Hide("urm_save_container_probe"),
+                urm_probe_urm.SetVarValue(
+                    urm_probe_urm.Var("urm_save_container_list"),
+                    None,
+                    None,
+                    "20",
+                    overruleVarType="int",
+                    operator="append",
+                ),
+                urm_probe_urm.SetVarValue(
+                    urm_probe_urm.Var("urm_save_container_dict"),
+                    None,
+                    None,
+                    "20",
+                    overruleVarType="int",
+                    varChildKey="a",
+                ),
+            ]
+
+label urm_save_load_containers_start:
+    if renpy.test.testexecution.urm_probe_container_save_reentered:
+        jump urm_save_load_containers_verify
+
+    $ urm_save_container_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ urm_save_container_list = [10]
+    $ urm_save_container_dict = {"a": 10}
+
+    if renpy.can_load("urm-probe-container-roundtrip"):
+        $ renpy.unlink_save("urm-probe-container-roundtrip")
+
+    show screen urm_save_container_probe
+    pause 0.5
+
+    $ print("CONTAINER_SAVE_BEFORE_SAVE", list(urm_save_container_list), dict(urm_save_container_dict))
+    $ renpy.save("urm-probe-container-roundtrip")
+
+    if renpy.test.testexecution.urm_probe_container_save_reentered:
+        jump urm_save_load_containers_verify
+
+    $ renpy.test.testexecution.urm_probe_container_save_reentered = True
+    $ urm_save_container_list.append(30)
+    $ urm_save_container_dict["a"] = 30
+    $ print("CONTAINER_SAVE_BEFORE_LOAD", list(urm_save_container_list), dict(urm_save_container_dict))
+    $ renpy.load("urm-probe-container-roundtrip")
+
+label urm_save_load_containers_verify:
+    $ print("CONTAINER_SAVE_AFTER_LOAD", list(urm_save_container_list), dict(urm_save_container_dict))
+    "Container save/load verification complete."
+    return
+
+testcase urm_save_load_containers_roundtrip:
+    $ renpy.test.testexecution.urm_probe_container_save_reentered = False
+    run Jump("urm_save_load_containers_start")
+    "Apply list and dictionary edits"
+    label urm_save_load_containers_verify
+    assert list(urm_save_container_list) == [10, 20]
+    assert dict(urm_save_container_dict) == {"a": 20}
+    assert urm_save_container_context_before is False
+    assert renpy.test.testexecution.urm_probe_container_save_reentered is True
+    $ renpy.quit()
