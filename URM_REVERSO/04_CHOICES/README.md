@@ -278,3 +278,6 @@ A validação de container também passou no run **38979672209**: a ação reduz
 
 
 A edição de item em dicionário também passou no run **39013297447**: a ação reduzida baseada em Var.getChild/SetVarValue mudou a chave a de 10 para 20; após duas Choices e rollback com force=False, o runtime observou o valor 10 e a rota voltou a 0. O teste usa um dict literal Ren'Py e não instrumenta o objeto/log diretamente; veja os limites no documento 22. A matriz reduzida cobre agora escalar raiz, append em lista e edição de chave em dicionário.
+
+
+O run **39013412540** validou também a exclusão de um índice de lista e uma chave de dicionário pela reprodução reduzida de Var.delete: antes do rollback, lista `[20]` e dicionário `{b: 20}`; depois, `[10, 20]` e `{a: 10, b: 20}`. As duas mutações e os efeitos das Choices foram restaurados. A matriz runtime e seus limites estão no documento 22.
