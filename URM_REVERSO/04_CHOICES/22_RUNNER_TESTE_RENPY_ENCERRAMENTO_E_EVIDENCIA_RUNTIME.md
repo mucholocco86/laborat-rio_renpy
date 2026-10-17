@@ -315,3 +315,40 @@ Esses casos demonstram reversibilidade de quatro operações na fixture reduzida
 ### Próxima etapa
 
 A sequência agora deve avançar em duas dimensões separadas: (1) save/load nativo com lista e dicionário mutados, para verificar se os containers atuais entram nas raízes serializadas; (2) CreateVar para testar runtime da rejeição de valores falsy deduzida da fonte convertida. Depois, construir uma instrumentação que observe StoreMonitor sem confundir seus checkpoints solicitados com os snapshots nativos que já demonstraram reversão.
+
+
+## Resultado — CreateVar rejeita valores convertidos falsy na reprodução runtime
+
+**OBSERVADO EM RUNTIME — run 39064784962, job 117490042033; fixture final commit 5ebd99072cc7fd77c31444b3c4cdccc9f10d90bc; workflow commit 157d333b7cc035c6f00374b361dda54ee50f9158:** o testcase reproduziu a classe CreateVar convertida, manteve a screen ativa para receber as mensagens de erro e tentou criar três valores falsy, além de um controle positivo. A saída foi:
+
+    0x52: No valid value for urm_created_zero (varType: int)
+    0x52: No valid value for urm_created_false (varType: boolean)
+    0x52: No valid value for urm_created_empty (varType: string)
+
+As asserções verificaram que os nomes dos três valores não foram criados no store; o controle inteiro 7 foi criado com sucesso. A etapa terminou com exit=0. A execução completa do workflow também repetiu com sucesso as provas anteriores de Choice, rollback, container deletion e save/load.
+
+**CONFIRMADO NA FONTE URM convertida:** CreateVar converte os tipos e depois condiciona a atribuição a if settableValue. Portanto int 0, boolean False, float 0.0 e string vazia não atravessam esse ramo; valores truthy válidos podem ser atribuídos.  
+**OBSERVADO EM RUNTIME:** a reprodução reduzida recusou int 0, boolean False e string vazia e aceitou int 7.
+
+### Limites
+
+- Runtime usa uma reprodução da classe convertida com stubs para Search/VarsStore e uma screen de teste; não executa a classe original carregada do URM.
+- Float 0.0 não foi incluído neste testcase, embora a mesma condição de truthiness e a conversão correspondente indiquem o mesmo resultado na fonte.
+- Não foram testados overwrite=True, nome já existente, frozen/unfreeze, valores numéricos malformados, callbacks de falha da interface nem persistência/save/rollback após criar.
+- A fonte convertida não é garantia de equivalência perfeita ao binário/original; conclusão sobre o URM completo ainda exige integração.
+
+### Classificação atualizada
+
+| Afirmação | Classificação |
+|---|---|
+| CreateVar convertido usa truthiness depois da conversão | **CONFIRMADO NA FONTE URM CONVERTIDA** |
+| A reprodução runtime rejeitou int 0, boolean False e string vazia | **OBSERVADO EM RUNTIME**, run 39064784962 |
+| A reprodução runtime criou o inteiro truthy 7 | **OBSERVADO EM RUNTIME**, run 39064784962 |
+| A classe original do URM, em um jogo-alvo, sempre rejeita esses valores | **PENDENTE** de integração/runtime original |
+| Float 0.0 tem o mesmo resultado runtime | **HIPÓTESE forte pela fonte**, ainda sem caso de teste próprio |
+
+Esse resultado esclarece um comportamento da interface de criação, mas não deve ser generalizado para edição com SetVarValue: os fluxos são distintos. A matriz de edição/rollback de variáveis e containers permanece independente da regra de criação.
+
+### Próxima etapa
+
+Seguir para persistência de containers em save/load nativo, separando lista e dicionário, depois testar criação de variável com rollback e save/load. Em seguida, investigar o instante do StoreMonitor: quando a screen altera o store, quando o callback Python executa e quando a solicitação de checkpoint chega a RollbackLog. Essa cronologia deve ser medida sem atribuir ao monitor as reversões que já são explicadas pelos deltas/snapshots nativos.
