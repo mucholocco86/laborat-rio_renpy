@@ -493,7 +493,7 @@ label urm_edit_dict_rollback_start:
 
 label urm_edit_dict_rollback_verify:
     $ print("DICT_ROLLBACK_AT_VERIFY", dict(urm_rollback_dict), urm_dict_route)
-    "Dictionary rollback restored item: [urm_rollback_dict['a']]."
+    "Dictionary rollback restored dictionary item."
     return
 
 testcase urm_edit_dict_rollback:
