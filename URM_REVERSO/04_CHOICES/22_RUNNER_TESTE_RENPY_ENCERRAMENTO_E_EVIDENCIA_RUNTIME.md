@@ -352,3 +352,46 @@ Esse resultado esclarece um comportamento da interface de criação, mas não de
 ### Próxima etapa
 
 Seguir para persistência de containers em save/load nativo, separando lista e dicionário, depois testar criação de variável com rollback e save/load. Em seguida, investigar o instante do StoreMonitor: quando a screen altera o store, quando o callback Python executa e quando a solicitação de checkpoint chega a RollbackLog. Essa cronologia deve ser medida sem atribuir ao monitor as reversões que já são explicadas pelos deltas/snapshots nativos.
+
+
+## Resultado — save/load nativo de lista e dicionário já editados
+
+**OBSERVADO EM RUNTIME — run 39064935980, job 117490480797; fixture commit 9b578720e460134ccd927b77d5dfa8ff7b7a6398; workflow commit 57296517dbba58d180a33f5bb8b59841ddeacc0a:** a fixture alterou uma lista e um dicionário por ações reduzidas equivalentes a URM SetVarValue. O estado foi salvo quando a lista era [10, 20] e o dicionário {a: 20}. Depois o teste mutou os mesmos objetos em memória para [10, 20, 30] e {a: 30}, e carregou o save nativo. Logs:
+
+    CONTAINER_SAVE_BEFORE_SAVE [10, 20] {u'a': 20}
+    CONTAINER_SAVE_BEFORE_LOAD [10, 20, 30] {u'a': 30}
+    CONTAINER_SAVE_AFTER_LOAD [10, 20] {u'a': 20}
+
+As asserções confirmaram que o load devolveu a lista e o dicionário ao conteúdo presente no instante do save. A etapa terminou com exit=0.
+
+**CONFIRMADO NO SDK 7.4.11 por inspeção estática:** save congela e serializa roots e RollbackLog; os valores raiz do store mantêm referências para os containers, e os objetos alcançáveis entram no grafo serializado.  
+**OBSERVADO EM RUNTIME:** na fixture, o save/load nativo restaurou tanto uma lista revertível mutada quanto um dicionário revertível mutado para o estado gravado.
+
+### Limites
+
+- São containers literais compilados pelo Ren'Py e uma reprodução reduzida das ações URM; não se carregou a implementação original integral.
+- O teste não instrumentou roots, pickle ou RollbackLog internamente. Confirma o resultado observável no runtime, não os detalhes byte-a-byte do save.
+- Não cobre objetos externos, containers não revertíveis, estruturas aninhadas, aliases/referências compartilhadas, save durante uma tela real do URM, nem interação com arquivo .urm.
+- Não se deve concluir que todo valor achado por Search seja serializável, alcançável ou restaurável do mesmo modo.
+
+### Classificação atualizada
+
+| Afirmação | Classificação |
+|---|---|
+| Save nativo após editar lista/dict manteve [10,20] e {a:20}; após alterações posteriores, load restaurou esses conteúdos | **OBSERVADO EM RUNTIME**, run 39064935980 |
+| O SDK serializa roots junto com o RollbackLog e grafo alcançável | **CONFIRMADO NO SDK 7.4.11** |
+| A edição de containers na reprodução reduzida pode ser revertida por rollback anterior e preservada no estado salvo por save posterior | **OBSERVADO EM RUNTIME** nos runs 38979672209, 39013297447 e 39064935980 |
+| Isso prova persistência dos metadados .urm ou serialização de qualquer objeto pesquisável | **NÃO DEMONSTRADO** |
+
+### Síntese da matriz de estado
+
+No cenário reduzido, a mesma classe geral de estado editado pode ter dois destinos dependendo da operação nativa:
+
+- **Rollback para checkpoint anterior à mutação:** restaura valores escalares e alterações de RevertableList/RevertableDict, como mostram as provas anteriores.
+- **Save depois da mutação, seguido de load:** restaura os valores/containers que existiam no instante do save, em vez de apagar a edição.
+
+Isso sustenta a distinção do usuário entre alteração ativa no estado do jogo, reversível por rollback, e inclusão dessa alteração no estado serializado quando se salva depois. A conclusão é limitada às reproduções e tipos testados; não demonstra equivalência da integração URM completa.
+
+### Próxima etapa
+
+A cronologia do StoreMonitor continua sem prova de runtime. O próximo experimento deve instrumentar a sequência exata: ação de screen altera store/container; interação seguinte executa nó Python; callback python_callbacks do URM é chamado; Context.force_checkpoint é transferido ao RollbackLog; rollback/save fecha o registro. Compare com a mesma sequência sem o monitor e não atribua ao monitor a reversão nativa já observada.
