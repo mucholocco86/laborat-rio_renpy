@@ -170,7 +170,7 @@ def _write_translation_map(output_dir: Path, root: Path, entries):
     payload = {
         "schema": MAP_SCHEMA,
         "version": MAP_VERSION,
-        "record_encoding": "wells-plain-v1",
+        "record_encoding": "wells-masked-v2",
         "source_tl": root.name,
         "record_count": len(entries),
         "source_files": _source_file_hashes(root),
@@ -196,7 +196,7 @@ def validate_translation_map(tl_dir, output_dir, old_records=None):
 
     if payload.get("schema") != MAP_SCHEMA or payload.get("version") != MAP_VERSION:
         raise ValueError("Versão do mapa Wells desconhecida. Faça uma nova extração.")
-    if payload.get("record_encoding") != "wells-plain-v1":
+    if payload.get("record_encoding") != "wells-masked-v2":
         raise ValueError("Codificação do mapa Wells incompatível. Faça uma nova extração.")
 
     root, entries = scan_tl(root)
