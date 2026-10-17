@@ -896,6 +896,7 @@ class WellsManager(tk.Tk):
             session = rest[-1]
             self._set_waiting(tl, session, fmt, button, original, original_command)
             self.progress["value"] = 100
+            self._log("[INFO] Mantenha os marcadores [[WELLS_P_000000]] no NEW; o mapa os usa para restaurar tags e variáveis Ren'Py na injeção.")
             if kind == "blocks":
                 blocks = rest[0]
                 self.status_var.set(f"Status: {count} textos em {blocks} blocos {fmt.upper()}.")
