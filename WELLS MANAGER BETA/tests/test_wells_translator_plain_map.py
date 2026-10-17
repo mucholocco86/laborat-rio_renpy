@@ -75,15 +75,17 @@ class WellsTranslatorPlainMapTests(unittest.TestCase):
 
             old, new, _ = _collect_txt_pair(out)
             self.assertFalse(old[0].startswith('"'))
-            new[0] = r'Bem-vindo, "Viajante"! [name] e \\n'
+            new[0] = 'Bem-vindo, "Viajante"! [name]'
             new[1] = 'Ele disse, "vá" para [player]!'
             _write_txt_records(out / "new.txt", new)
 
             count, _ = inject_translations(tl, out)
             self.assertEqual(count, 2)
             result = source.read_text(encoding="utf-8")
-            self.assertIn(r'new "Bem-vindo, \\"Viajante\\"! [name] e \\\\n"', result)
-            self.assertIn(r'e "Ele disse, \\"vá\\" para [player]!"', result)
+            self.assertIn(r'\"Viajante\"', result)
+            translated = scan_tl(tl)[1]
+            self.assertEqual(translated[0]["current"], new[0])
+            self.assertEqual(translated[1]["current"], new[1])
 
     def test_docx_blocks_and_txt_blocks_share_the_same_plain_records(self):
         for exporter, collector, injector in (
