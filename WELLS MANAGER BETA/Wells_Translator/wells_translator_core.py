@@ -26,7 +26,7 @@ FULL_OLD_DOCX = "old.docx"
 FULL_NEW_DOCX = "new.docx"
 MAP_FILENAME = "wells_translation_map.json"
 MAP_SCHEMA = "wells-rpy-translation-map"
-MAP_VERSION = 1
+MAP_VERSION = 2
 
 _QUOTED = re.compile(r'"((?:\\.|[^"\\])*)"')
 _TRANSLATE = re.compile(
@@ -36,12 +36,86 @@ _OLD = re.compile(r'^\s*old\s+(".*")\s*$')
 _NEW = re.compile(r'^\s*new\s+(".*")\s*$')
 
 
-def encode_transport_text(value: str) -> str:
-    """Encode one clean record without Ren'Py quote delimiters."""
+def _protected_parts(value: str):
+    """Split Ren'Py text into translatable runs and protected [...] / {...} tokens."""
+    value = str(value)
+    parts = []
+    buffer = []
+    i = 0
+
+    def flush():
+        if buffer:
+            parts.append((False, "".join(buffer)))
+            buffer.clear()
+
+    while i < len(value):
+        opener = value[i]
+        if opener not in "[{":
+            buffer.append(opener)
+            i += 1
+            continue
+        flush()
+        closer = "]" if opener == "[" else "}"
+        depth = 1
+        j = i + 1
+        while j < len(value) and depth:
+            if value[j] == opener:
+                depth += 1
+            elif value[j] == closer:
+                depth -= 1
+            j += 1
+        if depth:
+            parts.append((True, value[i:]))
+            i = len(value)
+        else:
+            parts.append((True, value[i:j]))
+            i = j
+    flush()
+    return parts
+
+
+def _protected_values(value: str):
+    return [part for protected, part in _protected_parts(value) if protected]
+
+
+def _mask_protected(value: str):
+    parts = _protected_parts(value)
+    out = []
+    index = 0
+    for protected, part in parts:
+        if protected:
+            # Bracketed sentinels survive the existing Revisor Ren'Py isolator.
+            out.append(f"[[WELLS_P_{index:06d}]]")
+            index += 1
+        else:
+            out.append(part)
+    return "".join(out)
+
+
+def _restore_protected(value: str, protected_values, record_number: int):
+    expected = [f"[[WELLS_P_{i:06d}]]" for i in range(len(protected_values))]
+    found = re.findall(r"\[\[WELLS_P_\d{6}\]\]", value)
+    if found != expected:
+        raise ValueError(
+            f"Marcadores Ren'Py alterados no registro {record_number}. "
+            "Revise o NEW e mantenha os marcadores [[WELLS_P_000000]] na ordem. "
+            "Nada foi injetado."
+        )
+    for marker, original in zip(expected, protected_values):
+        value = value.replace(marker, original)
+    return value
+
+
+def _encode_transport_raw(value: str) -> str:
     return (str(value).replace("\\", "\\\\")
             .replace("\r", "\\r")
             .replace("\n", "\\n")
             .replace("\t", "\\t"))
+
+
+def encode_transport_text(value: str) -> str:
+    """Encode clean text; Ren'Py tags/interpolations travel as opaque sentinels."""
+    return _encode_transport_raw(_mask_protected(value))
 
 
 def decode_transport_text(value: str) -> str:
@@ -86,6 +160,8 @@ def _map_record(index, entry):
         "source_line": int(entry["source_line"]) + 1,
         "target_line": int(entry["target_line"]) + 1,
         "original_sha256": hashlib.sha256(entry["original"].encode("utf-8")).hexdigest(),
+        "original_protected": _protected_values(entry["original"]),
+        "current_protected": _protected_values(entry["current"]),
     }
 
 
@@ -705,11 +781,16 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
             old_line == encode_transport_text(entry["original"])
             for entry, old_line in zip(entries, old_records)
         )
+        # Compatibilidade com extrações limpas anteriores ao mapa com sentinelas.
+        legacy_plain_old = all(
+            old_line == _encode_transport_raw(entry["original"])
+            for entry, old_line in zip(entries, old_records)
+        )
         legacy_old = all(
             old_line == entry["original_token"]
             for entry, old_line in zip(entries, old_records)
         )
-        if plain_old:
+        if plain_old or legacy_plain_old:
             plain_mode = True
         elif not legacy_old:
             raise ValueError(
@@ -718,7 +799,12 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
             )
 
     for idx, (entry, old_line) in enumerate(zip(entries, old_records), 1):
-        expected_old = encode_transport_text(entry["original"]) if plain_mode else entry["original_token"]
+        expected_old = (
+            encode_transport_text(entry["original"])
+            if plain_mode and (output_dir / MAP_FILENAME).is_file()
+            else _encode_transport_raw(entry["original"]) if plain_mode
+            else entry["original_token"]
+        )
         if old_line != expected_old:
             raise ValueError(
                 f"O OLD não corresponde à pasta TL no registro {idx}. "
@@ -730,6 +816,10 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
     per_file = {}
     for idx, (entry, new_line) in enumerate(zip(entries, new_records), 1):
         translated = decode_transport_text(new_line) if plain_mode else _validate_token(new_line, idx, label="NEW")
+        if plain_mode and (output_dir / MAP_FILENAME).is_file():
+            translated = _restore_protected(
+                translated, _protected_values(entry["current"]), idx
+            )
         per_file.setdefault(entry["file"], []).append((entry, translated))
 
     prepared = {}
