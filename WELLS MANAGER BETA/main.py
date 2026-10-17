@@ -896,7 +896,6 @@ class WellsManager(tk.Tk):
             session = rest[-1]
             self._set_waiting(tl, session, fmt, button, original, original_command)
             self.progress["value"] = 100
-            self._log("[INFO] Mantenha os marcadores [[WELLS_P_000000]] no NEW; o mapa os usa para restaurar tags e variáveis Ren'Py na injeção.")
             if kind == "blocks":
                 blocks = rest[0]
                 self.status_var.set(f"Status: {count} textos em {blocks} blocos {fmt.upper()}.")
@@ -1055,22 +1054,30 @@ class WellsManager(tk.Tk):
         if not path: return
         translated_path = Path(path)
         native_path = None
+        tl_root = None
         if translated_path.stem == "old" or translated_path.stem.startswith("old_"):
             messagebox.showwarning(APP, "Selecione o NEW traduzido. O OLD é referência e não deve ser revisado.")
             return
         if translated_path.stem == "new" or translated_path.stem.startswith("new_"):
             native_path = translated_path.with_name("old" + translated_path.name[3:])
             if not native_path.is_file():
-                messagebox.showwarning(APP, f"Não encontrei o OLD correspondente:\\n{native_path}")
+                messagebox.showwarning(APP, f"Não encontrei o OLD correspondente:\n{native_path}")
+                return
+            tl_root = self.pending_tl or self.choose_tl("Selecione a pasta TL usada para extrair este OLD/NEW")
+            if not tl_root:
                 return
         self.progress["value"] = 0
         self.status_var.set("Status: Preparando revisão...")
         self._begin_log_session("REVISOR RPY")
         self._log(f"Documento: {path}")
         def worker():
-            # A revisão trabalha nos documentos exportados selecionados. Quando
-            # houver um NEW, usa apenas o OLD que está ao lado como referência
-            # para a blindagem; não procura nem abre a pasta TL do jogo.
+            if native_path is not None:
+                from Wells_Translator.wells_translator_core import scan_tl, _collect_txt_pair, _collect_docx_pair
+                _, entries = scan_tl(tl_root)
+                collector = _collect_txt_pair if fmt == "txt" else _collect_docx_pair
+                olds, news, _ = collector(translated_path.parent)
+                if olds != [entry["original_token"] for entry in entries] or len(news) != len(olds):
+                    raise ValueError("OLD/NEW não correspondem à pasta TL selecionada. Nada foi alterado.")
             return review_file(translated_path, REVISOR_DIR, progress=self._revisor_progress,
                                native_path=native_path, blindagem_path=self._blindagem_path())
         def done(result):
@@ -1199,6 +1206,5 @@ class WellsManager(tk.Tk):
 
 if __name__ == "__main__":
     WellsManager().mainloop()
-
 
 
