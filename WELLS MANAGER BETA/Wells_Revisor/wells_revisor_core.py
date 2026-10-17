@@ -99,9 +99,11 @@ def _validate_translation_map_pair(map_path: Path, native_records, translated_re
     except Exception as exc:
         raise ValueError(f"Mapa Wells ausente ou inválido: {exc}") from exc
 
+    map_version = payload.get("version")
+    expected_encoding = "wells-masked-v2" if map_version == 2 else "wells-plain-v1"
     if (payload.get("schema") != "wells-rpy-translation-map"
-            or payload.get("version") != 2
-            or payload.get("record_encoding") != "wells-masked-v2"):
+            or map_version not in (1, 2)
+            or payload.get("record_encoding") != expected_encoding):
         raise ValueError("Mapa incompatível com esta revisão. Faça uma nova extração.")
 
     mapped = payload.get("records")
@@ -112,6 +114,13 @@ def _validate_translation_map_pair(map_path: Path, native_records, translated_re
         expected_id = f"W{index:08d}"
         if record.get("id") != expected_id:
             raise ValueError(f"Ordem/ID divergente no mapa Wells, registro {index}.")
+
+        if map_version == 1:
+            restored_old = _decode_transport_record(old)
+            digest = hashlib.sha256(restored_old.encode("utf-8")).hexdigest()
+            if digest != record.get("original_sha256"):
+                raise ValueError(f"OLD divergente do mapa Wells no registro {index}.")
+            continue
 
         original_tokens = record.get("original_protected")
         current_tokens = record.get("current_protected")
