@@ -1054,44 +1054,24 @@ class WellsManager(tk.Tk):
         if not path: return
         translated_path = Path(path)
         native_path = None
-        tl_root = None
         if translated_path.stem == "old" or translated_path.stem.startswith("old_"):
             messagebox.showwarning(APP, "Selecione o NEW traduzido. O OLD é referência e não deve ser revisado.")
             return
         if translated_path.stem == "new" or translated_path.stem.startswith("new_"):
             native_path = translated_path.with_name("old" + translated_path.name[3:])
             if not native_path.is_file():
-                messagebox.showwarning(APP, f"Não encontrei o OLD correspondente:\n{native_path}")
-                return
-            tl_root = self.pending_tl or self.choose_tl("Selecione a pasta TL usada para extrair este OLD/NEW")
-            if not tl_root:
+                messagebox.showwarning(APP, f"Não encontrei o OLD correspondente:\\n{native_path}")
                 return
         self.progress["value"] = 0
         self.status_var.set("Status: Preparando revisão...")
         self._begin_log_session("REVISOR RPY")
         self._log(f"Documento: {path}")
         def worker():
-            if native_path is not None:
-                from Wells_Translator.wells_translator_core import (
-                    MAP_FILENAME, scan_tl, validate_translation_map,
-                    _collect_txt_pair, _collect_docx_pair,
-                )
-                collector = _collect_txt_pair if fmt == "txt" else _collect_docx_pair
-                olds, news, _ = collector(translated_path.parent)
-                plain_records = (translated_path.parent / MAP_FILENAME).is_file()
-                if plain_records:
-                    validate_translation_map(tl_root, translated_path.parent, old_records=olds)
-                    if len(news) != len(olds):
-                        raise ValueError("OLD/NEW não correspondem ao mapa da extração. Nada foi alterado.")
-                else:
-                    _, entries = scan_tl(tl_root)
-                    if olds != [entry["original_token"] for entry in entries] or len(news) != len(olds):
-                        raise ValueError("OLD/NEW não correspondem à pasta TL selecionada. Nada foi alterado.")
-            else:
-                plain_records = None
+            # A revisão trabalha nos documentos exportados selecionados. Quando
+            # houver um NEW, usa apenas o OLD que está ao lado como referência
+            # para a blindagem; não procura nem abre a pasta TL do jogo.
             return review_file(translated_path, REVISOR_DIR, progress=self._revisor_progress,
-                               native_path=native_path, blindagem_path=self._blindagem_path(),
-                               plain_records=plain_records)
+                               native_path=native_path, blindagem_path=self._blindagem_path())
         def done(result):
             self.progress["value"] = 100; self.status_var.set(f"Status: {result['records']} linhas revisadas.")
             self._log(f"[OK] Revisão concluída: {result['records']} linhas.")
