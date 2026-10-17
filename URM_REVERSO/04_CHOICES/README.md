@@ -284,3 +284,6 @@ O run **39013412540** validou também a exclusão de um índice de lista e uma c
 
 
 O run **39064784962** validou na reprodução reduzida a regra de truthiness de CreateVar: valores convertidos para inteiro 0, boolean False e string vazia não foram criados; o inteiro 7 foi aceito. A fonte convertida também prevê 0.0 como rejeitado, mas esse valor ainda não foi testado em runtime. Isso é separado da edição de valores existente. Ver limites e classificação no documento 22.
+
+
+O run **39064935980** validou save/load nativo de containers editados: uma lista salva como `[10, 20]` e um dicionário como `{a: 20}` foram alterados depois para `[10, 20, 30]` e `{a: 30}`; o load restaurou os conteúdos do momento do save. O teste é reduzido e usa literais Ren'Py; não valida objetos externos nem metadados `.urm`. Detalhes no documento 22.
