@@ -185,6 +185,21 @@ jobs:
           echo "END CreateVar falsy-value probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
 
+      - name: Run native save/load after container edits
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START container save/load probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_save_load_containers_roundtrip
+          result=$?
+          echo "END container save/load probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
+
       - name: Run native save/load after manual edit
         shell: bash
         env:
