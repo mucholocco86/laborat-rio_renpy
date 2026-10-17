@@ -141,6 +141,12 @@ init python in urm_probe_urm:
                 return Var(self.name + '[' + repr(childVarName) + ']')
             return Var(self.name + '.' + str(childVarName))
 
+        def delete(self):
+            parentPath, keyExpression = self.name.split('[', 1)
+            key = renpy.python.py_eval(keyExpression[:-1], renpy.store.__dict__)
+            parent = renpy.python.py_eval(parentPath, renpy.store.__dict__)
+            del parent[key]
+
         def setValue(self, newValue, overruleVarType=None, operator='=', varChildKey=None):
             if not self.isEditable: return False
             if callable(newValue): newValue = newValue()
@@ -505,4 +511,65 @@ testcase urm_edit_dict_rollback:
     assert dict(urm_rollback_dict) == {"a": 10}
     assert urm_dict_route == 0
     assert urm_dict_context_before is False
+    $ renpy.quit()
+
+
+# Deletion probe models Var.delete for a list index and dictionary key.
+default urm_delete_list = [10, 20]
+default urm_delete_dict = {"a": 10, "b": 20}
+default urm_delete_context_before = None
+default urm_delete_route = 0
+
+screen urm_delete_items_probe():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Delete list index and dictionary key":
+            action [
+                Hide("urm_delete_items_probe"),
+                Function(urm_probe_urm.Var("urm_delete_list").getChild(0).delete, _update_screens=False),
+                Function(urm_probe_urm.Var("urm_delete_dict").getChild("a").delete),
+            ]
+
+label urm_delete_items_rollback_start:
+    $ urm_delete_context_before = renpy.game.context().rollback
+    $ renpy.game.context().rollback = True
+    $ urm_delete_route = 0
+    $ urm_delete_list = [10, 20]
+    $ urm_delete_dict = {"a": 10, "b": 20}
+    $ renpy.checkpoint("before-container-delete")
+
+    show screen urm_delete_items_probe
+    pause 0.5
+
+    menu:
+        "Delete route once":
+            $ urm_delete_route = 1
+
+    menu:
+        "Delete route twice":
+            $ urm_delete_route = 2
+
+    $ print("DELETE_ROLLBACK_PRE", list(urm_delete_list), dict(urm_delete_dict), urm_delete_route)
+    $ renpy.rollback(force=False, checkpoints=3, label="urm_delete_items_rollback_verify")
+
+label urm_delete_items_rollback_verify:
+    $ print("DELETE_ROLLBACK_AT_VERIFY", list(urm_delete_list), dict(urm_delete_dict), urm_delete_route)
+    "Container deletion rollback verification."
+    return
+
+testcase urm_delete_container_items_rollback:
+    run Jump("urm_delete_items_rollback_start")
+    "Delete list index and dictionary key"
+    "Delete route once"
+    "Delete route twice"
+    label urm_delete_items_rollback_verify
+    assert list(urm_delete_list) == [10, 20]
+    assert dict(urm_delete_dict) == {"a": 10, "b": 20}
+    assert urm_delete_route == 0
+    assert urm_delete_context_before is False
     $ renpy.quit()
