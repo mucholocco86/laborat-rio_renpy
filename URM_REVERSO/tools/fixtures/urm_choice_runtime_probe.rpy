@@ -636,7 +636,8 @@ screen urm_createvar_probe():
         vbox:
             spacing 8
             text "CreateVar falsy-value probe"
-            text "[errorMessage]" if errorMessage
+            if errorMessage:
+                text "[errorMessage]"
             textbutton "Create integer zero":
                 action urm_probe_urm.CreateVar("urm_created_zero", "0", "int", Hide("urm_createvar_probe"), "errorMessage")
             textbutton "Create boolean false":
