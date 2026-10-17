@@ -697,6 +697,26 @@ def _inject_common(tl_dir, output_dir, collector, session=None, progress=None):
             f"O NEW possui {len(new_records)} registros, mas são esperados {expected}. Nada foi alterado."
         )
 
+    # O mapa JSON é a fonte preferencial. Se ele não acompanhar os arquivos
+    # (por exemplo, ao enviar somente old/new a um tradutor externo), detecta
+    # o formato pela correspondência exata do OLD com a pasta TL.
+    if not plain_mode:
+        plain_old = all(
+            old_line == encode_transport_text(entry["original"])
+            for entry, old_line in zip(entries, old_records)
+        )
+        legacy_old = all(
+            old_line == entry["original_token"]
+            for entry, old_line in zip(entries, old_records)
+        )
+        if plain_old:
+            plain_mode = True
+        elif not legacy_old:
+            raise ValueError(
+                "O OLD não corresponde à pasta TL nem ao formato limpo nem ao formato antigo. "
+                "Faça uma nova extração. Nada foi alterado."
+            )
+
     for idx, (entry, old_line) in enumerate(zip(entries, old_records), 1):
         expected_old = encode_transport_text(entry["original"]) if plain_mode else entry["original_token"]
         if old_line != expected_old:
