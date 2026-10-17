@@ -10,6 +10,7 @@ from xml.sax.saxutils import escape
 import io
 import tempfile
 import json
+import hashlib
 from docx import Document
 from wells_guia_ptbr import validar_revisao, analisar_registro
 from wells_isolador_renpy import segmentar
@@ -63,6 +64,87 @@ def _encode_record(value: str, quoted: bool):
              .replace("\r", "\\r")
              .replace("\n", "\\n")
     ) + '"'
+
+
+def _decode_transport_record(value: str) -> str:
+    """Remove the reversible escape layer used by clean Wells OLD/NEW rows."""
+    value = str(value)
+    out = []
+    i = 0
+    while i < len(value):
+        if value[i] != "\\" or i + 1 >= len(value):
+            out.append(value[i])
+            i += 1
+            continue
+        nxt = value[i + 1]
+        decoded = {"\\": "\\", "n": "\n", "r": "\r", "t": "\t"}.get(nxt)
+        if decoded is None:
+            out.extend(("\\", nxt))
+        else:
+            out.append(decoded)
+        i += 2
+    return "".join(out)
+
+
+def _encode_transport_record(value: str) -> str:
+    return (str(value).replace("\\", "\\\\")
+            .replace("\r", "\\r")
+            .replace("\n", "\\n")
+            .replace("\t", "\\t"))
+
+
+def _validate_translation_map_pair(map_path: Path, native_records, translated_records):
+    """Validate a clean OLD/NEW pair against the adjacent Wells extraction map."""
+    try:
+        payload = json.loads(Path(map_path).read_text(encoding="utf-8-sig"))
+    except Exception as exc:
+        raise ValueError(f"Mapa Wells ausente ou inválido: {exc}") from exc
+
+    version = payload.get("version")
+    encoding = "wells-masked-v2" if version == 2 else "wells-plain-v1"
+    if (payload.get("schema") != "wells-rpy-translation-map"
+            or version not in (1, 2)
+            or payload.get("record_encoding") != encoding):
+        raise ValueError("Mapa incompatível com esta revisão. Faça uma nova extração.")
+
+    mapped = payload.get("records")
+    if not isinstance(mapped, list) or len(mapped) != len(native_records) or len(mapped) != len(translated_records):
+        raise ValueError("OLD/NEW não corresponde à quantidade de registros do mapa.")
+
+    for index, (record, old, new) in enumerate(zip(mapped, native_records, translated_records), 1):
+        if not isinstance(record, dict) or record.get("id") != f"W{index:08d}":
+            raise ValueError(f"Ordem/ID divergente no mapa Wells, registro {index}.")
+
+        if version == 1:
+            restored_old = _decode_transport_record(old)
+            digest = hashlib.sha256(restored_old.encode("utf-8")).hexdigest()
+            if digest != record.get("original_sha256"):
+                raise ValueError(f"OLD divergente do mapa Wells no registro {index}.")
+            continue
+
+        original_tokens = record.get("original_protected")
+        current_tokens = record.get("current_protected")
+        if not isinstance(original_tokens, list) or not isinstance(current_tokens, list):
+            raise ValueError(f"Mapa sem dados de proteção no registro {index}.")
+
+        old_markers = [f"[[WELLS_P_{i:06d}]]" for i in range(len(original_tokens))]
+        if re.findall(r"\[\[WELLS_P_\d{6}\]\]", old) != old_markers:
+            raise ValueError(f"OLD com marcadores divergentes no registro {index}.")
+        restored_old = old
+        for marker, token in zip(old_markers, original_tokens):
+            restored_old = restored_old.replace(marker, token)
+        restored_old = _decode_transport_record(restored_old)
+        digest = hashlib.sha256(restored_old.encode("utf-8")).hexdigest()
+        if digest != record.get("original_sha256"):
+            raise ValueError(f"OLD divergente do mapa Wells no registro {index}.")
+
+        new_markers = [f"[[WELLS_P_{i:06d}]]" for i in range(len(current_tokens))]
+        if re.findall(r"\[\[WELLS_P_\d{6}\]\]", new) != new_markers:
+            raise ValueError(
+                f"Marcadores Ren'Py alterados no NEW, registro {index}. "
+                "Corrija os marcadores antes de revisar."
+            )
+
 
 def _protect_renpy(text: str):
     """
@@ -434,6 +516,9 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
     else:
         records = _read_docx(path)
 
+    pair_name = bool(re.fullmatch(r"(?:old|new)(?:_\d+)?", path.stem, re.IGNORECASE))
+    plain_records = pair_name and (path.parent / "wells_translation_map.json").is_file()
+
     natives = None
     lists = None
     if native_path is not None:
@@ -445,16 +530,21 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
         if len(natives) != len(records):
             raise ValueError("Par OLD/NEW desalinhado. Nada foi alterado.")
         # Valida todos os registros antes de qualquer gravação.
-        for label, values in (("OLD", natives), ("NEW", records)):
-            for index, value in enumerate(values, 1):
-                if not _QUOTED.fullmatch(value):
-                    raise ValueError(f"Registro {index} inválido no {label}; mantenha as aspas.")
-                try:
-                    decoded = ast.literal_eval(value.strip())
-                except Exception as exc:
-                    raise ValueError(f"Registro {index} inválido no {label}.") from exc
-                if not isinstance(decoded, str):
-                    raise ValueError(f"Registro {index} não textual no {label}.")
+        if plain_records:
+            _validate_translation_map_pair(
+                path.parent / "wells_translation_map.json", natives, records
+            )
+        else:
+            for label, values in (("OLD", natives), ("NEW", records)):
+                for index, value in enumerate(values, 1):
+                    if not _QUOTED.fullmatch(value):
+                        raise ValueError(f"Registro {index} inválido no {label}; mantenha as aspas.")
+                    try:
+                        decoded = ast.literal_eval(value.strip())
+                    except Exception as exc:
+                        raise ValueError(f"Registro {index} inválido no {label}.") from exc
+                    if not isinstance(decoded, str):
+                        raise ValueError(f"Registro {index} não textual no {label}.")
         lists = carregar_listas(blindagem_path) if blindagem_path else {"NOMES_BLINDADOS": [], "NOMES_TRADUZIVEIS": []}
 
     total = len(records)
@@ -483,14 +573,18 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
     first_temp = True
 
     for idx, record in enumerate(records, 1):
-        text, quoted = _decode_record(record)
+        if plain_records:
+            text, quoted = _decode_transport_record(record), False
+        else:
+            text, quoted = _decode_record(record)
         for issue in diagnosticar_texto(text):
             linguistic_issues.append({"record": idx, **issue, "text": text})
         if natives is None:
             reviewed, count, tokens = review_text(text, dictionary=dictionary, base_linguistica=base_linguistica)
         else:
             from wells_blindagem_review import revisar_com_blindagem
-            native = ast.literal_eval(natives[idx - 1].strip())
+            native = (_decode_transport_record(natives[idx - 1]) if plain_records
+                      else ast.literal_eval(natives[idx - 1].strip()))
             reviewed, count, tokens, stats = revisar_com_blindagem(
                 native, text, lists,
                 lambda value: review_text(value, dictionary=dictionary, base_linguistica=base_linguistica),
@@ -501,7 +595,7 @@ def review_file(path: Path, base_dir: Path, progress=None, native_path=None, bli
             unresolved_names.extend({"record": idx, "term": term, "native": native, "translated": text}
                                     for term in stats["missing"])
 
-        encoded = _encode_record(reviewed, quoted)
+        encoded = _encode_transport_record(reviewed) if plain_records else _encode_record(reviewed, quoted)
 
         item = analisar_registro(idx, text, reviewed, tokens)
         if not first_temp:
