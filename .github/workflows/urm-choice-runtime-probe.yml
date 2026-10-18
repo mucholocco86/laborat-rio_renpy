@@ -373,3 +373,18 @@ jobs:
           result=$?
           echo "END x52 notification object rollback probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+      - name: Run rooted x52 notification object rollback probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START rooted x52 notification object rollback probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_x52_rooted_notification_list_rollback
+          result=$?
+          echo "END rooted x52 notification object rollback probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
