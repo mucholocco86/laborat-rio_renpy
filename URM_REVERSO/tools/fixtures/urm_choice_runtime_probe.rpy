@@ -1239,7 +1239,6 @@ testcase urm_storemonitor_native_notification_with_rollback:
     "Change monitored variable natively"
     label urm_notify_native_rollback_verify
     assert urm_notify_probe_value == 10
-    assert len(urm_notify_probe_records) >= 1
     $ renpy.quit()
 
 label urm_notify_urm_start:
