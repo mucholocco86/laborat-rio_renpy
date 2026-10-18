@@ -325,3 +325,8 @@ O segundo probe de freeze também passou no run [39104385145](https://github.com
 ### Monitor de variáveis e notificações — runtime (2026-10-18)
 
 O run [39148026518](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39148026518) comparou SetVariable nativo e SetVarValue direto. No teste reduzido, a escrita nativa gerou uma notificação síncrona pelo hook; a edição direta não notificou durante a ação, mas foi detectada pelo callback posterior quando o delta estava disponível. Sem rollback, o callback simplificado processou repetidamente o mesmo delta não ciclado, acrescentando registros duplicados no harness. Isso levanta uma hipótese de duplicação no StoreMonitor, ainda sem confirmação no URM integral ou em gameplay com rollback. Detalhes e classificação no [documento 29](29_NOTIFICACOES_VARIAVEIS_MONITORADAS_RUNTIME.md).
+
+
+### Monitor URM com rollback habilitado (2026-10-18)
+
+No run [39148219484](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39148219484), a edição direta SetVarValue de variável monitorada foi para 30, não passou pelo hook nativo e não produziu aviso no contexto testado. O callback posterior não encontrou o delta; o rollback explícito restaurou o valor a 10. Isso mostra que a restauração do estado do jogo pode ocorrer sem notificação do StoreMonitor reduzido naquele instante. A integração completa e a escrita nativa sob rollback continuam pendentes. Ver [documento 30](30_MONITOR_ROLLBACK_NOTIFICACAO_URM.md).
