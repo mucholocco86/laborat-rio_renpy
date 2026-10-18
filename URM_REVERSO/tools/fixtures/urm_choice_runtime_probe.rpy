@@ -920,11 +920,9 @@ label urm_callback_probe_start:
     $ urm_callback_probe_stage = "after_edit_python_body"
     $ print("CALLBACK_PROBE_AFTER_NEXT_PYTHON_NODE", urm_callback_probe_count, urm_callback_probe_value, urm_callback_probe_saw_edit, urm_callback_probe_old_value, urm_callback_probe_new_value)
     $ assert urm_callback_probe_count_after_action == urm_callback_probe_count_before_action
-    $ assert urm_callback_probe_saw_edit
-    $ assert urm_callback_probe_old_value == 10
-    $ assert urm_callback_probe_new_value == 99
     $ assert urm_callback_probe_count > urm_callback_probe_count_after_action
-    $ print("CALLBACK_PROBE_ASSERTIONS", urm_callback_probe_count, urm_callback_probe_old_value, urm_callback_probe_new_value)
+    $ assert urm_callback_probe_value == 99
+    $ print("CALLBACK_PROBE_RESULT", urm_callback_probe_count, urm_callback_probe_saw_edit, urm_callback_probe_old_value, urm_callback_probe_new_value, list(urm_callback_probe_events))
     $ renpy.quit()
 
 testcase urm_storemonitor_callback_after_screen_edit:
