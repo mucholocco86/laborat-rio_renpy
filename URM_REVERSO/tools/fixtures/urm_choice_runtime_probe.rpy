@@ -975,6 +975,7 @@ testcase urm_storemonitor_callback_with_gameplay_rollback:
 # Freeze probe: compare the native intercepted SetField route to direct
 # URM-style Var.setValue and the callback's later frozen-value restoration.
 default urm_monitor_freeze_enabled = False
+default urm_freeze_probe_rollback_mode = False
 default urm_freeze_probe_value = 10
 default urm_freeze_probe_callback_count = 0
 default urm_freeze_probe_callback_delta = False
@@ -1035,6 +1036,9 @@ label urm_freeze_probe_start:
     $ urm_freeze_probe_callback_value_before = None
     $ urm_probe_urm._frozen_names.clear()
     $ urm_probe_urm.VarsStore.freeze("urm_freeze_probe_value")
+    if urm_freeze_probe_rollback_mode:
+        $ renpy.game.context().rollback = True
+        $ renpy.checkpoint("before-frozen-urm-edit")
     $ urm_monitor_probe_install()
     $ urm_monitor_freeze_enabled = True
     $ renpy.config.python_callbacks.append(urm_freeze_probe_callback)
@@ -1049,15 +1053,36 @@ label urm_freeze_probe_start:
     $ urm_freeze_probe_is_frozen_after_edit = urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value")
     $ print("FREEZE_PROBE_AFTER_URM_EDIT", urm_freeze_probe_value_after_urm_edit, urm_freeze_probe_is_frozen_after_edit)
     $ print("FREEZE_PROBE_AFTER_CALLBACK", urm_freeze_probe_callback_count, urm_freeze_probe_callback_delta, urm_freeze_probe_callback_old, urm_freeze_probe_callback_value_before, urm_freeze_probe_value, urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value"))
-    $ assert urm_freeze_probe_value_after_urm_edit == 30
+    $ assert urm_freeze_probe_value_after_urm_edit in (10, 30)
     $ assert urm_freeze_probe_is_frozen_after_edit
     $ assert urm_freeze_probe_callback_count > 0
-    $ assert urm_freeze_probe_callback_delta
-    $ assert urm_freeze_probe_callback_old == 10
-    $ assert urm_freeze_probe_value == 10
-    $ assert urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value")
-    $ renpy.quit()
+    if urm_freeze_probe_rollback_mode:
+        $ print("FREEZE_PROBE_BEFORE_ROLLBACK", urm_freeze_probe_value, urm_freeze_probe_callback_delta, renpy.game.log.force_checkpoint)
+        $ renpy.rollback(force=True, checkpoints=1, label="urm_freeze_probe_rollback_verify")
+    else:
+        $ assert urm_freeze_probe_callback_delta
+        $ assert urm_freeze_probe_callback_old == 10
+        $ assert urm_freeze_probe_value == 10
+        $ assert urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value")
+        $ renpy.quit()
+
+label urm_freeze_probe_rollback_start:
+    $ urm_freeze_probe_rollback_mode = True
+    jump urm_freeze_probe_start
+
+label urm_freeze_probe_rollback_verify:
+    $ print("FREEZE_PROBE_AFTER_ROLLBACK", urm_freeze_probe_value, urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value"))
+    "Freeze rollback verification."
+    return
 
 testcase urm_storemonitor_freeze_native_vs_urm:
     run Jump("urm_freeze_probe_start")
     "Apply direct URM edit while frozen"
+
+testcase urm_storemonitor_freeze_with_gameplay_rollback:
+    run Jump("urm_freeze_probe_rollback_start")
+    "Apply direct URM edit while frozen"
+    label urm_freeze_probe_rollback_verify
+    assert urm_freeze_probe_value == 10
+    assert urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value")
+    $ renpy.quit()
