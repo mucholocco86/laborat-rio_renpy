@@ -1406,3 +1406,31 @@ label urm_x52_notification_screen_rollback_verify:
 
 testcase urm_x52_displayed_notification_list_rollback:
     run Jump("urm_x52_notification_screen_rollback_start")
+
+
+# clear() probe mirrors NotificationsClass.clear(): replace the owner's list
+# attribute rather than mutating the existing RevertableList in place.
+label urm_x52_notification_clear_rollback_start:
+    $ urm_probe_urm.ProbeNotifications.notifications = []
+    $ urm_probe_urm.ProbeNotifications.add("Before clear", "clear_rollback_probe")
+    show screen urm_x52_notification_overlay_probe
+    pause 0.1
+    $ renpy.checkpoint("before-x52-notification-clear")
+    $ print("X52_NOTIFICATION_CLEAR_BEFORE", len(urm_probe_urm.ProbeNotifications.notifications), renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    $ urm_probe_urm.ProbeNotifications.notifications = []
+    $ renpy.restart_interaction()
+    $ renpy.rollback(force=True, checkpoints=1, label="urm_x52_notification_clear_rollback_verify")
+
+
+label urm_x52_notification_clear_rollback_verify:
+    $ print("X52_NOTIFICATION_CLEAR_AFTER_ROLLBACK", len(urm_probe_urm.ProbeNotifications.notifications), renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    python:
+        # The reduced owner derives from the built-in object, like x52NonPicklable.
+        # Its attribute replacement is not a RevertableObject mutation.
+        if len(urm_probe_urm.ProbeNotifications.notifications) != 0:
+            raise Exception("Expected clear() attribute replacement to remain empty after rollback in this reduced model.")
+    $ renpy.quit()
+
+
+testcase urm_x52_notification_clear_rollback:
+    run Jump("urm_x52_notification_clear_rollback_start")
