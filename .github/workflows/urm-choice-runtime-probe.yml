@@ -232,6 +232,22 @@ jobs:
           echo "END StoreMonitor callback timing probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
 
+
+      - name: Run StoreMonitor callback with rollback enabled
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START StoreMonitor callback with rollback enabled: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_storemonitor_callback_with_gameplay_rollback
+          result=$?
+          echo "END StoreMonitor callback with rollback enabled: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
+
       - name: Run native save/load after manual edit
         shell: bash
         env:
