@@ -233,3 +233,14 @@ Nenhum teste de thread foi adicionado nesta etapa; a conclusão acima é somente
 | SDK 7.4.11 `renpy/exports.py` | `invoke_in_thread`, linhas 3698–3728 | `781b35b31522dafc6a24e7c3212d206c7bd6dfa5` |
 | SDK 7.4.11 `renpy/python.py` | `mutator`, linhas 862–877; `RollbackLog.complete`, linhas 1707–1743 | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
 
+
+### Probe de timeout em thread preparado (2026-10-18)
+
+Foi adicionada a testcase `urm_x52_notification_timeout_rollback`. Ela exibe a notificação numa screen, registra checkpoint, inicia `renpy.invoke_in_thread`; a função worker espera brevemente, executa `ProbeNotifications.notifications.remove(notification)` e marca uma variável de conclusão. A execução principal aguarda o sinal e solicita rollback ao checkpoint anterior. A expectativa é que a mutação da lista seja desfeita e que o item retorne.
+
+Esse teste mede se o SDK reduzido registra e restaura uma mutação `RevertableList` feita nessa thread. Não mede segurança geral de chamadas Ren'Py em thread, timeout longo, corrida na borda do checkpoint, encerramento durante a espera nem o pacote URM integral.
+
+- **PENDENTE:** nenhum log runtime verificado até o momento.
+- **Evidência estática preservada:** `invoke_in_thread` permite poucas operações na thread; `mutator` escreve em `renpy.game.log.mutated`; `RollbackLog.complete` repete a iteração do mapa em certos `RuntimeError`.
+- **Fixture:** testcase `urm_x52_notification_timeout_rollback`, commit [b4de1e4c476668f27da51775c48536f82fe16f91](https://github.com/mucholocco86/laborat-rio_renpy/commit/b4de1e4c476668f27da51775c48536f82fe16f91).
+- **Workflow:** passo “Run x52 notification timeout thread rollback probe”, commit [4ffdae65e48c42dad9c314c62fd1c68b78e78c63](https://github.com/mucholocco86/laborat-rio_renpy/commit/4ffdae65e48c42dad9c314c62fd1c68b78e78c63).
