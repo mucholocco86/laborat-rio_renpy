@@ -320,3 +320,8 @@ O probe [39104245128](https://github.com/mucholocco86/laborat-rio_renpy/actions/
 ### Freeze com rollback habilitado (2026-10-18)
 
 O segundo probe de freeze também passou no run [39104385145](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39104385145). A escrita nativa continuou bloqueada em 10; a edição URM reduziu o valor para 30 e reaplicou freeze; desta vez o callback posterior não recebeu o delta, então o valor permaneceu em 30 até o rollback explícito, que restaurou 10. Isso reproduz, para uma variável escalar e uma fixture reduzida, a relação relatada entre edição durante a execução e rollback para um estado anterior. O metadado frozen do URM real não foi validado; ver [documento 28](28_FREEZE_ROLLBACK_RUNTIME.md).
+
+
+### Monitor de variáveis e notificações — runtime (2026-10-18)
+
+O run [39148026518](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39148026518) comparou SetVariable nativo e SetVarValue direto. No teste reduzido, a escrita nativa gerou uma notificação síncrona pelo hook; a edição direta não notificou durante a ação, mas foi detectada pelo callback posterior quando o delta estava disponível. Sem rollback, o callback simplificado processou repetidamente o mesmo delta não ciclado, acrescentando registros duplicados no harness. Isso levanta uma hipótese de duplicação no StoreMonitor, ainda sem confirmação no URM integral ou em gameplay com rollback. Detalhes e classificação no [documento 29](29_NOTIFICACOES_VARIAVEIS_MONITORADAS_RUNTIME.md).
