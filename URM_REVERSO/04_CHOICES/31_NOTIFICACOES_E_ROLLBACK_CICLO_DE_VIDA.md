@@ -199,6 +199,8 @@ A diferença interessa porque o dono `NotificationsClass` herda de `x52NonPickla
 
 Foi acrescentado o testcase `urm_x52_notification_clear_rollback` à fixture e o passo “Run x52 notification clear rollback probe” ao workflow. O probe mantém uma screen com action de notificação visível, cria checkpoint, substitui a lista como o método `clear()` faz e retorna ao checkpoint. Commit do passo do workflow: [7cb6f6c5b0e20a9cb0198b3acbfd7dfb3b19a103](https://github.com/mucholocco86/laborat-rio_renpy/commit/7cb6f6c5b0e20a9cb0198b3acbfd7dfb3b19a103). **Resultado runtime ainda pendente; não tratar a previsão acima como observação.**
 
+Para separar os dois mecanismos com condições equivalentes, foi adicionado também `urm_x52_notification_remove_rollback`: começa com uma notificação já alcançável pela screen, cria checkpoint, chama `RevertableList.remove()` no objeto atual e volta ao checkpoint. A expectativa testável é a lista retornar a um item, em contraste com a previsão de `clear()` permanecer vazia. Ambos os probes estão no workflow atualizado; o run de push não está exposto pelo conector disponível, então **os dois resultados seguem pendentes até que os logs do Actions sejam consultados**. A última alteração do workflow é o commit [537a46dcbc98ae76af80464efc7ae8582aa62eaa](https://github.com/mucholocco86/laborat-rio_renpy/commit/537a46dcbc98ae76af80464efc7ae8582aa62eaa), e a fixture foi atualizada no commit [37deb35335fec1fb140ab6b26e565ac7bdd6ab3e](https://github.com/mucholocco86/laborat-rio_renpy/commit/37deb35335fec1fb140ab6b26e565ac7bdd6ab3e).
+
 Fontes adicionais consultadas:
 
 | Fonte | Símbolos | Identificação |
