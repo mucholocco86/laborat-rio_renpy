@@ -38,7 +38,7 @@ Interpretação dos pontos:
 ## Limites
 
 - O handler e o estado de freeze são reproduções reduzidas; não foi carregado o pacote completo URM nem inicializado seu StoreMonitor real.
-- O callback foi observado no contexto do test runner com rollback desabilitado. O run 39098551052 mostra que, com rollback habilitado, o callback pode não receber o delta da edição por screen; portanto, este resultado de restauração não pode ser generalizado para toda configuração temporal.
+- Este primeiro testcase usou o contexto com rollback desabilitado. A comparação com rollback habilitado foi executada em separado e consta no [documento 28](28_FREEZE_ROLLBACK_RUNTIME.md): o callback não recebeu o delta, o valor permaneceu 30 até rollback e então retornou a 10.
 - O probe testa uma variável escalar raiz e o helper nativo encontrado no SDK. Não testa atributos internos, containers, notificações de monitor ou arquivo .urm.
 - O comportamento de uma variável frozen após edição URM com rollback habilitado ainda precisa ser observado diretamente: pode haver restauração no callback se o delta estiver disponível, ou apenas rollback nativo em momento posterior.
 
@@ -51,4 +51,4 @@ Interpretação dos pontos:
 
 ## Próxima validação
 
-Repetir o mesmo circuito com rollback habilitado e uma fronteira explicitamente registrada. Capturar o delta visto pelo callback, o valor e flag frozen antes/depois, e o estado após rollback. Em seguida, validar a notificação de uma variável monitorada separadamente do freeze.
+O cenário com rollback habilitado está no documento 28. Próximos testes: validar notificações de variável monitorada separadamente do freeze e testar se metadados frozen/watch sobrevivem a save/load ou troca de jogo no URM completo.
