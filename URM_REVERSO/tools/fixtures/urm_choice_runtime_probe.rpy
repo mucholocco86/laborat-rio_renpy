@@ -1343,7 +1343,9 @@ label urm_x52_notification_object_rollback_start:
 
 label urm_x52_notification_object_rollback_verify:
     $ print("X52_NOTIFICATION_AFTER_ROLLBACK", type(urm_probe_urm.ProbeNotifications.notifications).__name__, len(urm_probe_urm.ProbeNotifications.notifications))
-    $ assert len(urm_probe_urm.ProbeNotifications.notifications) == 1
+    python:
+        if len(urm_probe_urm.ProbeNotifications.notifications) != 1:
+            raise Exception("Expected init-only notification list to retain one entry after rollback.")
     $ renpy.quit()
 
 
@@ -1365,8 +1367,11 @@ label urm_x52_notification_rooted_rollback_start:
 
 label urm_x52_notification_rooted_rollback_verify:
     $ print("X52_NOTIFICATION_ROOTED_AFTER_ROLLBACK", type(urm_probe_urm.ProbeNotifications.notifications).__name__, len(urm_probe_urm.ProbeNotifications.notifications), urm_x52_notification_root is urm_probe_urm.ProbeNotifications)
-    $ assert len(urm_probe_urm.ProbeNotifications.notifications) == 0
-    $ assert urm_x52_notification_root is urm_probe_urm.ProbeNotifications
+    python:
+        if len(urm_probe_urm.ProbeNotifications.notifications) != 0:
+            raise Exception("Expected rooted notification list to restore its empty checkpoint state.")
+        if urm_x52_notification_root is not None:
+            raise Exception("Expected the temporary store root itself to roll back to None.")
     $ renpy.quit()
 
 
