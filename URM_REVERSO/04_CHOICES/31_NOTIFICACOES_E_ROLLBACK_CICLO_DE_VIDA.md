@@ -211,3 +211,25 @@ Fontes adicionais consultadas:
 | Fixture | testcase `urm_x52_notification_clear_rollback` | commit `1f3e253e01c2d713cf3ed72999c0dcfce347c6a1` |
 | Workflow | passo de clear rollback | commit `7cb6f6c5b0e20a9cb0198b3acbfd7dfb3b19a103` |
 
+
+### Timeout em thread e mutação da lista (2026-10-18)
+
+A fonte convertida mostra que, quando `Settings.notificationTimeout` está ativo, `NotificationsClass.add` cria uma função que espera com `time.sleep` e então executa `self.notifications.remove(notif)`; essa função é enviada a `renpy.invoke_in_thread`.
+
+No SDK 7.4.11, `invoke_in_thread` inicia uma thread daemon e reinicia a interação quando ela termina. A documentação da função delimita o que pode ser feito nessa thread: escrita de variáveis do store e `renpy.queue_event` são permitidas; a maior parte das outras APIs deve ficar na thread principal. A remoção não é uma simples atribuição a variável do store: `RevertableList.remove` passa por `mutator`, que acessa `renpy.game.log.mutated`, guarda o estado limpo e altera a lista.
+
+Há um detalhe no rollback log: `RollbackLog.complete` percorre `self.mutated` para comprimir snapshots e tenta novamente até quatro vezes se ocorrer `RuntimeError` por mudança concorrente desse dicionário. Isso demonstra que o SDK reconhece concorrência nessa estrutura; **não prova** que toda mutação revertível em thread seja suportada, segura ou determinística. Também não prova que a remoção por timeout terá o mesmo ponto de rollback que uma remoção executada pela interação principal.
+
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** timeout chama `self.notifications.remove(notif)` dentro da função passada a `renpy.invoke_in_thread`.
+- **CONFIRMADO NO SDK 7.4.11:** `invoke_in_thread` usa thread daemon e documenta limites de uso da API; `RevertableList` usa mutator ligado ao log; `RollbackLog.complete` repete a coleta se o mapa de mutações mudar durante a iteração.
+- **HIPÓTESE / RISCO A VALIDAR:** timeout e rollback podem disputar o registro de mutação ou mudar o instante em que a lista é capturada. O retry nativo reduz um caso específico de erro de iteração, sem garantir o resultado semântico.
+- **PENDENTE:** runtime com timeout real, rollback imediatamente antes/depois da remoção, encerramento do jogo durante a espera, e comparação entre timeout e remoção por botão.
+
+Nenhum teste de thread foi adicionado nesta etapa; a conclusão acima é somente estática. Os probes pareados de `clear()` e `remove()` continuam sem logs runtime verificados, pois o conector não expõe runs de push.
+
+| Fonte | Símbolos / intervalo | Blob SHA |
+|---|---|---|
+| URM convertido `classes/notifications.rpy` | `NotificationsClass.add`, linhas 9–17 | `3283ec4b1615967a71ad21cc34670bf8158ab96d5` |
+| SDK 7.4.11 `renpy/exports.py` | `invoke_in_thread`, linhas 3698–3728 | `781b35b31522dafc6a24e7c3212d206c7bd6dfa5` |
+| SDK 7.4.11 `renpy/python.py` | `mutator`, linhas 862–877; `RollbackLog.complete`, linhas 1707–1743 | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+
