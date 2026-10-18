@@ -79,4 +79,4 @@ O print URM_FINAL ocorreu dentro do nó Python antes da execução dos callbacks
 
 ## Próxima validação
 
-O caso de edição URM com rollback habilitado foi testado no [documento 30](30_MONITOR_ROLLBACK_NOTIFICACAO_URM.md): o callback não encontrou o delta e não houve aviso antes do rollback. Ainda falta testar escrita nativa monitorada com rollback habilitado e a NotificationClass/tela verdadeira do URM convertido, se o pacote puder ser inicializado sem alterar fontes protegidas.
+Os dois caminhos com rollback habilitado estão no [documento 30](30_MONITOR_ROLLBACK_NOTIFICACAO_URM.md): a escrita nativa gerou aviso imediato antes do rollback; a edição direta URM não notificou no callback sem delta. Ainda falta a NotificationClass/tela verdadeira do URM convertido, se o pacote puder ser inicializado sem alterar fontes protegidas.
