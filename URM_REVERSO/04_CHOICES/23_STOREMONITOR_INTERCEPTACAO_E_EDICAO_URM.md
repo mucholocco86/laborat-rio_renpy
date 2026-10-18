@@ -55,7 +55,7 @@ A sequência temporal para uma edição feita com o URM enquanto uma interação
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** callback e hook de atribuição são mecanismos separados.
 - **HIPÓTESE:** hookeando o helper, o URM observa chamadas nativas de `SetVariable/SetField` em atribuições ao store raiz.
 - **OBSERVADO EM RUNTIME (fixture reduzida):** o helper disponível foi `_m1_00action_data__set_field`; após `SetVariable`, contador do hook=1 e valor=20; após `SetVarValue` reduzido, contador permaneceu 1 e valor=30. O testcase terminou com exit 0 no run 39098070978.
-- **PENDENTE:** testar notificação/freeze para edição manual feita pelo URM e observar quando o callback posterior a processa.
+- **OBSERVADO EM RUNTIME (fixture reduzida):** sem rollback, callback posterior encontrou delta 10→99; com rollback habilitado, callback posterior não encontrou o delta, o log estava com checkpoint pendente e rollback restaurou 99→10. Ver documentos 24 e 25. Isso ainda não testa notificação/freeze do StoreMonitor completo.
 - **PENDENTE:** repetir com URM completo, caso seja possível carregar o pacote convertido em ambiente controlado. A fixture atual só reproduz os métodos relevantes; não é uma integração do URM original.
 
 ## Prova runtime preparada
