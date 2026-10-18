@@ -278,3 +278,19 @@ jobs:
           result=$?
           echo "END StoreMonitor freeze probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+
+      - name: Run StoreMonitor freeze with rollback enabled
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START StoreMonitor freeze with rollback enabled: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_storemonitor_freeze_with_gameplay_rollback
+          result=$?
+          echo "END StoreMonitor freeze with rollback enabled: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
