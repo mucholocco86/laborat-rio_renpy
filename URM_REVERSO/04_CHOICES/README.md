@@ -341,3 +341,6 @@ O documento [31 — Ciclo de vida das notificações do URM e rollback](31_NOTIF
 
 
 A análise estática do timeout, também registrada no [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md), confirmou que a remoção automática ocorre dentro da thread de `renpy.invoke_in_thread`. O SDK limita as operações esperadas nessa thread; `RevertableList.remove()` também grava no mapa de mutações do rollback. `RollbackLog.complete` tenta novamente se esse mapa muda durante a iteração, mas isso não comprova suporte semântico ou segurança para o padrão do URM. O teste de timeout/rollback ainda está pendente.
+
+
+Foi incluído também o testcase `urm_x52_notification_timeout_rollback` para medir uma remoção de `RevertableList` dentro de `renpy.invoke_in_thread`, seguida por rollback ao checkpoint anterior. Fixture commit [b4de1e4c476668f27da51775c48536f82fe16f91](https://github.com/mucholocco86/laborat-rio_renpy/commit/b4de1e4c476668f27da51775c48536f82fe16f91); workflow commit [4ffdae65e48c42dad9c314c62fd1c68b78e78c63](https://github.com/mucholocco86/laborat-rio_renpy/commit/4ffdae65e48c42dad9c314c62fd1c68b78e78c63). O teste é reduzido e seu resultado runtime ainda não foi consultado.
