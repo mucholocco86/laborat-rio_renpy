@@ -294,3 +294,34 @@ jobs:
           result=$?
           echo "END StoreMonitor freeze with rollback enabled: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+
+      - name: Run StoreMonitor native monitored notification
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START native monitored notification probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_storemonitor_native_notification
+          result=$?
+          echo "END native monitored notification probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
+
+      - name: Run StoreMonitor URM monitored notification
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START URM monitored notification probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_storemonitor_urm_notification
+          result=$?
+          echo "END URM monitored notification probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
