@@ -73,18 +73,29 @@ default urm_rollback_value = 10
 default urm_rollback_context_before = None
 
 init python in urm_probe_urm:
+    _frozen_names = set()
+
     class VarsStore:
         @staticmethod
         def isFrozen(varName):
-            return False
+            return varName in _frozen_names
 
         @staticmethod
         def unfreeze(varName):
-            pass
+            _frozen_names.discard(varName)
 
         @staticmethod
         def freeze(varName):
-            pass
+            _frozen_names.add(varName)
+
+    class StoreMonitor:
+        @staticmethod
+        def handleVarChange(varName, oldVal, newVal):
+            if VarsStore.isFrozen(varName):
+                if newVal != oldVal:
+                    Var(varName).setValue(str(oldVal))
+                return False
+            return True
 
     class SearchClass:
         def isInt(self, value):
@@ -768,6 +779,10 @@ init python:
 
     def urm_monitor_probe_injected_set_field(obj, name, value, *args, **kwargs):
         renpy.store.urm_monitor_probe_hits += 1
+        if renpy.store.urm_monitor_freeze_enabled:
+            old_value = getattr(obj, name)
+            if not urm_probe_urm.StoreMonitor.handleVarChange(name, old_value, value):
+                return None
         return renpy.store.urm_monitor_probe_original_set_field(obj, name, value, *args, **kwargs)
 
     def urm_monitor_probe_install():
@@ -955,3 +970,94 @@ testcase urm_storemonitor_callback_with_gameplay_rollback:
     label urm_callback_probe_rollback_verify
     assert urm_callback_probe_value == 10
     $ renpy.quit()
+
+
+# Freeze probe: compare the native intercepted SetField route to direct
+# URM-style Var.setValue and the callback's later frozen-value restoration.
+default urm_monitor_freeze_enabled = False
+default urm_freeze_probe_value = 10
+default urm_freeze_probe_callback_count = 0
+default urm_freeze_probe_callback_delta = False
+default urm_freeze_probe_callback_old = None
+default urm_freeze_probe_callback_value_before = None
+default urm_freeze_probe_value_after_native = None
+default urm_freeze_probe_value_after_urm_edit = None
+default urm_freeze_probe_is_frozen_after_edit = False
+default urm_freeze_probe_is_frozen_after_callback = False
+
+init python:
+    def urm_freeze_probe_callback():
+        if not renpy.store.urm_monitor_freeze_enabled:
+            return
+
+        changes = renpy.store.__dict__.get_changes(False)
+        if isinstance(changes, tuple):
+            changes = changes[0]
+
+        renpy.store.urm_freeze_probe_callback_count += 1
+        if "urm_freeze_probe_value" in changes:
+            old_value = changes["urm_freeze_probe_value"]
+            new_value = renpy.store.urm_freeze_probe_value
+            renpy.store.urm_freeze_probe_callback_delta = True
+            renpy.store.urm_freeze_probe_callback_old = old_value
+            renpy.store.urm_freeze_probe_callback_value_before = new_value
+            print("FREEZE_PROBE_CALLBACK_BEFORE", old_value, new_value, urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value"))
+            urm_probe_urm.StoreMonitor.handleVarChange("urm_freeze_probe_value", old_value, new_value)
+            print("FREEZE_PROBE_CALLBACK_AFTER", renpy.store.urm_freeze_probe_value, urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value"))
+
+        renpy.game.context().force_checkpoint = True
+
+screen urm_freeze_probe_screen():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Apply direct URM edit while frozen":
+            action [
+                Hide("urm_freeze_probe_screen"),
+                urm_probe_urm.SetVarValue(
+                    urm_probe_urm.Var("urm_freeze_probe_value"),
+                    None,
+                    None,
+                    "30",
+                ),
+            ]
+
+label urm_freeze_probe_start:
+    $ urm_monitor_freeze_enabled = False
+    $ urm_freeze_probe_value = 10
+    $ urm_freeze_probe_callback_count = 0
+    $ urm_freeze_probe_callback_delta = False
+    $ urm_freeze_probe_callback_old = None
+    $ urm_freeze_probe_callback_value_before = None
+    $ urm_probe_urm._frozen_names.clear()
+    $ urm_probe_urm.VarsStore.freeze("urm_freeze_probe_value")
+    $ urm_monitor_probe_install()
+    $ urm_monitor_freeze_enabled = True
+    $ renpy.config.python_callbacks.append(urm_freeze_probe_callback)
+    $ print("FREEZE_PROBE_BEFORE_NATIVE", urm_freeze_probe_value, urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value"))
+    $ renpy.store.SetVariable("urm_freeze_probe_value", 20)()
+    $ urm_freeze_probe_value_after_native = urm_freeze_probe_value
+    $ print("FREEZE_PROBE_AFTER_NATIVE", urm_freeze_probe_value_after_native, urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value"))
+    $ assert urm_freeze_probe_value == 10
+    show screen urm_freeze_probe_screen
+    pause 0.5
+    $ urm_freeze_probe_value_after_urm_edit = urm_freeze_probe_value
+    $ urm_freeze_probe_is_frozen_after_edit = urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value")
+    $ print("FREEZE_PROBE_AFTER_URM_EDIT", urm_freeze_probe_value_after_urm_edit, urm_freeze_probe_is_frozen_after_edit)
+    $ print("FREEZE_PROBE_AFTER_CALLBACK", urm_freeze_probe_callback_count, urm_freeze_probe_callback_delta, urm_freeze_probe_callback_old, urm_freeze_probe_callback_value_before, urm_freeze_probe_value, urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value"))
+    $ assert urm_freeze_probe_value_after_urm_edit == 30
+    $ assert urm_freeze_probe_is_frozen_after_edit
+    $ assert urm_freeze_probe_callback_count > 0
+    $ assert urm_freeze_probe_callback_delta
+    $ assert urm_freeze_probe_callback_old == 10
+    $ assert urm_freeze_probe_value == 10
+    $ assert urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value")
+    $ renpy.quit()
+
+testcase urm_storemonitor_freeze_native_vs_urm:
+    run Jump("urm_freeze_probe_start")
+    "Apply direct URM edit while frozen"
