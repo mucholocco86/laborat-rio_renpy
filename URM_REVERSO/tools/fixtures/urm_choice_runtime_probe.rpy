@@ -805,11 +805,16 @@ label urm_monitor_probe_start:
         "30",
     )()
     $ print("STOREMONITOR_AFTER_URM_SET", urm_monitor_probe_hits, urm_monitor_probe_value)
+    jump urm_monitor_probe_verify
+
+label urm_monitor_probe_verify:
+    "StoreMonitor assignment-hook verification."
     return
 
 testcase urm_storemonitor_assignment_hook:
     run Jump("urm_monitor_probe_start")
-    label urm_monitor_probe_start
+    "StoreMonitor assignment-hook verification."
+    label urm_monitor_probe_verify
     assert urm_monitor_probe_method == "_m1_00action_data__set_field" or urm_monitor_probe_method == "_set_field"
     assert urm_monitor_probe_hits == 1
     assert urm_monitor_probe_value == 30
