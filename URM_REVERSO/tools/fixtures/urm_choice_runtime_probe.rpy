@@ -753,3 +753,64 @@ testcase urm_save_load_containers_roundtrip:
     assert urm_save_container_context_before is False
     assert renpy.test.testexecution.urm_probe_container_save_reentered is True
     $ renpy.quit()
+
+
+# Reduced StoreMonitor hook probe.
+# It contrasts the native SetVariable action (which uses Ren'Py's
+# __set_field helper) with the URM-style SetVarValue assignment
+# (which writes directly to the store module).
+default urm_monitor_probe_hits = 0
+default urm_monitor_probe_value = 10
+default urm_monitor_probe_method = None
+
+init python:
+    import types
+
+    def urm_monitor_probe_injected_set_field(obj, name, value, *args, **kwargs):
+        renpy.store.urm_monitor_probe_hits += 1
+        return renpy.store.urm_monitor_probe_original_set_field(obj, name, value, *args, **kwargs)
+
+    def urm_monitor_probe_install():
+        for method_name in ('_m1_00action_data__set_field', '_set_field'):
+            if hasattr(renpy.store, method_name):
+                original_method = getattr(renpy.store, method_name)
+                renpy.store.urm_monitor_probe_original_set_field = types.FunctionType(
+                    original_method.func_code,
+                    original_method.func_globals,
+                    original_method.func_name,
+                    original_method.func_defaults,
+                    original_method.func_closure,
+                )
+                original_method.func_code = urm_monitor_probe_injected_set_field.func_code
+                renpy.store.urm_monitor_probe_method = method_name
+                return method_name
+
+        raise Exception("No SetField helper found in the SDK store.")
+
+label urm_monitor_probe_start:
+    $ urm_monitor_probe_hits = 0
+    $ urm_monitor_probe_value = 10
+    $ urm_monitor_probe_install()
+    $ print("STOREMONITOR_HOOK_METHOD", urm_monitor_probe_method)
+
+    # Ren'Py's native variable action delegates to __set_field.
+    $ renpy.store.SetVariable("urm_monitor_probe_value", 20)()
+    $ print("STOREMONITOR_AFTER_NATIVE_SETVARIABLE", urm_monitor_probe_hits, urm_monitor_probe_value)
+
+    # The reduced URM action uses exec + setattr(store, ...), not SetVariable.
+    $ urm_probe_urm.SetVarValue(
+        urm_probe_urm.Var("urm_monitor_probe_value"),
+        None,
+        None,
+        "30",
+    )()
+    $ print("STOREMONITOR_AFTER_URM_SET", urm_monitor_probe_hits, urm_monitor_probe_value)
+    return
+
+testcase urm_storemonitor_assignment_hook:
+    run Jump("urm_monitor_probe_start")
+    label urm_monitor_probe_start
+    assert urm_monitor_probe_method == "_m1_00action_data__set_field" or urm_monitor_probe_method == "_set_field"
+    assert urm_monitor_probe_hits == 1
+    assert urm_monitor_probe_value == 30
+    $ renpy.quit()
