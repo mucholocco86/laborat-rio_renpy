@@ -310,3 +310,8 @@ O run [39098551052](https://github.com/mucholocco86/laborat-rio_renpy/actions/ru
 ### Freeze, monitor e watch — distinção estática (2026-10-18)
 
 A leitura de **classes/vars.rpy** e **screens/vars.rpy** separou três mecanismos do URM: freeze e monitor são flags no store **vars** e aceitam apenas variáveis escalares raiz segundo os predicados convertidos; watch usa o store **watched** e alimenta o painel de observação. **Var.setValue** remove temporariamente freeze, realiza a edição direta e volta a aplicar freeze, o que permite a edição feita pelo próprio URM. O hook SetField e o callback Python são caminhos de detecção diferentes; quando uma edição direta vira notificação depende do delta disponível ao callback. Esta etapa é estática e deixa a validação runtime em aberto. Detalhes, símbolos e pendências no [documento 26](26_FREEZE_MONITOR_WATCH_EDICAO_URM.md).
+
+
+### Freeze em runtime — edição nativa, URM e callback (2026-10-18)
+
+O probe [39104245128](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39104245128) passou. Na fixture reduzida, a escrita nativa foi bloqueada com valor 10 frozen; a edição direta SetVarValue mudou para 30 e manteve freeze; no callback seguinte, que ainda tinha o delta 10→30, o handler restaurou 10 e conservou freeze. Essa restauração foi observada com rollback desabilitado. O caso de rollback habilitado permanece pendente porque o callback pode não receber o delta, como observado no documento 25. Ver [documento 27](27_FREEZE_RUNTIME_EDICAO_E_CALLBACK.md) e revisão do modelo estático no [documento 26](26_FREEZE_MONITOR_WATCH_EDICAO_URM.md).
