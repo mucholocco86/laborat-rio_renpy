@@ -74,6 +74,7 @@ default urm_rollback_context_before = None
 
 init python in urm_probe_urm:
     _frozen_names = set()
+    _monitored_names = set()
 
     class VarsStore:
         @staticmethod
@@ -88,6 +89,25 @@ init python in urm_probe_urm:
         def freeze(varName):
             _frozen_names.add(varName)
 
+        @staticmethod
+        def isMonitored(varName):
+            return varName in _monitored_names
+
+        @staticmethod
+        def monitor(varName):
+            _monitored_names.add(varName)
+
+        @staticmethod
+        def unmonitor(varName):
+            _monitored_names.discard(varName)
+
+    class Notifications:
+        @staticmethod
+        def add(**kwargs):
+            renpy.store.urm_notify_probe_records.append(
+                (kwargs.get("label"), kwargs.get("text"), kwargs.get("prevVal"), kwargs.get("newVal"))
+            )
+
     class StoreMonitor:
         @staticmethod
         def handleVarChange(varName, oldVal, newVal):
@@ -95,6 +115,9 @@ init python in urm_probe_urm:
                 if newVal != oldVal:
                     Var(varName).setValue(str(oldVal))
                 return False
+            elif VarsStore.isMonitored(varName):
+                if not renpy.get_screen("URM_modify_value") and oldVal != newVal:
+                    Notifications.add(label="Variable changed", text=varName, prevVal=oldVal, newVal=newVal)
             return True
 
     class SearchClass:
@@ -779,7 +802,7 @@ init python:
 
     def urm_monitor_probe_injected_set_field(obj, name, value, *args, **kwargs):
         renpy.store.urm_monitor_probe_hits += 1
-        if renpy.store.urm_monitor_freeze_enabled:
+        if renpy.store.urm_monitor_probe_enabled:
             old_value = getattr(obj, name)
             if not urm_probe_urm.StoreMonitor.handleVarChange(name, old_value, value):
                 return None
@@ -975,6 +998,7 @@ testcase urm_storemonitor_callback_with_gameplay_rollback:
 # Freeze probe: compare the native intercepted SetField route to direct
 # URM-style Var.setValue and the callback's later frozen-value restoration.
 default urm_monitor_freeze_enabled = False
+default urm_monitor_probe_enabled = False
 default urm_freeze_probe_rollback_mode = False
 default urm_freeze_probe_value = 10
 default urm_freeze_probe_callback_count = 0
@@ -1086,3 +1110,134 @@ testcase urm_storemonitor_freeze_with_gameplay_rollback:
     assert urm_freeze_probe_value == 10
     assert urm_probe_urm.VarsStore.isFrozen("urm_freeze_probe_value")
     $ renpy.quit()
+
+
+# Monitor-notification probes. These measure the synchronous native helper hook
+# separately from later StoreMonitor-style callback processing.
+default urm_notify_probe_value = 10
+default urm_notify_probe_records = []
+default urm_notify_probe_enabled = False
+default urm_notify_probe_count_before_action = None
+default urm_notify_probe_count_after_action = None
+default urm_notify_probe_callback_delta = False
+default urm_notify_probe_callback_old = None
+default urm_notify_probe_callback_new = None
+
+init python:
+    def urm_notify_probe_callback():
+        if not renpy.store.urm_notify_probe_enabled:
+            return
+
+        changes = renpy.store.__dict__.get_changes(False)
+        if isinstance(changes, tuple):
+            changes = changes[0]
+
+        if "urm_notify_probe_value" in changes:
+            old_value = changes["urm_notify_probe_value"]
+            new_value = renpy.store.urm_notify_probe_value
+            renpy.store.urm_notify_probe_callback_delta = True
+            renpy.store.urm_notify_probe_callback_old = old_value
+            renpy.store.urm_notify_probe_callback_new = new_value
+            print("NOTIFY_PROBE_CALLBACK_BEFORE", old_value, new_value, len(renpy.store.urm_notify_probe_records))
+            urm_probe_urm.StoreMonitor.handleVarChange("urm_notify_probe_value", old_value, new_value)
+            print("NOTIFY_PROBE_CALLBACK_AFTER", len(renpy.store.urm_notify_probe_records))
+
+        renpy.game.context().force_checkpoint = True
+
+    def urm_notify_probe_before_action():
+        renpy.store.urm_notify_probe_count_before_action = len(renpy.store.urm_notify_probe_records)
+        print("NOTIFY_PROBE_BEFORE_ACTION", renpy.store.urm_notify_probe_count_before_action)
+
+    def urm_notify_probe_after_action():
+        renpy.store.urm_notify_probe_count_after_action = len(renpy.store.urm_notify_probe_records)
+        print("NOTIFY_PROBE_AFTER_ACTION", renpy.store.urm_notify_probe_count_after_action, renpy.store.urm_notify_probe_records)
+
+screen urm_notify_native_screen():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Change monitored variable natively":
+            action [
+                Function(urm_notify_probe_before_action, _update_screens=False),
+                Hide("urm_notify_native_screen"),
+                SetVariable("urm_notify_probe_value", 20),
+                Function(urm_notify_probe_after_action, _update_screens=False),
+            ]
+
+screen urm_notify_urm_screen():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Change monitored variable through URM":
+            action [
+                Function(urm_notify_probe_before_action, _update_screens=False),
+                Hide("urm_notify_urm_screen"),
+                urm_probe_urm.SetVarValue(
+                    urm_probe_urm.Var("urm_notify_probe_value"),
+                    None,
+                    None,
+                    "30",
+                ),
+                Function(urm_notify_probe_after_action, _update_screens=False),
+            ]
+
+label urm_notify_native_start:
+    $ urm_notify_probe_value = 10
+    $ urm_notify_probe_records = []
+    $ urm_notify_probe_callback_delta = False
+    $ urm_notify_probe_callback_old = None
+    $ urm_notify_probe_callback_new = None
+    $ urm_probe_urm._monitored_names.clear()
+    $ urm_probe_urm.VarsStore.monitor("urm_notify_probe_value")
+    $ urm_monitor_probe_install()
+    $ urm_monitor_probe_enabled = True
+    $ urm_notify_probe_enabled = True
+    $ renpy.config.python_callbacks.append(urm_notify_probe_callback)
+    show screen urm_notify_native_screen
+    pause 0.5
+    $ print("NOTIFY_PROBE_NATIVE_FINAL", urm_notify_probe_value, list(urm_notify_probe_records), urm_notify_probe_callback_delta, urm_notify_probe_callback_old, urm_notify_probe_callback_new)
+    $ assert urm_notify_probe_count_after_action >= 1
+    $ assert urm_notify_probe_callback_delta
+    $ assert urm_notify_probe_callback_old == 10
+    $ assert urm_notify_probe_callback_new == 20
+    $ assert len(urm_notify_probe_records) >= 1
+    $ renpy.quit()
+
+testcase urm_storemonitor_native_notification:
+    run Jump("urm_notify_native_start")
+    "Change monitored variable natively"
+
+label urm_notify_urm_start:
+    $ urm_notify_probe_value = 10
+    $ urm_notify_probe_records = []
+    $ urm_notify_probe_callback_delta = False
+    $ urm_notify_probe_callback_old = None
+    $ urm_notify_probe_callback_new = None
+    $ urm_probe_urm._monitored_names.clear()
+    $ urm_probe_urm.VarsStore.monitor("urm_notify_probe_value")
+    $ urm_monitor_probe_install()
+    $ urm_monitor_probe_enabled = True
+    $ urm_notify_probe_enabled = True
+    $ renpy.config.python_callbacks.append(urm_notify_probe_callback)
+    show screen urm_notify_urm_screen
+    pause 0.5
+    $ print("NOTIFY_PROBE_URM_FINAL", urm_notify_probe_value, list(urm_notify_probe_records), urm_notify_probe_callback_delta, urm_notify_probe_callback_old, urm_notify_probe_callback_new, urm_monitor_probe_hits)
+    $ assert urm_notify_probe_count_after_action == 0
+    $ assert urm_notify_probe_callback_delta
+    $ assert urm_notify_probe_callback_old == 10
+    $ assert urm_notify_probe_callback_new == 30
+    $ assert len(urm_notify_probe_records) == 1
+    $ assert urm_monitor_probe_hits == 0
+    $ renpy.quit()
+
+testcase urm_storemonitor_urm_notification:
+    run Jump("urm_notify_urm_start")
+    "Change monitored variable through URM"
