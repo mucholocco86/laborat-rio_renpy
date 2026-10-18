@@ -1118,6 +1118,7 @@ default urm_notify_probe_value = 10
 default urm_notify_probe_records = []
 default urm_notify_probe_enabled = False
 default urm_notify_rollback_mode = False
+default urm_notify_native_rollback_mode = False
 default urm_notify_probe_count_before_action = None
 default urm_notify_probe_count_after_action = None
 default urm_notify_probe_callback_delta = False
@@ -1198,6 +1199,9 @@ label urm_notify_native_start:
     $ urm_notify_probe_callback_new = None
     $ urm_probe_urm._monitored_names.clear()
     $ urm_probe_urm.VarsStore.monitor("urm_notify_probe_value")
+    if urm_notify_native_rollback_mode:
+        $ renpy.game.context().rollback = True
+        $ renpy.checkpoint("before-monitored-native-edit")
     $ urm_monitor_probe_install()
     $ urm_monitor_probe_enabled = True
     $ urm_notify_probe_enabled = True
@@ -1206,15 +1210,37 @@ label urm_notify_native_start:
     pause 0.5
     $ print("NOTIFY_PROBE_NATIVE_FINAL", urm_notify_probe_value, list(urm_notify_probe_records), urm_notify_probe_callback_delta, urm_notify_probe_callback_old, urm_notify_probe_callback_new)
     $ assert urm_notify_probe_count_after_action >= 1
-    $ assert urm_notify_probe_callback_delta
-    $ assert urm_notify_probe_callback_old == 10
-    $ assert urm_notify_probe_callback_new == 20
+    $ assert urm_notify_probe_value == 20
     $ assert len(urm_notify_probe_records) >= 1
-    $ renpy.quit()
+    if urm_notify_native_rollback_mode:
+        $ print("NOTIFY_PROBE_NATIVE_BEFORE_ROLLBACK", urm_notify_probe_value, list(urm_notify_probe_records), urm_notify_probe_callback_delta, renpy.game.log.force_checkpoint)
+        $ renpy.rollback(force=True, checkpoints=1, label="urm_notify_native_rollback_verify")
+    else:
+        $ assert urm_notify_probe_callback_delta
+        $ assert urm_notify_probe_callback_old == 10
+        $ assert urm_notify_probe_callback_new == 20
+        $ renpy.quit()
+
+label urm_notify_native_rollback_start:
+    $ urm_notify_native_rollback_mode = True
+    jump urm_notify_native_start
+
+label urm_notify_native_rollback_verify:
+    $ print("NOTIFY_PROBE_NATIVE_AFTER_ROLLBACK", urm_notify_probe_value, list(urm_notify_probe_records), urm_notify_probe_callback_delta)
+    "Native monitor rollback verification."
+    return
 
 testcase urm_storemonitor_native_notification:
     run Jump("urm_notify_native_start")
     "Change monitored variable natively"
+
+testcase urm_storemonitor_native_notification_with_rollback:
+    run Jump("urm_notify_native_rollback_start")
+    "Change monitored variable natively"
+    label urm_notify_native_rollback_verify
+    assert urm_notify_probe_value == 10
+    assert len(urm_notify_probe_records) >= 1
+    $ renpy.quit()
 
 label urm_notify_urm_start:
     $ urm_notify_probe_value = 10
