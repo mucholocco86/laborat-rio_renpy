@@ -37,11 +37,11 @@ Na tupla instrumentada, os campos finais são, nesta ordem: flag `Context.force_
 - **CONFIRMADO NO SDK 7.4.11:** `StoreDict.get_changes(False)` calcula deltas sem ciclar `old`.
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** o callback do StoreMonitor solicita `Context.force_checkpoint=True` e chama `get_changes(False)`.
 
-## Limite sobre rollback/checkpoint
+## Limite desta execução e continuação
 
-Este testcase começou no contexto do test runner, onde rollback estava desabilitado. Por isso, embora a função instrumentada tenha definido `Context.force_checkpoint=True`, o log observado manteve `RollbackLog.force_checkpoint=False`. O teste **não** demonstra a transferência da flag para o log em gameplay, nem a seleção do alvo de rollback.
+Este testcase específico começou no contexto do test runner, onde rollback estava desabilitado. Portanto, seus próprios logs não demonstram a transferência de force_checkpoint ao log nem o rollback da edição.
 
-Isso permanece separado dos testes anteriores que habilitaram rollback na fixture e observaram a restauração de escalar e containers. A próxima prova deve repetir o timing do callback com `context.rollback=True`, registrar os estados antes/depois da transferência e então comparar a edição restaurada após rollback. Também permanece pendente verificar notificações e freeze do StoreMonitor completo.
+A continuação com rollback habilitado foi executada separadamente e documentada em [25 — Callback, edição por screen e restauração por rollback](25_CALLBACK_ROLLBACK_STOREDELTA_GAMEPLAY.md). Nessa fixture reduzida, o log recebeu a flag, o callback posterior não encontrou o delta do alvo e o rollback restaurou 99→10. Essa evidência posterior não altera o escopo deste primeiro teste: os dois cenários diferem na configuração de rollback.
 
 ## Fixture e fontes
 
