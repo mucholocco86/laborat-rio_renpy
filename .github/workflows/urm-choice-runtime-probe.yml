@@ -341,3 +341,19 @@ jobs:
           result=$?
           echo "END URM notification with rollback probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+
+      - name: Run StoreMonitor native notification with rollback
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START native notification with rollback probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_storemonitor_native_notification_with_rollback
+          result=$?
+          echo "END native notification with rollback probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
