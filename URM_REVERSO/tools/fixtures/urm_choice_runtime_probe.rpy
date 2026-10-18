@@ -1434,3 +1434,28 @@ label urm_x52_notification_clear_rollback_verify:
 
 testcase urm_x52_notification_clear_rollback:
     run Jump("urm_x52_notification_clear_rollback_start")
+
+
+# remove() probe mutates the existing RevertableList in place, unlike clear().
+label urm_x52_notification_remove_rollback_start:
+    $ urm_probe_urm.ProbeNotifications.notifications = []
+    $ urm_probe_urm.ProbeNotifications.add("Before remove", "remove_rollback_probe")
+    show screen urm_x52_notification_overlay_probe
+    pause 0.1
+    $ renpy.checkpoint("before-x52-notification-remove")
+    $ print("X52_NOTIFICATION_REMOVE_BEFORE", len(urm_probe_urm.ProbeNotifications.notifications), renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    $ urm_probe_urm.ProbeNotifications.notifications.remove(urm_probe_urm.ProbeNotifications.notifications[0])
+    $ renpy.restart_interaction()
+    $ renpy.rollback(force=True, checkpoints=1, label="urm_x52_notification_remove_rollback_verify")
+
+
+label urm_x52_notification_remove_rollback_verify:
+    $ print("X52_NOTIFICATION_REMOVE_AFTER_ROLLBACK", len(urm_probe_urm.ProbeNotifications.notifications), renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    python:
+        if len(urm_probe_urm.ProbeNotifications.notifications) != 1:
+            raise Exception("Expected RevertableList.remove() mutation to be restored by rollback in the reduced model.")
+    $ renpy.quit()
+
+
+testcase urm_x52_notification_remove_rollback:
+    run Jump("urm_x52_notification_remove_rollback_start")
