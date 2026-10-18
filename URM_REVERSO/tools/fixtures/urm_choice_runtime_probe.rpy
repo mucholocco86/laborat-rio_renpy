@@ -1329,6 +1329,12 @@ init python in urm_probe_urm:
 
     ProbeNotifications = ProbeNotificationsClass()
 
+    def timeout_remove(notification):
+        import time
+        time.sleep(0.35)
+        ProbeNotifications.notifications.remove(notification)
+        renpy.store.urm_x52_timeout_done = True
+
 
 label urm_x52_notification_object_rollback_start:
     $ renpy.game.context().rollback = True
@@ -1459,3 +1465,37 @@ label urm_x52_notification_remove_rollback_verify:
 
 testcase urm_x52_notification_remove_rollback:
     run Jump("urm_x52_notification_remove_rollback_start")
+
+
+# Timeout probe: the list mutation is performed inside invoke_in_thread.
+default urm_x52_timeout_done = False
+
+label urm_x52_notification_timeout_rollback_start:
+    $ renpy.game.context().rollback = True
+    $ urm_x52_timeout_done = False
+    $ urm_probe_urm.ProbeNotifications.notifications = []
+    $ urm_probe_urm.ProbeNotifications.add("Timed notification", "timeout_rollback_probe")
+    show screen urm_x52_notification_overlay_probe
+    pause 0.1
+    $ renpy.checkpoint("before-x52-notification-timeout-remove")
+    $ renpy.invoke_in_thread(urm_probe_urm.timeout_remove, urm_probe_urm.ProbeNotifications.notifications[0])
+    python:
+        import time
+        deadline = time.time() + 5.0
+        while not urm_x52_timeout_done and time.time() < deadline:
+            time.sleep(0.05)
+        if not urm_x52_timeout_done:
+            raise Exception("Timeout worker did not complete within the probe deadline.")
+    $ renpy.rollback(force=True, checkpoints=1, label="urm_x52_notification_timeout_rollback_verify")
+
+
+label urm_x52_notification_timeout_rollback_verify:
+    $ print("X52_NOTIFICATION_TIMEOUT_AFTER_ROLLBACK", len(urm_probe_urm.ProbeNotifications.notifications), urm_x52_timeout_done)
+    python:
+        if len(urm_probe_urm.ProbeNotifications.notifications) != 1:
+            raise Exception("Expected the timeout-thread remove() to be restored by rollback in the reduced model.")
+    $ renpy.quit()
+
+
+testcase urm_x52_notification_timeout_rollback:
+    run Jump("urm_x52_notification_timeout_rollback_start")
