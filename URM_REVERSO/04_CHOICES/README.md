@@ -300,3 +300,8 @@ A execução **39098070978** concluiu **SUCCESS** para o contraste do helper de 
 ### Callback após edição por screen — runtime (2026-10-18)
 
 No run [39098269040](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39098269040), a ação da screen mudou o valor 10→99 sem incrementar o contador do callback; ao fim do primeiro nó Python posterior, o callback observou o novo valor e o delta anterior 10. O testcase usou rollback desabilitado, portanto não confirma a transferência de `force_checkpoint` ao log em gameplay. A evidência e os limites estão no [documento 24](24_CALLBACK_SCREEN_EDIT_RUNTIME.md).
+
+
+### Callback com rollback habilitado — restauração verificada (2026-10-18)
+
+O run [39098551052](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39098551052) repetiu a edição por screen com rollback habilitado. A fixture observou valor 99 após a edição; o callback Python posterior não encontrou o delta do alvo em **StoreDict.get_changes(False)**, enquanto **RollbackLog.force_checkpoint=True**. Depois, o rollback explícito restaurou o valor a 10. Isso demonstra, para o escalar raiz da fixture reduzida, que a ausência do delta naquele callback não significa que a alteração esteja fora do histórico reversível. A explicação provável é a ciclagem anterior do StoreDict pelo caminho de checkpoint/registro; a fixture não instrumenta todas as estruturas internas do RollbackLog e não é integração completa do URM. Fontes, log e limites no [documento 25](25_CALLBACK_ROLLBACK_STOREDELTA_GAMEPLAY.md).
