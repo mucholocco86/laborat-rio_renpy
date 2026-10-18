@@ -127,3 +127,37 @@ Isso concilia a implementação de `x52NonPicklable` com o probe: a classe não 
 **Classificação atual:** confirmado no SDK que mutações de objetos são filtradas por alcance; observado em runtime reduzido que o probe sem uma raiz de store alterada manteve a lista em 1 após a tentativa de rollback; hipótese forte que o singleton de init isolado seja descartado do log quando não houver outro caminho alcançável; pendente comparar a raiz init-only com uma raiz adicionada/alterada em runtime e com a screen ativa.
 
 A fixture e o workflow foram ampliados para duas comparações controladas: (a) singleton init-only; (b) a mesma instância também referenciada por variável raiz alterada em runtime antes do checkpoint. O segundo run deve ser consultado antes de concluir a previsão.
+
+
+### Comparação runtime com checagens explícitas — run 39156621298
+
+O run [39156621298](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156621298) terminou **SUCCESS**. As duas comparações usaram exceções explícitas em vez de depender de `assert` no código Python da fixture.
+
+**Singleton criado durante init, sem variável raiz alterada:**
+
+```text
+X52_NOTIFICATION_PRE ProbeNotificationsClass RevertableList 0 False
+X52_NOTIFICATION_AFTER_ADD 1 Variable changed
+X52_NOTIFICATION_AFTER_ROLLBACK RevertableList 1
+```
+
+O probe terminou com código 0 exigindo que a lista continuasse com uma entrada. Isso confirma no cenário reduzido que a mutação da lista interna do objeto init-only não foi restaurada quando não havia outra raiz considerada.
+
+**A mesma instância referenciada por variável raiz alterada antes do checkpoint:**
+
+```text
+X52_NOTIFICATION_ROOTED_AFTER_ADD 1
+X52_NOTIFICATION_ROOTED_AFTER_ROLLBACK RevertableList 0 False
+```
+
+O probe terminou com código 0 exigindo lista vazia e variável raiz de volta a `None`. A lista foi revertida; a referência temporária também voltou ao valor anterior.
+
+**CONFIRMADO EM RUNTIME (fixture SDK reduzida):** o destino da mutação de uma lista revertível depende de o grafo do objeto ser alcançável pelas raízes do rollback no cenário testado. Isso corresponde ao código do SDK em `RollbackLog.get_roots()` (linhas 1757–1777) e `purge_unreachable()` (1779–1797). O run não carregou URM e não tinha screen ativa; logo, ainda não responde se os displayables/actions da `URM_notifications` real mantêm o singleton alcançável.
+
+O probe final, [39156073470](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156073470), falhou por expectativa incorreta e interação do teste. O run [39156311306](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156311306) também falhou porque o diálogo de verificação repetiu o fluxo antes da asserção. Ambos foram substituídos pela fixture com saída direta no label de verificação e checagens explícitas. O run [39156468364](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156468364) passou, mas usava asserts Python que não eram uma garantia suficiente; seus valores de log coincidiram, e a conclusão é apoiada pelo run 39156621298.
+
+### Screen ativa: verificação pendente
+
+A fixture agora inclui `urm_x52_notification_overlay_probe`, com um `textbutton` cuja action é o objeto Notification, e executa o ciclo add → exibir screen → rollback. O testcase foi adicionado ao workflow no commit `4bf99251122fd9034f73f9710f1ebeb26430343f`; a execução está pendente.
+
+Essa comparação importa porque `Rollback.purge_unreachable` inclui os displayables de `Context.scene_lists`. Se o screen ativo alcança o objeto Notification pela action, o caminho Notification → NotificationsClass → lista pode preservar o snapshot da mutação e mudar o resultado do singleton sem raiz de store.
