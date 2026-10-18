@@ -315,3 +315,8 @@ A leitura de **classes/vars.rpy** e **screens/vars.rpy** separou três mecanismo
 ### Freeze em runtime — edição nativa, URM e callback (2026-10-18)
 
 O probe [39104245128](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39104245128) passou. Na fixture reduzida, a escrita nativa foi bloqueada com valor 10 frozen; a edição direta SetVarValue mudou para 30 e manteve freeze; no callback seguinte, que ainda tinha o delta 10→30, o handler restaurou 10 e conservou freeze. Essa restauração foi observada com rollback desabilitado. O caso de rollback habilitado permanece pendente porque o callback pode não receber o delta, como observado no documento 25. Ver [documento 27](27_FREEZE_RUNTIME_EDICAO_E_CALLBACK.md) e revisão do modelo estático no [documento 26](26_FREEZE_MONITOR_WATCH_EDICAO_URM.md).
+
+
+### Freeze com rollback habilitado (2026-10-18)
+
+O segundo probe de freeze também passou no run [39104385145](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39104385145). A escrita nativa continuou bloqueada em 10; a edição URM reduziu o valor para 30 e reaplicou freeze; desta vez o callback posterior não recebeu o delta, então o valor permaneceu em 30 até o rollback explícito, que restaurou 10. Isso reproduz, para uma variável escalar e uma fixture reduzida, a relação relatada entre edição durante a execução e rollback para um estado anterior. O metadado frozen do URM real não foi validado; ver [documento 28](28_FREEZE_ROLLBACK_RUNTIME.md).
