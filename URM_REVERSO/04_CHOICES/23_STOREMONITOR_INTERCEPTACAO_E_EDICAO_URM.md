@@ -3,7 +3,7 @@
 **Data:** 2026-10-18  
 **Escopo:** distinção entre o callback Python do StoreMonitor, o helper de atribuição das ações nativas do Ren'Py e as ações de edição próprias do URM.  
 **Referência principal:** Ren'Py SDK 7.4.11.  
-**Evidência até esta revisão:** leitura estática; prova runtime adicionada à fixture isolada e aguardando execução do GitHub Actions.
+**Evidência até esta revisão:** leitura estática e primeiro trace runtime observado na fixture isolada; a execução falhou apenas no marcador de conclusão do testcase, que foi corrigido e está sendo repetido.
 
 ## Resultado
 
@@ -54,7 +54,7 @@ A sequência temporal para uma edição feita com o URM enquanto uma interação
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** StoreMonitor troca o código da função helper quando encontra um dos nomes previstos; `Var.setValue` e `CreateVar` usam atribuição direta.
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** callback e hook de atribuição são mecanismos separados.
 - **HIPÓTESE:** hookeando o helper, o URM observa chamadas nativas de `SetVariable/SetField` em atribuições ao store raiz.
-- **PENDENTE DE RUNTIME:** confirmar o hook no SDK 7.4.11 e a ausência de chamada pelo `SetVarValue` reduzido.
+- **OBSERVADO EM RUNTIME (trace, execução com falha posterior no harness):** o hook foi identificado como `_m1_00action_data__set_field`; após `SetVariable`, contador=1/valor=20; após `SetVarValue` reduzido, contador=1/valor=30. Os dados observados sustentam que a primeira rota chamou o hook e a segunda não, mas a execução ainda precisa terminar sem erro do test runner para fechar o gate.
 - **PENDENTE:** testar notificação/freeze para edição manual feita pelo URM e observar quando o callback posterior a processa.
 - **PENDENTE:** repetir com URM completo, caso seja possível carregar o pacote convertido em ambiente controlado. A fixture atual só reproduz os métodos relevantes; não é uma integração do URM original.
 
@@ -65,7 +65,7 @@ Workflow isolado: `.github/workflows/urm-choice-runtime-probe.yml`, passo “Run
 
 A prova clona e instrumenta temporariamente o helper em uma cópia descartável, executa `SetVariable` nativo e, em seguida, a ação reduzida `SetVarValue`; asserts comparam contagem do hook e valor final. Não modifica o SDK versionado, o Wells, nem as fontes originais do URM.
 
-Execuções disparadas nesta investigação: [run 39093312665](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093312665) e [run 39093314766](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093314766). Ambas estavam pendentes/em execução no momento desta revisão; nenhum resultado runtime é afirmado aqui.
+O primeiro run com a prova, [39093314766](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093314766), imprimiu `STOREMONITOR_HOOK_METHOD _m1_00action_data__set_field`, `STOREMONITOR_AFTER_NATIVE_SETVARIABLE 1 20` e `STOREMONITOR_AFTER_URM_SET 1 30`. Depois, falhou com `Testcase stuck` porque a label de verificação não foi alcançada após `return`. O run anterior [39093312665](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093312665) foi cancelado pela regra de concorrência ao entrar a versão atualizada do workflow. A fixture agora salta para uma label de verificação com diálogo; o novo run [39097924784](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39097924784) está na fila. O trace é evidência runtime observada, mas a confirmação automatizada final depende do run corrigido.
 
 ## Próximos passos
 
