@@ -181,3 +181,31 @@ As verificações explícitas exigiram a lista vazia após rollback. Portanto, o
 - **PENDENTE:** testar notificação adicionada e rollback antes da screen concluir um novo render; testar timeout/thread e `clear()`; testar save/load da lista; carregar URM real para validar a hipótese ponta a ponta.
 
 O erro anterior de esperar rollback da lista init-only sem uma raiz ativa estava no modelo inicial, não no SDK. Os runs [39156073470](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156073470) e [39156311306](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156311306) foram tentativas de fixture com expectativa/fluxo de interação incorretos; as conclusões agora apoiam-se nas comparações controladas dos runs [39156621298](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156621298) e [39156808878](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156808878).
+
+### Novo alvo: `clear()` substitui o atributo (2026-10-18)
+
+A fonte de `classes/notifications.rpy` distingue três operações:
+
+- `add()` chama `self.notifications.append(notif)`;
+- `remove()` chama `self.notifications.remove(notif)`;
+- `clear()` faz `self.notifications = []`.
+
+A diferença interessa porque o dono `NotificationsClass` herda de `x52NonPicklable`, que por sua vez herda de `python_object` (o `object` nativo preservado por `renpy/minstore.py)), e não de `RevertableObject`. Já os conteúdos são listas revertíveis: mutações como append/remove passam pelo wrapper `mutator`, que guarda um estado limpo no rollback log. Uma substituição de atributo em objeto Python comum não é automaticamente a mesma operação que uma mutação da `RevertableList`.
+
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** `clear()` substitui a referência da lista; `remove()` altera a lista atual.
+- **CONFIRMADO NO SDK 7.4.11:** mutadores de `RevertableList` registram snapshot do próprio objeto. O SDK salva a classe nativa `object` como `python_object` antes de mapear `object` para `RevertableObject` no ambiente Ren'Py.
+- **HIPÓTESE:** `clear()` pode não ser revertido como `remove()` quando o dono é a instância URM baseada no objeto Python comum. A screen pode restaurar um displayable antigo no contexto, mas isso não restaura necessariamente o atributo `notifications` do dono.
+- **PENDENTE DE RUNTIME:** confirmar essa diferença com fixture reduzida e depois com o URM completo.
+
+Foi acrescentado o testcase `urm_x52_notification_clear_rollback` à fixture e o passo “Run x52 notification clear rollback probe” ao workflow. O probe mantém uma screen com action de notificação visível, cria checkpoint, substitui a lista como o método `clear()` faz e retorna ao checkpoint. Commit do passo do workflow: [7cb6f6c5b0e20a9cb0198b3acbfd7dfb3b19a103](https://github.com/mucholocco86/laborat-rio_renpy/commit/7cb6f6c5b0e20a9cb0198b3acbfd7dfb3b19a103). **Resultado runtime ainda pendente; não tratar a previsão acima como observação.**
+
+Fontes adicionais consultadas:
+
+| Fonte | Símbolos | Identificação |
+|---|---|---|
+| URM convertido `classes/notifications.rpy` | `NotificationsClass.add/remove/clear`, linhas 1–39 | blob SHA `3283ec4b1615967a71ad21cc34670bf8158ab96d5` |
+| Ren'Py 7.4.11 `renpy/minstore.py` | aliases `python_object = _object = object`; substituição `object = RevertableObject` | blob SHA `5dd44affc52aeb10a9c28433baee0b9948d3f759` |
+| Ren'Py 7.4.11 `renpy/python.py` | `mutator`, `RevertableList` | blob SHA `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+| Fixture | testcase `urm_x52_notification_clear_rollback` | commit `1f3e253e01c2d713cf3ed72999c0dcfce347c6a1` |
+| Workflow | passo de clear rollback | commit `7cb6f6c5b0e20a9cb0198b3acbfd7dfb3b19a103` |
+
