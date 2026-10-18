@@ -101,3 +101,29 @@ A execução foi disparada pelo push do commit `021a78ffaea993c4f647daf5941e4fc4
 | URM convertido `framework/bootstrap.rpy` | mapa de módulos; `main` depende de `modules/01utils.x52rpy` | `9d72267c2d86c68aa9dac1fee94652c891a611fe` |
 | Fixture runtime | testcase `urm_x52_nonpicklable_notification_list_rollback` | commit `196e17e0cd474620eb21a75aa1237a45a68c9c13` |
 | Workflow | passo “Run x52 notification object rollback probe” | commit `021a78ffaea993c4f647daf5941e4fc44a5592d8` |
+
+
+### Revisão após o primeiro runtime probe — raízes do log
+
+O primeiro probe [39156073470](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156073470) terminou **FAILURE** porque a asserção esperava lista vazia e a fixture ficou presa procurando a interação textual errada. Antes da falha, o runtime imprimiu:
+
+```text
+X52_NOTIFICATION_PRE ProbeNotificationsClass RevertableList 0 False
+X52_NOTIFICATION_AFTER_ADD 1 Variable changed
+X52_NOTIFICATION_AFTER_ROLLBACK RevertableList 1
+```
+
+O marcador após a chamada de rollback indica que a execução chegou à etapa de verificação, mas o testcase não concluiu corretamente. O valor 1 é evidência intermediária; não é, isoladamente, uma prova integral do URM.
+
+A revisão do SDK revelou uma condição que faltava ao raciocínio anterior:
+
+- `RollbackLog.get_roots()` cria raízes a partir de `StoreDict.ever_been_changed`, ou seja, variáveis marcadas como alteradas desde o fim da fase init.
+- `RollbackLog.complete()` registra objetos mutados, mas `purge_unreachable()` remove registros de objetos não alcançáveis a partir das raízes e do contexto.
+- A instância `Notifications` do URM é atribuída durante `init 52`. A lista pode ser `RevertableList` e registrar o append, mas isso **não basta**: se o objeto dono não for alcançado por uma raiz elegível, o snapshot da lista pode ser descartado.
+- Uma referência adicional a `Notifications` guardada numa variável de store alterada em runtime pode tornar o grafo alcançável e mudar o resultado do mesmo append.
+
+Isso concilia a implementação de `x52NonPicklable` com o probe: a classe não interrompe a travessia como `NoRollback`, mas a raiz inicial ainda pode estar ausente de `get_roots()`. A screen em execução pode adicionar caminhos de alcance por displayables/actions; esse caminho ainda precisa de teste e não é inferido só por sua declaração estática.
+
+**Classificação atual:** confirmado no SDK que mutações de objetos são filtradas por alcance; observado em runtime reduzido que o probe sem uma raiz de store alterada manteve a lista em 1 após a tentativa de rollback; hipótese forte que o singleton de init isolado seja descartado do log quando não houver outro caminho alcançável; pendente comparar a raiz init-only com uma raiz adicionada/alterada em runtime e com a screen ativa.
+
+A fixture e o workflow foram ampliados para duas comparações controladas: (a) singleton init-only; (b) a mesma instância também referenciada por variável raiz alterada em runtime antes do checkpoint. O segundo run deve ser consultado antes de concluir a previsão.
