@@ -3,7 +3,7 @@
 **Data:** 2026-10-18  
 **Escopo:** distinção entre o callback Python do StoreMonitor, o helper de atribuição das ações nativas do Ren'Py e as ações de edição próprias do URM.  
 **Referência principal:** Ren'Py SDK 7.4.11.  
-**Evidência até esta revisão:** leitura estática e primeiro trace runtime observado na fixture isolada; a execução falhou apenas no marcador de conclusão do testcase, que foi corrigido e está sendo repetido.
+**Evidência:** leitura estática e teste runtime concluído com sucesso na fixture reduzida do SDK 7.4.11; isso não é uma integração completa do URM.
 
 ## Resultado
 
@@ -54,7 +54,7 @@ A sequência temporal para uma edição feita com o URM enquanto uma interação
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** StoreMonitor troca o código da função helper quando encontra um dos nomes previstos; `Var.setValue` e `CreateVar` usam atribuição direta.
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** callback e hook de atribuição são mecanismos separados.
 - **HIPÓTESE:** hookeando o helper, o URM observa chamadas nativas de `SetVariable/SetField` em atribuições ao store raiz.
-- **OBSERVADO EM RUNTIME (trace, execução com falha posterior no harness):** o hook foi identificado como `_m1_00action_data__set_field`; após `SetVariable`, contador=1/valor=20; após `SetVarValue` reduzido, contador=1/valor=30. Os dados observados sustentam que a primeira rota chamou o hook e a segunda não, mas a execução ainda precisa terminar sem erro do test runner para fechar o gate.
+- **OBSERVADO EM RUNTIME (fixture reduzida):** o helper disponível foi `_m1_00action_data__set_field`; após `SetVariable`, contador do hook=1 e valor=20; após `SetVarValue` reduzido, contador permaneceu 1 e valor=30. O testcase terminou com exit 0 no run 39098070978.
 - **PENDENTE:** testar notificação/freeze para edição manual feita pelo URM e observar quando o callback posterior a processa.
 - **PENDENTE:** repetir com URM completo, caso seja possível carregar o pacote convertido em ambiente controlado. A fixture atual só reproduz os métodos relevantes; não é uma integração do URM original.
 
@@ -65,11 +65,10 @@ Workflow isolado: `.github/workflows/urm-choice-runtime-probe.yml`, passo “Run
 
 A prova clona e instrumenta temporariamente o helper em uma cópia descartável, executa `SetVariable` nativo e, em seguida, a ação reduzida `SetVarValue`; asserts comparam contagem do hook e valor final. Não modifica o SDK versionado, o Wells, nem as fontes originais do URM.
 
-O primeiro run com a prova, [39093314766](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093314766), imprimiu `STOREMONITOR_HOOK_METHOD _m1_00action_data__set_field`, `STOREMONITOR_AFTER_NATIVE_SETVARIABLE 1 20` e `STOREMONITOR_AFTER_URM_SET 1 30`. Depois, falhou com `Testcase stuck` porque a label de verificação não foi alcançada após `return`. O run anterior [39093312665](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093312665) foi cancelado pela regra de concorrência ao entrar a versão atualizada do workflow. A fixture agora salta para uma label de verificação com diálogo; o novo run [39097924784](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39097924784) está na fila. O trace é evidência runtime observada, mas a confirmação automatizada final depende do run corrigido.
+A execução final [39098070978](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39098070978) concluiu **SUCCESS**. O log traz `STOREMONITOR_HOOK_METHOD _m1_00action_data__set_field`, `STOREMONITOR_AFTER_NATIVE_SETVARIABLE 1 20`, `STOREMONITOR_AFTER_URM_SET 1 30` e `STOREMONITOR_ASSERTIONS _m1_00action_data__set_field 1 30`. As execuções anteriores [39093314766](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093314766) e [39097924784](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39097924784) imprimiram os mesmos valores, mas falharam ao sincronizar a label do test runner; a versão corrigida encerra e valida os asserts na própria label de verificação. O run [39093312665](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39093312665) foi cancelado pela concorrência.
 
 ## Próximos passos
 
-1. Ler o resultado do testcase de interceptação; corrigir a fixture se houver falha de sintaxe ou de instrumentação.
-2. Se a distinção for confirmada, atualizar o documento 19 para substituir a pendência sobre o hook por evidência classificada.
-3. Testar em runtime o callback Python posterior, separadamente da interceptação síncrona.
-4. Retomar o circuito da interação/menu: edição URM → seleção Choice → nó Python seguinte → callback → checkpoint soft → rollback.
+1. Testar em runtime o callback Python posterior, separadamente da interceptação síncrona.
+2. Retomar o circuito da interação/menu: edição URM → seleção Choice → nó Python seguinte → callback → checkpoint soft → rollback.
+3. Atualizar o documento 19 com referência cruzada a esta validação.
