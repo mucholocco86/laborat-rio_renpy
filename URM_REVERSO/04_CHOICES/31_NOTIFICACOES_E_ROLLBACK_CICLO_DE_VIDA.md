@@ -156,11 +156,9 @@ O probe terminou com código 0 exigindo lista vazia e variável raiz de volta a 
 
 O probe final, [39156073470](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156073470), falhou por expectativa incorreta e interação do teste. O run [39156311306](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156311306) também falhou porque o diálogo de verificação repetiu o fluxo antes da asserção. Ambos foram substituídos pela fixture com saída direta no label de verificação e checagens explícitas. O run [39156468364](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156468364) passou, mas usava asserts Python que não eram uma garantia suficiente; seus valores de log coincidiram, e a conclusão é apoiada pelo run 39156621298.
 
-### Screen ativa: verificação pendente
+### Screen ativa: comparação concluída
 
-A fixture agora inclui `urm_x52_notification_overlay_probe`, com um `textbutton` cuja action é o objeto Notification, e executa o ciclo add → exibir screen → rollback. O testcase foi adicionado ao workflow no commit `4bf99251122fd9034f73f9710f1ebeb26430343f`; a execução está pendente.
-
-Essa comparação importa porque `Rollback.purge_unreachable` inclui os displayables de `Context.scene_lists`. Se o screen ativo alcança o objeto Notification pela action, o caminho Notification → NotificationsClass → lista pode preservar o snapshot da mutação e mudar o resultado do singleton sem raiz de store.
+A fixture inclui `urm_x52_notification_overlay_probe`, com um `textbutton` cuja action é o objeto Notification. O run [39156808878](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156808878) concluiu **SUCCESS**. Os marcadores e a interpretação estão registrados na seção final deste documento.
 
 
 ### Screen ativa como raiz de alcance — run 39156808878
