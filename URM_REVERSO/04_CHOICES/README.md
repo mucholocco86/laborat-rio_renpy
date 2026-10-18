@@ -295,3 +295,8 @@ A análise estática separou o callback `python_callbacks` do hook que o StoreMo
 
 
 A execução **39098070978** concluiu **SUCCESS** para o contraste do helper de atribuição. Na fixture reduzida, a ação nativa `SetVariable` chamou o helper uma vez (contador 1, valor 20); a ação reduzida `SetVarValue` mudou para 30 sem incrementar o contador. Isso confirma a diferença de rota no ambiente do teste, sem equivaler a integração completa do URM. Detalhes e logs em [documento 23](23_STOREMONITOR_INTERCEPTACAO_E_EDICAO_URM.md).
+
+
+### Callback após edição por screen — runtime (2026-10-18)
+
+No run [39098269040](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39098269040), a ação da screen mudou o valor 10→99 sem incrementar o contador do callback; ao fim do primeiro nó Python posterior, o callback observou o novo valor e o delta anterior 10. O testcase usou rollback desabilitado, portanto não confirma a transferência de `force_checkpoint` ao log em gameplay. A evidência e os limites estão no [documento 24](24_CALLBACK_SCREEN_EDIT_RUNTIME.md).
