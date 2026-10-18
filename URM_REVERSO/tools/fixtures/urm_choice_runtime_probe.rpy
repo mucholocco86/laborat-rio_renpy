@@ -1377,3 +1377,32 @@ label urm_x52_notification_rooted_rollback_verify:
 
 testcase urm_x52_rooted_notification_list_rollback:
     run Jump("urm_x52_notification_rooted_rollback_start")
+
+
+# A visible screen holding the notification action may be another rollback root.
+screen urm_x52_notification_overlay_probe():
+    vbox:
+        for notif in urm_probe_urm.ProbeNotifications.notifications:
+            textbutton notif.label action notif
+
+
+label urm_x52_notification_screen_rollback_start:
+    $ renpy.game.context().rollback = True
+    $ renpy.checkpoint("before-x52-notification-screen-add")
+    $ urm_probe_urm.ProbeNotifications.add("Variable changed", "screen_notification_probe")
+    show screen urm_x52_notification_overlay_probe
+    pause 0.1
+    $ print("X52_NOTIFICATION_SCREEN_BEFORE_ROLLBACK", len(urm_probe_urm.ProbeNotifications.notifications), renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    $ renpy.rollback(force=True, checkpoints=1, label="urm_x52_notification_screen_rollback_verify")
+
+
+label urm_x52_notification_screen_rollback_verify:
+    $ print("X52_NOTIFICATION_SCREEN_AFTER_ROLLBACK", len(urm_probe_urm.ProbeNotifications.notifications), renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    python:
+        if len(urm_probe_urm.ProbeNotifications.notifications) != 0:
+            raise Exception("Expected a visible notification action to keep the list reachable for rollback.")
+    $ renpy.quit()
+
+
+testcase urm_x52_displayed_notification_list_rollback:
+    run Jump("urm_x52_notification_screen_rollback_start")
