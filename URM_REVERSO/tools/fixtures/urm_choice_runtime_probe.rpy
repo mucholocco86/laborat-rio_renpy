@@ -1291,3 +1291,65 @@ testcase urm_storemonitor_urm_notification_with_rollback:
     label urm_notify_rollback_verify
     assert urm_notify_probe_value == 10
     $ renpy.quit()
+
+
+# Lifecycle probe for the URM notification object graph.
+# Mirrors x52NonPicklable from framework/modules/01utils.rpy and the
+# Notification(s) list owner from classes/notifications.rpy.
+init python in urm_probe_urm:
+    class ProbeX52NonPicklable(python_object):
+        def __setstate__(self, d):
+            pass
+
+        def __getstate__(self):
+            return {}
+
+        def __getnewargs__(self):
+            return ()
+
+        def __iter__(self):
+            return None
+
+        def itervalues(self):
+            return None
+
+    class ProbeNotification(ProbeX52NonPicklable):
+        def __init__(self, notification_owner, label, text=None):
+            self.notification_owner = notification_owner
+            self.label = label
+            self.text = text
+
+    class ProbeNotificationsClass(ProbeX52NonPicklable):
+        def __init__(self):
+            self.notifications = []
+
+        def add(self, label, text=None):
+            notification = ProbeNotification(self, label, text)
+            self.notifications.append(notification)
+
+    ProbeNotifications = ProbeNotificationsClass()
+
+
+label urm_x52_notification_object_rollback_start:
+    $ renpy.game.context().rollback = True
+    $ assert not isinstance(urm_probe_urm.ProbeNotifications, renpy.python.NoRollback)
+    $ assert isinstance(urm_probe_urm.ProbeNotifications.notifications, renpy.python.RevertableList)
+    $ print("X52_NOTIFICATION_PRE", type(urm_probe_urm.ProbeNotifications).__name__, type(urm_probe_urm.ProbeNotifications.notifications).__name__, len(urm_probe_urm.ProbeNotifications.notifications), isinstance(urm_probe_urm.ProbeNotifications, renpy.python.NoRollback))
+    $ renpy.checkpoint("before-x52-notification-append")
+    $ urm_probe_urm.ProbeNotifications.add("Variable changed", "urm_notification_probe")
+    $ print("X52_NOTIFICATION_AFTER_ADD", len(urm_probe_urm.ProbeNotifications.notifications), urm_probe_urm.ProbeNotifications.notifications[0].label)
+    $ renpy.rollback(force=True, checkpoints=1, label="urm_x52_notification_object_rollback_verify")
+
+
+label urm_x52_notification_object_rollback_verify:
+    $ print("X52_NOTIFICATION_AFTER_ROLLBACK", type(urm_probe_urm.ProbeNotifications.notifications).__name__, len(urm_probe_urm.ProbeNotifications.notifications))
+    "Notification object rollback verification."
+    return
+
+
+testcase urm_x52_nonpicklable_notification_list_rollback:
+    run Jump("urm_x52_notification_object_rollback_start")
+    "Add a notification object"
+    label urm_x52_notification_object_rollback_verify
+    assert len(urm_probe_urm.ProbeNotifications.notifications) == 0
+    $ renpy.quit()
