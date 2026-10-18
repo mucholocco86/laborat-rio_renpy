@@ -292,3 +292,6 @@ O run **39064935980** validou save/load nativo de containers editados: uma lista
 ### StoreMonitor: hook e edição direta (2026-10-18)
 
 A análise estática separou o callback `python_callbacks` do hook que o StoreMonitor instala no helper nativo `_m1_00action_data__set_field`/`_set_field`. `SetVariable` passa pelo helper; o `Var.setValue` convertido usa atribuição direta via `exec`, e `CreateVar` usa `setattr`. Logo, o hook não deve ser atribuído automaticamente às ações de edição próprias do URM. A fixture runtime contrapõe esses caminhos, mas o run estava pendente/em execução na revisão; veja [documento 23](23_STOREMONITOR_INTERCEPTACAO_E_EDICAO_URM.md) para fontes e status.
+
+
+A execução **39098070978** concluiu **SUCCESS** para o contraste do helper de atribuição. Na fixture reduzida, a ação nativa `SetVariable` chamou o helper uma vez (contador 1, valor 20); a ação reduzida `SetVarValue` mudou para 30 sem incrementar o contador. Isso confirma a diferença de rota no ambiente do teste, sem equivaler a integração completa do URM. Detalhes e logs em [documento 23](23_STOREMONITOR_INTERCEPTACAO_E_EDICAO_URM.md).
