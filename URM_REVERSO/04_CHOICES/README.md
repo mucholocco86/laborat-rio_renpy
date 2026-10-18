@@ -330,3 +330,6 @@ O run [39148026518](https://github.com/mucholocco86/laborat-rio_renpy/actions/ru
 ### Monitor URM com rollback habilitado (2026-10-18)
 
 No run [39148219484](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39148219484), a edição direta SetVarValue de variável monitorada foi para 30, não passou pelo hook nativo e não produziu aviso no contexto testado. O callback posterior não encontrou o delta; o rollback explícito restaurou o valor a 10. Isso mostra que a restauração do estado do jogo pode ocorrer sem notificação do StoreMonitor reduzido naquele instante. A integração completa e a escrita nativa sob rollback continuam pendentes. Ver [documento 30](30_MONITOR_ROLLBACK_NOTIFICACAO_URM.md).
+
+
+O contraponto nativo com rollback habilitado também passou no run [39148594202](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39148594202): SetVariable gerou aviso imediato 10→20 pelo hook e o rollback restaurou a variável a 10. O coletor de avisos da fixture foi limpo pelo rollback porque era uma lista reversível do store; isso não prova que a lista interna da NotificationClass do URM seja revertida. A comparação está consolidada no [documento 30](30_MONITOR_ROLLBACK_NOTIFICACAO_URM.md).
