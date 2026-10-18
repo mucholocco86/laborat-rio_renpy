@@ -161,3 +161,25 @@ O probe final, [39156073470](https://github.com/mucholocco86/laborat-rio_renpy/a
 A fixture agora inclui `urm_x52_notification_overlay_probe`, com um `textbutton` cuja action é o objeto Notification, e executa o ciclo add → exibir screen → rollback. O testcase foi adicionado ao workflow no commit `4bf99251122fd9034f73f9710f1ebeb26430343f`; a execução está pendente.
 
 Essa comparação importa porque `Rollback.purge_unreachable` inclui os displayables de `Context.scene_lists`. Se o screen ativo alcança o objeto Notification pela action, o caminho Notification → NotificationsClass → lista pode preservar o snapshot da mutação e mudar o resultado do singleton sem raiz de store.
+
+
+### Screen ativa como raiz de alcance — run 39156808878
+
+O run [39156808878](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156808878) terminou **SUCCESS**, incluindo o testcase `urm_x52_displayed_notification_list_rollback`. A fixture exibiu um screen com o mesmo padrão estrutural importante da screen URM: iteração pela lista e botão com `action notif`.
+
+```text
+X52_NOTIFICATION_SCREEN_BEFORE_ROLLBACK 1 True
+X52_NOTIFICATION_SCREEN_AFTER_ROLLBACK 0 False
+```
+
+As verificações explícitas exigiram a lista vazia após rollback. Portanto, o displayable visível que contém a action alcançou o objeto de notificação e sua lista no cenário reduzido; ao voltar ao checkpoint, a lista foi revertida e a screen posterior foi retirada/restaurada conforme o estado do contexto.
+
+### Síntese para o URM
+
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** `Notifications.add` acrescenta Notification à lista; `Notification` guarda referência ao dono `NotificationsClass`; `URM_notifications` percorre essa lista e usa cada objeto como action; `URM_overlay` inclui a screen; `afterLoad` mostra `URM_overlay`.
+- **CONFIRMADO NO SDK 7.4.11:** `show_screen` insere `ScreenDisplayable` em `Context.scene_lists`; a purga de objetos do rollback percorre os displayables da scene list. A action do botão é, portanto, um possível caminho de alcance para Notification → NotificationsClass → lista.
+- **OBSERVADO EM RUNTIME (fixture reduzida):** sem screen/action ou raiz de store alterada, a lista do singleton init-only permaneceu com um item; com raiz de store alterada ou com screen visível que carrega `action notif`, a lista retornou ao estado vazio no rollback.
+- **INFERÊNCIA FORTE, ainda não integração runtime URM:** quando a overlay real já está visível e a notificação foi renderizada como botão, o caminho de alcance da action deve permitir que o rollback desfaça a inclusão. A estrutura fonte da screen real coincide no aspecto relevante, mas ainda falta executar o pacote URM completo.
+- **PENDENTE:** testar notificação adicionada e rollback antes da screen concluir um novo render; testar timeout/thread e `clear()`; testar save/load da lista; carregar URM real para validar a hipótese ponta a ponta.
+
+O erro anterior de esperar rollback da lista init-only sem uma raiz ativa estava no modelo inicial, não no SDK. Os runs [39156073470](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156073470) e [39156311306](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156311306) foram tentativas de fixture com expectativa/fluxo de interação incorretos; as conclusões agora apoiam-se nas comparações controladas dos runs [39156621298](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156621298) e [39156808878](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39156808878).
