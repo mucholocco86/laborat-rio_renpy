@@ -808,14 +808,11 @@ label urm_monitor_probe_start:
     jump urm_monitor_probe_verify
 
 label urm_monitor_probe_verify:
-    "StoreMonitor assignment-hook verification."
-    return
+    $ print("STOREMONITOR_ASSERTIONS", urm_monitor_probe_method, urm_monitor_probe_hits, urm_monitor_probe_value)
+    $ assert urm_monitor_probe_method in ("_m1_00action_data__set_field", "_set_field")
+    $ assert urm_monitor_probe_hits == 1
+    $ assert urm_monitor_probe_value == 30
+    $ renpy.quit()
 
 testcase urm_storemonitor_assignment_hook:
     run Jump("urm_monitor_probe_start")
-    label urm_monitor_probe_verify
-    "StoreMonitor assignment-hook verification."
-    assert urm_monitor_probe_method == "_m1_00action_data__set_field" or urm_monitor_probe_method == "_set_field"
-    assert urm_monitor_probe_hits == 1
-    assert urm_monitor_probe_value == 30
-    $ renpy.quit()
