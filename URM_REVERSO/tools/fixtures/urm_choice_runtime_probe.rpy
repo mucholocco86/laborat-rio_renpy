@@ -816,3 +816,117 @@ label urm_monitor_probe_verify:
 
 testcase urm_storemonitor_assignment_hook:
     run Jump("urm_monitor_probe_start")
+
+
+# Reduced callback timing probe. This installs a small python_callbacks
+# observer that mirrors the StoreMonitor's checkpoint request and non-cycling
+# StoreDict delta read, without loading the URM package itself.
+default urm_callback_probe_enabled = False
+default urm_callback_probe_value = 10
+default urm_callback_probe_stage = "init"
+default urm_callback_probe_count = 0
+default urm_callback_probe_events = []
+default urm_callback_probe_count_before_action = None
+default urm_callback_probe_count_after_action = None
+default urm_callback_probe_saw_edit = False
+default urm_callback_probe_old_value = None
+default urm_callback_probe_new_value = None
+
+init python:
+    def urm_callback_probe_callback():
+        if not renpy.store.urm_callback_probe_enabled:
+            return
+
+        context = renpy.game.context()
+        changes = renpy.store.__dict__.get_changes(False)
+        if isinstance(changes, tuple):
+            changes = changes[0]
+
+        renpy.store.urm_callback_probe_count += 1
+        has_value_delta = "urm_callback_probe_value" in changes
+        old_value = changes.get("urm_callback_probe_value", None)
+        new_value = renpy.store.urm_callback_probe_value
+        event = (
+            renpy.store.urm_callback_probe_stage,
+            new_value,
+            context.current,
+            context.force_checkpoint,
+            renpy.game.log.force_checkpoint,
+            has_value_delta,
+            old_value,
+        )
+        renpy.store.urm_callback_probe_events.append(event)
+        print("CALLBACK_PROBE_EVENT", renpy.store.urm_callback_probe_count, event)
+
+        if has_value_delta and new_value == 99:
+            renpy.store.urm_callback_probe_saw_edit = True
+            renpy.store.urm_callback_probe_old_value = old_value
+            renpy.store.urm_callback_probe_new_value = new_value
+
+        # Mirrors the StoreMonitor's request; Context.run transfers it later.
+        context.force_checkpoint = True
+
+    def urm_callback_probe_before_action():
+        renpy.store.urm_callback_probe_count_before_action = renpy.store.urm_callback_probe_count
+        print("CALLBACK_PROBE_BEFORE_SCREEN_ACTION", renpy.store.urm_callback_probe_count, renpy.store.urm_callback_probe_value)
+
+    def urm_callback_probe_after_action():
+        renpy.store.urm_callback_probe_count_after_action = renpy.store.urm_callback_probe_count
+        print("CALLBACK_PROBE_AFTER_SCREEN_ACTION", renpy.store.urm_callback_probe_count, renpy.store.urm_callback_probe_value)
+        if renpy.store.urm_callback_probe_count_after_action != renpy.store.urm_callback_probe_count_before_action:
+            raise Exception("python_callbacks ran during the screen action.")
+        if renpy.store.urm_callback_probe_value != 99:
+            raise Exception("URM-style screen edit did not set the probe value.")
+
+screen urm_callback_probe_screen():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Apply callback timing edit":
+            action [
+                Function(urm_callback_probe_before_action, _update_screens=False),
+                Hide("urm_callback_probe_screen"),
+                urm_probe_urm.SetVarValue(
+                    urm_probe_urm.Var("urm_callback_probe_value"),
+                    None,
+                    None,
+                    "99",
+                ),
+                Function(urm_callback_probe_after_action, _update_screens=False),
+            ]
+
+label urm_callback_probe_start:
+    $ urm_callback_probe_enabled = False
+    $ urm_callback_probe_value = 10
+    $ urm_callback_probe_stage = "install"
+    $ urm_callback_probe_count = 0
+    $ urm_callback_probe_events = []
+    $ urm_callback_probe_count_before_action = None
+    $ urm_callback_probe_count_after_action = None
+    $ urm_callback_probe_saw_edit = False
+    $ urm_callback_probe_old_value = None
+    $ urm_callback_probe_new_value = None
+    $ renpy.config.python_callbacks.append(urm_callback_probe_callback)
+
+    $ urm_callback_probe_enabled = True
+    $ urm_callback_probe_stage = "screen_open"
+    show screen urm_callback_probe_screen
+    pause 0.5
+
+    $ urm_callback_probe_stage = "after_edit_python_body"
+    $ print("CALLBACK_PROBE_AFTER_NEXT_PYTHON_NODE", urm_callback_probe_count, urm_callback_probe_value, urm_callback_probe_saw_edit, urm_callback_probe_old_value, urm_callback_probe_new_value)
+    $ assert urm_callback_probe_count_after_action == urm_callback_probe_count_before_action
+    $ assert urm_callback_probe_saw_edit
+    $ assert urm_callback_probe_old_value == 10
+    $ assert urm_callback_probe_new_value == 99
+    $ assert urm_callback_probe_count > urm_callback_probe_count_after_action
+    $ print("CALLBACK_PROBE_ASSERTIONS", urm_callback_probe_count, urm_callback_probe_old_value, urm_callback_probe_new_value)
+    $ renpy.quit()
+
+testcase urm_storemonitor_callback_after_screen_edit:
+    run Jump("urm_callback_probe_start")
+    "Apply callback timing edit"
