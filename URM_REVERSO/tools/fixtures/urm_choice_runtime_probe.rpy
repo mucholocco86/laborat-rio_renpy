@@ -822,6 +822,8 @@ testcase urm_storemonitor_assignment_hook:
 # observer that mirrors the StoreMonitor's checkpoint request and non-cycling
 # StoreDict delta read, without loading the URM package itself.
 default urm_callback_probe_enabled = False
+default urm_callback_probe_rollback_mode = False
+default urm_callback_probe_context_before = None
 default urm_callback_probe_value = 10
 default urm_callback_probe_stage = "init"
 default urm_callback_probe_count = 0
@@ -910,6 +912,10 @@ label urm_callback_probe_start:
     $ urm_callback_probe_saw_edit = False
     $ urm_callback_probe_old_value = None
     $ urm_callback_probe_new_value = None
+    if urm_callback_probe_rollback_mode:
+        $ urm_callback_probe_context_before = renpy.game.context().rollback
+        $ renpy.game.context().rollback = True
+        $ renpy.checkpoint("before-callback-screen-edit")
     $ renpy.config.python_callbacks.append(urm_callback_probe_callback)
 
     $ urm_callback_probe_enabled = True
@@ -927,4 +933,13 @@ label urm_callback_probe_start:
 
 testcase urm_storemonitor_callback_after_screen_edit:
     run Jump("urm_callback_probe_start")
+    "Apply callback timing edit"
+
+
+label urm_callback_probe_rollback_start:
+    $ urm_callback_probe_rollback_mode = True
+    jump urm_callback_probe_start
+
+testcase urm_storemonitor_callback_with_gameplay_rollback:
+    run Jump("urm_callback_probe_rollback_start")
     "Apply callback timing edit"
