@@ -287,3 +287,8 @@ O run **39064784962** validou na reprodução reduzida a regra de truthiness de 
 
 
 O run **39064935980** validou save/load nativo de containers editados: uma lista salva como `[10, 20]` e um dicionário como `{a: 20}` foram alterados depois para `[10, 20, 30]` e `{a: 30}`; o load restaurou os conteúdos do momento do save. O teste é reduzido e usa literais Ren'Py; não valida objetos externos nem metadados `.urm`. Detalhes no documento 22.
+
+
+### StoreMonitor: hook e edição direta (2026-10-18)
+
+A análise estática separou o callback `python_callbacks` do hook que o StoreMonitor instala no helper nativo `_m1_00action_data__set_field`/`_set_field`. `SetVariable` passa pelo helper; o `Var.setValue` convertido usa atribuição direta via `exec`, e `CreateVar` usa `setattr`. Logo, o hook não deve ser atribuído automaticamente às ações de edição próprias do URM. A fixture runtime contrapõe esses caminhos, mas o run estava pendente/em execução na revisão; veja [documento 23](23_STOREMONITOR_INTERCEPTACAO_E_EDICAO_URM.md) para fontes e status.
