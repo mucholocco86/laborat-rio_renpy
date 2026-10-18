@@ -59,10 +59,10 @@ Essa limitação se aplica também ao teste reduzido do documento [29](29_NOTIFI
 
 | Fonte | Símbolos / intervalo | Identificação |
 |---|---|---|
-| URM convertido `classes/notifications.rpy` | `NotificationsClass`, `Notification` | blob SHA `3283ec4b1615967a71ad21cc34670bf8158ab96d` |
-| URM convertido `classes/main.rpy` | instanciação `Notifications` em init 52 | blob SHA `14f93406d2946eaed664ed72c1d47063984ce24f` |
-| URM convertido `screens/main.rpy` | `URM_overlay` usa `URM_notifications` | blob SHA `ceb5dc63b3691a4b6244345e1c5a3e3b9d149291` |
-| Ren'Py 7.4.11 `renpy/python.py` | `WrapNode.visit_List`, `py_compile`, `RevertableList`, `NoRollback`, `reached` | blob SHA `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+| URM convertido `classes/notifications.rpy` | linhas 1–39; `NotificationsClass`, `Notification` | blob SHA `3283ec4b1615967a71ad21cc34670bf8158ab96d` |
+| URM convertido `classes/main.rpy` | linhas 10–42; instanciação `Notifications` em init 52 | blob SHA `14f93406d2946eaed664ed72c1d47063984ce24f` |
+| URM convertido `screens/main.rpy` | linhas 20–53; `URM_overlay` usa `URM_notifications` | blob SHA `ceb5dc63b3691a4b6244345e1c5a3e3b9d149291` |
+| Ren'Py 7.4.11 `renpy/python.py` | linhas 354–405 (`NoRollback/reached`), 453–506 (`WrapNode`), 723–835 (`py_compile`), 953–1048 (`RevertableList`) | blob SHA `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
 | Ren'Py 7.4.11 `renpy/minstore.py` | `__renpy__list__ = RevertableList` | SHA a registrar na próxima leitura dirigida |
 
 ## Próximos passos
