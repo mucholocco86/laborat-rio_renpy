@@ -1349,7 +1349,34 @@ label urm_x52_notification_object_rollback_verify:
 
 testcase urm_x52_nonpicklable_notification_list_rollback:
     run Jump("urm_x52_notification_object_rollback_start")
-    "Add a notification object"
+    "Notification object rollback verification."
     label urm_x52_notification_object_rollback_verify
+    assert len(urm_probe_urm.ProbeNotifications.notifications) == 1
+    $ renpy.quit()
+
+
+default urm_x52_notification_root = None
+
+
+label urm_x52_notification_rooted_rollback_start:
+    $ renpy.game.context().rollback = True
+    $ urm_x52_notification_root = urm_probe_urm.ProbeNotifications
+    $ renpy.checkpoint("after-x52-notification-root-registration")
+    $ urm_probe_urm.ProbeNotifications.add("Variable changed", "rooted_notification_probe")
+    $ print("X52_NOTIFICATION_ROOTED_AFTER_ADD", len(urm_probe_urm.ProbeNotifications.notifications))
+    $ renpy.rollback(force=True, checkpoints=1, label="urm_x52_notification_rooted_rollback_verify")
+
+
+label urm_x52_notification_rooted_rollback_verify:
+    $ print("X52_NOTIFICATION_ROOTED_AFTER_ROLLBACK", type(urm_probe_urm.ProbeNotifications.notifications).__name__, len(urm_probe_urm.ProbeNotifications.notifications), urm_x52_notification_root is urm_probe_urm.ProbeNotifications)
+    "Rooted notification rollback verification."
+    return
+
+
+testcase urm_x52_rooted_notification_list_rollback:
+    run Jump("urm_x52_notification_rooted_rollback_start")
+    "Rooted notification rollback verification."
+    label urm_x52_notification_rooted_rollback_verify
     assert len(urm_probe_urm.ProbeNotifications.notifications) == 0
+    assert urm_x52_notification_root is urm_probe_urm.ProbeNotifications
     $ renpy.quit()
