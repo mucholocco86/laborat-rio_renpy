@@ -333,3 +333,8 @@ No run [39148219484](https://github.com/mucholocco86/laborat-rio_renpy/actions/r
 
 
 O contraponto nativo com rollback habilitado também passou no run [39148594202](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39148594202): SetVariable gerou aviso imediato 10→20 pelo hook e o rollback restaurou a variável a 10. O coletor de avisos da fixture foi limpo pelo rollback porque era uma lista reversível do store; isso não prova que a lista interna da NotificationClass do URM seja revertida. A comparação está consolidada no [documento 30](30_MONITOR_ROLLBACK_NOTIFICACAO_URM.md).
+
+
+### Notificações do URM e rollback — ciclo de vida
+
+O documento [31 — Ciclo de vida das notificações do URM e rollback](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md) distingue o coletor raiz da fixture da lista aninhada em `NotificationsClass`. O SDK 7.4.11 transforma literais de lista compilados em estruturas revertíveis, mas a participação da lista real no rollback depende do alcance do objeto e da definição de `x52NonPicklable`. A fixture anterior não responde a essa questão. A definição da base e a screen `URM_notifications` seguem pendentes; não se afirma ainda se os avisos reais sobrevivem ao rollback.
