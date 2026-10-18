@@ -929,7 +929,16 @@ label urm_callback_probe_start:
     $ assert urm_callback_probe_count > urm_callback_probe_count_after_action
     $ assert urm_callback_probe_value == 99
     $ print("CALLBACK_PROBE_RESULT", urm_callback_probe_count, urm_callback_probe_saw_edit, urm_callback_probe_old_value, urm_callback_probe_new_value, list(urm_callback_probe_events))
-    $ renpy.quit()
+    if urm_callback_probe_rollback_mode:
+        $ print("CALLBACK_PROBE_BEFORE_ROLLBACK", urm_callback_probe_value, urm_callback_probe_saw_edit, renpy.game.log.force_checkpoint)
+        $ renpy.rollback(force=True, checkpoints=1, label="urm_callback_probe_rollback_verify")
+    else:
+        $ renpy.quit()
+
+label urm_callback_probe_rollback_verify:
+    $ print("CALLBACK_PROBE_AFTER_ROLLBACK", urm_callback_probe_value)
+    "Callback and rollback verification."
+    return
 
 testcase urm_storemonitor_callback_after_screen_edit:
     run Jump("urm_callback_probe_start")
@@ -943,3 +952,6 @@ label urm_callback_probe_rollback_start:
 testcase urm_storemonitor_callback_with_gameplay_rollback:
     run Jump("urm_callback_probe_rollback_start")
     "Apply callback timing edit"
+    label urm_callback_probe_rollback_verify
+    assert urm_callback_probe_value == 10
+    $ renpy.quit()
