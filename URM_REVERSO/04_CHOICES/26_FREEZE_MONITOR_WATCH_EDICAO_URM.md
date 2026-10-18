@@ -56,7 +56,7 @@ Para uma variável monitorada, a atribuição direta por `Var.setValue` não pas
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** `Var.setValue` temporariamente remove e restaura freeze ao escrever por ação URM.
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** o hook SetField bloqueia mudança detectada em variável frozen e o callback Python usa deltas do store.
 - **OBSERVADO EM RUNTIME (fixture reduzida; doc 25):** uma edição por screen pode ser restaurada por rollback mesmo quando o callback posterior não encontrou o delta.
-- **PENDENTE:** testar em runtime o comportamento de freeze diante de escrita nativa, escrita direta URM e callback subsequente, nos contextos com e sem rollback.
+- **OBSERVADO EM RUNTIME (fixture reduzida; doc 27):** escrita nativa via helper foi bloqueada em variável frozen; SetVarValue mudou 10→30 e reaplicou freeze; callback posterior, recebendo o delta, restaurou 30→10 e manteve freeze. Foi em contexto com rollback desabilitado.\n- **PENDENTE:** repetir o circuito com rollback habilitado, pois o delta pode não estar disponível no callback.
 - **PENDENTE:** testar notificação de variável monitorada após edição direta URM, verificando também se StoreDict.get_changes(False) ainda contém o delta naquele momento.
 - **PENDENTE:** verificar no URM completo como o ciclo de StoreMonitor é instalado e como os metadados freeze/monitor/watch sobrevivem a reinício e carregamento de outro jogo.
 
