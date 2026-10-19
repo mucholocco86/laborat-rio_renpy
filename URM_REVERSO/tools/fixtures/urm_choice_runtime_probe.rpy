@@ -12,6 +12,10 @@ init python:
         renpy.game.log.rollback_is_fixed = False
         return renpy.ui.ChoiceReturn(label, index)()
 
+    def urm_x52_probe_after_load_callback():
+        renpy.session["_urm_x52_probe_after_load_callback_ran"] = True
+        renpy.show_screen("urm_x52_notification_overlay_probe")
+
 screen urm_probe():
     modal True
     zorder 200
@@ -1627,6 +1631,8 @@ label urm_x52_notification_fresh_save_start:
 label urm_x52_notification_fresh_load_start:
     $ assert renpy.can_load("urm-probe-x52-notification-fresh-process")
     $ print("X52_NOTIFICATION_FRESH_LOAD_BEFORE", type(urm_probe_urm.ProbeNotifications).__name__, type(urm_probe_urm.ProbeNotifications.notifications).__name__, [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
+    $ renpy.config.after_load_callbacks.append(urm_x52_probe_after_load_callback)
+    $ renpy.session.pop("_urm_x52_probe_after_load_callback_ran", None)
     $ renpy.session["_urm_x52_notification_fresh_load_marker"] = True
     $ renpy.load("urm-probe-x52-notification-fresh-process")
 
@@ -1642,7 +1648,10 @@ label urm_x52_notification_fresh_load_verify:
             result_labels = [getattr(n, "label", "<missing-label>") for n in notifications]
         screen = renpy.get_screen("urm_x52_notification_overlay_probe")
         widget = renpy.display.screen.get_widget("urm_x52_notification_overlay_probe", "urm_x52_notification_action_probe")
-        print("X52_NOTIFICATION_FRESH_LOAD_AFTER", type(owner).__name__, result_type, result_labels, screen is not None, widget is not None)
+        callback_ran = renpy.session.get("_urm_x52_probe_after_load_callback_ran", False)
+        print("X52_NOTIFICATION_FRESH_LOAD_AFTER", type(owner).__name__, result_type, result_labels, screen is not None, widget is not None, callback_ran)
+        if not callback_ran:
+            raise Exception("Expected the registered after-load callback to run.")
         if widget is not None:
             raise Exception("Expected the rebuilt notification screen to have no action widget when its list is empty.")
     $ renpy.quit()
