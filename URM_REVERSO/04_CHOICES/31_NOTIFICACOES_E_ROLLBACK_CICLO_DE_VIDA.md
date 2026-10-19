@@ -292,3 +292,36 @@ A fixture foi corrigida no commit [8ee3804dadb2320f574ef6550f71f38ba10e9bac](htt
 - **HIPÓTESE DE CAUSA:** a ausência dessa configuração causou a falta de local de parada. A correção está no commit indicado, mas requer novo run para validar.
 - **PENDENTE:** resultado runtime válido de clear, remove e timeout thread após a correção.
 
+
+
+### Clear, remove e timeout: probes runtime válidos — run 39205520906
+
+Depois de habilitar rollback nos dois labels que não tinham essa configuração, o run [39205520906](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39205520906) concluiu **SUCCESS**. Todos os passos do workflow passaram, inclusive clear, remove e timeout em thread. Os logs registram:
+
+```text
+X52_NOTIFICATION_CLEAR_BEFORE 1 True
+X52_NOTIFICATION_CLEAR_AFTER_ROLLBACK 0 True
+X52_NOTIFICATION_REMOVE_BEFORE 1 True
+X52_NOTIFICATION_REMOVE_AFTER_ROLLBACK 1 True
+X52_NOTIFICATION_TIMEOUT_AFTER_ROLLBACK 1 False
+```
+
+Interpretação restrita ao fixture reduzido:
+
+- **clear() — OBSERVADO EM RUNTIME:** a lista ficou vazia depois do rollback; o screen permaneceu ativo. Neste harness, a substituição owner.notifications = [] não restaurou o atributo anterior do dono. Isso é consistente com o dono sendo um objeto Python comum não revertível.
+- **remove() — OBSERVADO EM RUNTIME:** a lista voltou a conter um elemento, embora a remoção tenha alterado a RevertableList no lugar. É consistente com o snapshot do mutador da lista sendo reaplicado.
+- **Timeout em thread — OBSERVADO EM RUNTIME:** após o worker remover o item, o rollback restaurou a lista a um item; timeout_done voltou a False, o valor do checkpoint. O probe demonstra resultado neste agendamento controlado, sem demonstrar segurança geral para mutações concorrentes ou determinismo em outras corridas.
+
+Os três casos usam a classe reduzida ProbeNotifications, com formato equivalente ao ponto investigado, e uma screen de fixture. Eles **não carregam a classe, o loader, a thread de timeout nem a screen do URM integralmente**. Portanto, são evidência de runtime do SDK 7.4.11 sob o harness, e suporte para as previsões do código convertido, não prova ponta a ponta do pacote URM.
+
+A comparação também revela uma diferença funcional de interesse: com screen ativa, rollback até o checkpoint preserva a própria screen nos probes clear/remove, enquanto o estado da lista depende da forma da operação. Em clear, a tela continua aberta, mas sem notificação; em remove, o item reaparece. Logo, screen ativa não implica que toda operação no objeto seja revertida uniformemente: mutação da lista e reatribuição de atributo seguem caminhos distintos.
+
+| Caso | Resultado runtime | Classificação | Limite |
+|---|---|---|---|
+| Atribuir lista vazia (clear) | lista permanece vazia; screen ativa | Observado em runtime (fixture reduzida) | não executou método URM integral |
+| RevertableList.remove | elemento reaparece; screen ativa | Observado em runtime (fixture reduzida) | mesma limitação |
+| remove por invoke_in_thread | elemento reaparece; flag worker retorna ao checkpoint | Observado em runtime (fixture reduzida) | um agendamento controlado; sem garantia de corrida |
+
+O run anterior [39177581946](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39177581946) falhou antes da verificação porque os probes clear/remove não habilitavam rollback. A correção de fixture está no commit [8ee3804dadb2320f574ef6550f71f38ba10e9bac](https://github.com/mucholocco86/laborat-rio_renpy/commit/8ee3804dadb2320f574ef6550f71f38ba10e9bac). O run 39205520906, com todos os três passos concluídos, substitui esses resultados inválidos.
+
+- **PENDENTE:** validar a diferença no pacote URM carregado integralmente; repetir timeout em múltiplos atrasos relativos ao checkpoint/rollback; testar add → clear → rollback com a screen real; estudar save/load.
