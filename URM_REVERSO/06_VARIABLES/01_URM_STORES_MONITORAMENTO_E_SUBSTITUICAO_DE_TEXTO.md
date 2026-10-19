@@ -91,3 +91,47 @@ Para separar o comportamento de mapa aninhado do pacote URM integral, foi criada
 | URM convertido `screens/main.rpy` | indicador `unsaved` (135–137) | `ceb5dc63b3691a4b6244345e1c5a3e3b9d149291` |
 | URM convertido `screens/vars.rpy` | tabela e ações de variáveis (115–178) | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
 | URM convertido `screens/watchpanel.rpy` | leitura da lista assistida e valor atual por `Var(varName)` (89–103) | `8cc83f00838ed409183e85e4ebdb37ddf4433823` |
+
+
+## 7. Consumidores efetivos de `vars` e `watched`
+
+Esta leitura fecha o circuito entre metadados persistidos no arquivo URM e os pontos que os consultam durante a execução.
+
+### Ciclo de carregamento
+
+**Confirmado na fonte convertida:** `afterLoad()` chama `StoreMonitor.init()` e, depois das configurações visuais, chama `URMFiles.autoLoad()` (`classes/main.rpy`, linhas 54–63). A inicialização do monitor instala o callback Python e tenta substituir o helper de atribuição; ela não percorre os registros de `VarsStore.store` para aplicar flags em lote (`classes/vars.rpy`, linhas 492–509).
+
+As verificações são feitas sob demanda em `handleVarChange`: cada alteração examinada consulta `VarsStore.isFrozen(varName)` ou `VarsStore.isMonitored(varName)` (`vars.rpy`, linhas 521–538). Como as propriedades `store`/ `watchedStore` apontam para os stores do arquivo atual, os metadados carregados pelo `autoLoad` podem ser lidos por essas consultas posteriores. **A fonte não demonstra um replay retroativo de alterações ocorridas antes do carregamento.**
+
+### Mapa de metadado → consumidor
+
+| Metadado em `.urm` | Leitura demonstrada | Efeito descrito pela fonte |
+|---|---|---|
+| `vars[name].frozen` | `isFrozen` → `StoreMonitor.handleVarChange`; também `Var.setValue` consulta a flag | No helper interceptado, `handleVarChange` retorna falso e não chama o helper original; `Var.setValue` remove temporariamente a flag antes de escrever e a repõe no `finally`. |
+| `vars[name].monitor` | `isMonitored` → `handleVarChange` | Se o valor difere e a tela de edição do URM não está aberta, enfileira notificação de variável alterada. |
+| `vars[name].ignored` | `strContainsIgnored` alimenta detecção de caminhos e CodeView | Filtra condições de caminho ou trechos Python apresentados pelo CodeView; não altera o valor da variável nem o AST do jogo. |
+| `vars[name].name` | Tela de variáveis | Nome de exibição; o valor atual é obtido separadamente com `Var(varName)`. |
+| `watched[name].name` | Tela de watch panel | Rótulo exibido; o painel chama `Var(varName).getButtonValue()`, que resolve o valor vivo no store atual. |
+
+**Confirmado na fonte convertida:** `watch` armazena nome e rótulo, não valor histórico. O painel consulta o valor atual em cada renderização (`screens/watchpanel.rpy`, linhas 77–103). Similarmente, a tabela de variáveis lê os metadados e resolve o valor por `Var(varName)` (`screens/vars.rpy`, linhas 115–168).
+
+### Limites para a relação com rollback
+
+- `frozen` e `monitor` são regras/configurações mantidas no arquivo URM; as alterações ao valor do jogo passam por rotas do store Ren'Py. Não se deve confundir persistência da regra com persistência do valor.
+- A rota do helper e o callback Python não cobrem necessariamente toda mutação. A fonte convertida de `Var.setValue` usa `exec` para atribuição e `CreateVar` usa `setattr`; a cobertura do monitor nessas ações precisa ser lida em conjunto com a investigação anterior e seu teste reduzido.
+- O callback marca `Context.force_checkpoint` e examina `StoreDict.get_changes`; isso descreve uma solicitação de checkpoint e uma observação de deltas, não prova isoladamente que uma alteração específica foi registrada, restaurada ou exibida ao jogador. A semântica do SDK e os resultados runtime já documentados nos documentos 18–24 continuam sendo o suporte necessário para essas afirmações.
+- `watched` é somente uma lista persistida para exibição/edição rápida. Não é monitoramento de mudanças: a notificação depende da flag `monitor` em `vars`.
+- `ignored` afeta projeções/filtros do URM (PathDetection e CodeView), não seleção de Choice nem execução dos blocos AST, conforme os consumidores examinados.
+
+**Classificação:** consumidores e efeitos acima são **confirmados na fonte URM convertida**. A leitura dinâmica após um `autoLoad` é uma consequência estrutural das referências lazy, ainda não validada numa execução integral do URM. Não se afirma que todos os caminhos de escrita tenham cobertura pelo monitor.
+
+### Fontes verificadas nesta etapa
+
+| Fonte | Símbolos / linhas | Blob SHA |
+|---|---|---|
+| `classes/main.rpy` | `afterLoad`, ordem `StoreMonitor.init` → configurações → `URMFiles.autoLoad` (54–63) | `14f93406d2946eaed664ed72c1d47063984ce24f` |
+| `classes/vars.rpy` | `isFrozen`, `isMonitored`, `watch`, `ignore`; `StoreMonitor.init`, `handleVarChange`, callback (46–119, 492–563) | `57482937e14f215dac0ecb22a62da8ad160cba58` |
+| `classes/PathDetection.rpy` | exclusão de condição via `strContainsIgnored(..., 'path')` (em `nextIfStatement`) | `078950513618fe64f6a9961d77230e4c468a3ab4` |
+| `classes/codeview.rpy` | exclusão de código via `strContainsIgnored(..., 'code')`; links de variáveis | `508783b02b319f3a34c16730c82ef1de1e9fbb45` |
+| `screens/vars.rpy` | metadados/valor, ações freeze/monitor/ignore e edição (115–210) | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
+| `screens/watchpanel.rpy` | rótulo persistido e leitura viva por `Var(varName)` (75–103) | `8cc83f00838ed409183e85e4ebdb37ddf4433823` |
