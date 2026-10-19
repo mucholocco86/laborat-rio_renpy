@@ -463,3 +463,18 @@ jobs:
           result=$?
           echo "END x52 notification save/load probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+      - name: Run x52 notification in-place remove save/load probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START x52 notification remove save/load probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-choice-runtime-probe" test urm_x52_notification_save_load_remove_roundtrip
+          result=$?
+          echo "END x52 notification remove save/load probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
