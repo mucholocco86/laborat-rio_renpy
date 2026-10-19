@@ -340,6 +340,13 @@ O fixture agora acrescenta `ProbeNotifications.clear()` (mesma semântica de atr
 
 - Fixture: commit [6587ae8bbd3199d29d6e19ab7882dc8261511d81](https://github.com/mucholocco86/laborat-rio_renpy/commit/6587ae8bbd3199d29d6e19ab7882dc8261511d81).
 - Workflow: commit [1f6585e91e163b9d97ed9927d0e76c62b9e8c3c6](https://github.com/mucholocco86/laborat-rio_renpy/commit/1f6585e91e163b9d97ed9927d0e76c62b9e8c3c6).
-- Run do workflow: [39214386042](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214386042); resultado ainda em execução na última consulta.
+- Run inicial do workflow: [39214386042](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214386042); falhou por loop no controle de reentrada do fixture, sem chegar ao estado pós-load.
 - **PENDENTE:** verificar se o load conclui e ler `X52_NOTIFICATION_SAVE_AFTER_LOAD`; este probe cobre load na mesma sessão e uma screen com action, não novo processo nem o pacote URM completo.
 
+
+
+#### Correção do fluxo de reentrada
+
+O primeiro run de save/load imprimiu o estado antes do save e depois da mutação pós-save, mas falhou com `Exception: Possible infinite loop.` A execução retomava no statement após `renpy.save`, porém o fixture não checava a flag de reentrada nesse ponto; assim, repetia a mutação e o load continuamente. O log não contém o marcador pós-load e não permite inferir o estado salvo.
+
+A fixture agora segue o padrão já usado pelos roundtrips de containers do mesmo arquivo: logo após `renpy.save`, verifica se a execução está retornando do load e salta à verificação, sem repetir alterações nem chamar load de novo. Correção no commit [ce79b20e3775f2d8fd442a1a043c4f631637148a](https://github.com/mucholocco86/laborat-rio_renpy/commit/ce79b20e3775f2d8fd442a1a043c4f631637148a). O run acionado por essa correção deve substituir o primeiro; até sua conclusão, save/load permanece **PENDENTE**.
