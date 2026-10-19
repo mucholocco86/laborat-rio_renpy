@@ -353,3 +353,22 @@ A fixture agora segue o padrão já usado pelos roundtrips de containers do mesm
 
 
 O segundo run [39214615646](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214615646) também falhou com loop: a flag guardada em `renpy.test.testexecution` não sobreviveu ao load do save com o objeto customizado em teste, e o marker pós-load não foi alcançado. Isso é uma descoberta sobre o mecanismo do harness neste cenário, não sobre a notificação salva. Para evitar repetir o slot, a nova tentativa armazena a guarda em `renpy.session`, estado consultado pelo SDK durante `RollbackLog.unfreeze`; a fixture limpa essa chave antes de iniciar e verifica após o save. Correção no commit [7558d97d6966fa3b1d43679b4eaaef6ba2979499](https://github.com/mucholocco86/laborat-rio_renpy/commit/7558d97d6966fa3b1d43679b4eaaef6ba2979499). Resultado do run acionado por essa mudança ainda pendente.
+
+
+### Save/load com reatribuição após o save — run 39214784786
+
+A terceira execução do testcase de roundtrip, [run 39214784786](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214784786), terminou **SUCCESS** após trocar o marker do harness para `renpy.session` (fixture commit [7558d97d6966fa3b1d43679b4eaaef6ba2979499](https://github.com/mucholocco86/laborat-rio_renpy/commit/7558d97d6966fa3b1d43679b4eaaef6ba2979499)). O log registrou:
+
+```text
+X52_NOTIFICATION_SAVE_BEFORE ProbeNotificationsClass RevertableList [u'Saved notification']
+X52_NOTIFICATION_SAVE_MUTATED_AFTER [u'Post-save notification']
+X52_NOTIFICATION_SAVE_AFTER_LOAD ProbeNotificationsClass RevertableList [u'Post-save notification'] True
+```
+
+**OBSERVADO EM RUNTIME (fixture reduzida, load na mesma sessão):** após salvar com a notificação `Saved notification`, o teste chamou `clear()` (substituição de atributo), acrescentou `Post-save notification` e carregou o slot. Depois do load, o dono ainda expunha uma `RevertableList` contendo `Post-save notification`, e a screen estava ativa. Portanto, nesse caminho do fixture, o load não restaurou o atributo do objeto dono ao valor que existia no save.
+
+**INFERÊNCIA sustentada pelo SDK, ainda não prova do objeto URM integral:** `StoreBackup` usa cópia rasa para os stores, e `clean_stores()` reaplica referências aos mesmos objetos init-only. Como `clear()` substitui `owner.notifications` em um objeto Python comum, essa alteração ao atributo pode permanecer na instância viva durante load na mesma sessão. A lista nova e o append posterior são estados pós-save; este resultado não demonstra que o save preserva os valores originais de qualquer save URM. A screen permaneceu ativa e, após reconstrução, leu a lista atual do owner.
+
+Os runs [39214386042](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214386042) e [39214615646](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214615646) falharam somente por controle de reentrada do fixture e não produziram evidência pós-load. O run 39214784786 é o primeiro resultado válido desse probe.
+
+- **PENDENTE:** comparar com `remove()` in-place sobre a lista existente; executar em processo novo; carregar o URM integralmente e conferir se objetos `Notification` e owner têm a mesma semântica de serialização em runtime.
