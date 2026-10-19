@@ -412,3 +412,33 @@ Como os dois roundtrips na mesma sessão mantiveram o estado pós-save, a fixtur
 
 
 O run [39215399305](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39215399305) não executou os testes: o parser Ren'Py interrompeu a compilação na linha do `raise` Python solto dentro de um `if` de script. A fixture foi corrigida para usar `$ assert renpy.can_load(...)`, commit [403f67b801d5a44c81fa93b23e5007fb43dce6d4](https://github.com/mucholocco86/laborat-rio_renpy/commit/403f67b801d5a44c81fa93b23e5007fb43dce6d4). Esse run é falha de sintaxe do harness e não fornece evidência de runtime; aguardar o run seguinte.
+
+
+### Save/load entre processos — run 39215564208
+
+O run [39215564208](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39215564208) concluiu **SUCCESS** depois da correção de sintaxe no fixture. O workflow executou a criação do slot e o carregamento em dois processos Ren'Py separados, usando a mesma cópia descartável do jogo.
+
+Marcadores relevantes:
+
+```text
+X52_NOTIFICATION_FRESH_SAVE_BEFORE [u'Saved notification']
+X52_NOTIFICATION_FRESH_SAVE_MUTATED_AFTER [u'Post-save notification']
+X52_NOTIFICATION_FRESH_LOAD_BEFORE ProbeNotificationsClass RevertableList []
+X52_NOTIFICATION_FRESH_LOAD_AFTER ProbeNotificationsClass RevertableList [] True
+```
+
+No segundo processo, o singleton iniciado novamente pelo código `init` já apresentava lista vazia antes do load. Depois de carregar o slot, a lista continuou vazia; a screen `urm_x52_notification_overlay_probe` constava ativa.
+
+**OBSERVADO EM RUNTIME (fixture reduzida, processo novo):** neste desenho, o load não repôs `Saved notification` na lista do owner. A conclusão limitada é que a lista/owner do modelo reduzido não teve seu conteúdo do momento do save restaurado no novo singleton.
+
+**Não demonstrado:** o marcador `screen=True` só confirma que a screen existe após o load; o probe não inspecionou seus displayables nem validou se a ação do botão ainda aponta para o objeto de notificação salvo, se foi reconstruída, ou se a screen simplesmente renderizou a lista vazia. Portanto, não concluir que screen e objeto de ação tenham sido restaurados corretamente.
+
+**Relação com o SDK:** o resultado é compatível com o fluxo nativo em que saves persistem roots do store e o RollbackLog, enquanto objetos iniciados em init e não incluídos como roots modificados podem continuar sendo criados no processo novo sem que o conteúdo do singleton seja substituído. A classe-base reduzida reproduz os métodos de serialização identificados em `x52NonPicklable`; o teste não isolou separadamente cada etapa de serialização nem carregou o pacote original do URM. Essa explicação permanece **INFERÊNCIA**, não causa confirmada pelo probe.
+
+A tentativa anterior [39215399305](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39215399305) terminou na compilação do fixture e não executou probes; a correção sintática está no commit [403f67b801d5a44c81fa93b23e5007fb43dce6d4](https://github.com/mucholocco86/laborat-rio_renpy/commit/403f67b801d5a44c81fa93b23e5007fb43dce6d4). O run 39215564208 é o primeiro resultado válido do cenário entre processos.
+
+- **CONFIRMADO NO SDK 7.4.11 (fonte):** o save/load opera sobre roots serializados e o log nativo; stores limpos têm backup raso no ciclo do rollback.
+- **OBSERVADO EM RUNTIME:** no fixture com classes reduzidas, o segundo processo carregou o slot, mas o novo owner permaneceu com lista vazia; a screen aparecia ativa.
+- **HIPÓTESE:** o singleton init-only não faz parte das roots restauradas e mantém o estado inicial do novo processo.
+- **PENDENTE:** inspecionar o conteúdo/ações da screen carregada; repetir com o pacote URM integral; comparar um objeto modificado em store root e um singleton init-only; confirmar exatamente quais objetos/atributos entram no arquivo save e quais permanecem apenas em runtime.
+
