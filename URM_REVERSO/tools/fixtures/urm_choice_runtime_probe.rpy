@@ -1594,3 +1594,58 @@ label urm_x52_notification_save_load_remove_verify:
 testcase urm_x52_notification_save_load_remove_roundtrip:
     $ renpy.session.pop("_urm_x52_notification_save_remove_reentered", None)
     run Jump("urm_x52_notification_save_load_remove_start")
+
+
+# Two-process save/load probe. Step one creates a slot, mutates the live
+# singleton after the save, and exits. A separate Ren'Py process then loads it.
+label urm_x52_notification_fresh_save_start:
+    if renpy.session.get("_urm_x52_notification_fresh_load_marker", False):
+        jump urm_x52_notification_fresh_load_verify
+
+    $ renpy.game.context().rollback = True
+    $ urm_probe_urm.ProbeNotifications.notifications = []
+    $ urm_probe_urm.ProbeNotifications.add("Saved notification", "fresh-process")
+    show screen urm_x52_notification_overlay_probe
+    pause 0.1
+
+    if renpy.can_load("urm-probe-x52-notification-fresh-process"):
+        $ renpy.unlink_save("urm-probe-x52-notification-fresh-process")
+
+    $ print("X52_NOTIFICATION_FRESH_SAVE_BEFORE", [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
+    $ renpy.save("urm-probe-x52-notification-fresh-process")
+
+    if renpy.session.get("_urm_x52_notification_fresh_load_marker", False):
+        jump urm_x52_notification_fresh_load_verify
+
+    $ urm_probe_urm.ProbeNotifications.notifications.remove(urm_probe_urm.ProbeNotifications.notifications[0])
+    $ urm_probe_urm.ProbeNotifications.add("Post-save notification", "fresh-process")
+    $ print("X52_NOTIFICATION_FRESH_SAVE_MUTATED_AFTER", [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
+    $ renpy.quit()
+
+label urm_x52_notification_fresh_load_start:
+    if not renpy.can_load("urm-probe-x52-notification-fresh-process"):
+        raise Exception("Fresh-process probe save slot was not found.")
+    $ print("X52_NOTIFICATION_FRESH_LOAD_BEFORE", type(urm_probe_urm.ProbeNotifications).__name__, type(urm_probe_urm.ProbeNotifications.notifications).__name__, [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
+    $ renpy.session["_urm_x52_notification_fresh_load_marker"] = True
+    $ renpy.load("urm-probe-x52-notification-fresh-process")
+
+label urm_x52_notification_fresh_load_verify:
+    python:
+        owner = urm_probe_urm.ProbeNotifications
+        notifications = getattr(owner, "notifications", None)
+        if notifications is None:
+            result_type = "missing"
+            result_labels = []
+        else:
+            result_type = type(notifications).__name__
+            result_labels = [getattr(n, "label", "<missing-label>") for n in notifications]
+        print("X52_NOTIFICATION_FRESH_LOAD_AFTER", type(owner).__name__, result_type, result_labels, renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    $ renpy.quit()
+
+testcase urm_x52_notification_fresh_process_save:
+    $ renpy.session.pop("_urm_x52_notification_fresh_load_marker", None)
+    run Jump("urm_x52_notification_fresh_save_start")
+
+testcase urm_x52_notification_fresh_process_load:
+    $ renpy.session.pop("_urm_x52_notification_fresh_load_marker", None)
+    run Jump("urm_x52_notification_fresh_load_start")
