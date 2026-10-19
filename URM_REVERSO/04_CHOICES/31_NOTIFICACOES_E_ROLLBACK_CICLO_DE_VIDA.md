@@ -325,3 +325,21 @@ A comparação também revela uma diferença funcional de interesse: com screen 
 O run anterior [39177581946](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39177581946) falhou antes da verificação porque os probes clear/remove não habilitavam rollback. A correção de fixture está no commit [8ee3804dadb2320f574ef6550f71f38ba10e9bac](https://github.com/mucholocco86/laborat-rio_renpy/commit/8ee3804dadb2320f574ef6550f71f38ba10e9bac). O run 39205520906, com todos os três passos concluídos, substitui esses resultados inválidos.
 
 - **PENDENTE:** validar a diferença no pacote URM carregado integralmente; repetir timeout em múltiplos atrasos relativos ao checkpoint/rollback; testar add → clear → rollback com a screen real; estudar save/load.
+
+
+### Probe de save/load em preparação (2026-10-19)
+
+A inspeção do SDK especifica o que será medido no novo roundtrip:
+
+- `RollbackLog.freeze` chama `complete(False)`, obtém roots via `get_roots()` e executa `purge_unreachable(roots)`. O método `get_roots()` inclui variáveis do store alteradas depois de init e roots dinâmicas de contexto; mutação interna de um objeto, isoladamente, não torna o nome do singleton root de store.
+- `reached()` percorre `vars(obj).values()`, então um objeto alcançado por uma screen pode levar a travessia até `Notification → NotificationsClass → notifications`; `NoRollback` interromperia esse caminho, mas a base convertida do URM não é `NoRollback`.
+- `StoreBackup` copia os dicionários de store com `dict(d)`, portanto é cópia rasa: referências a objetos init-only permanecem apontando para as instâncias existentes durante o load na mesma sessão.
+- `RollbackLog.unfreeze` restaura stores limpos e aplica roots e snapshots carregados. O screen/displayable também pode ser reconstruído; o save não equivale a serializar diretamente a árvore visual inteira.
+
+O fixture agora acrescenta `ProbeNotifications.clear()` (mesma semântica de atribuição da fonte convertida) e um testcase de roundtrip: mantém um aviso visível no momento do save, substitui a lista e adiciona outro aviso, carrega o slot e imprime tipo/labels da lista e presença da screen. O teste não afirma antecipadamente se o estado esperado é o do save, o pós-save ou ausência de atributos serializados.
+
+- Fixture: commit [6587ae8bbd3199d29d6e19ab7882dc8261511d81](https://github.com/mucholocco86/laborat-rio_renpy/commit/6587ae8bbd3199d29d6e19ab7882dc8261511d81).
+- Workflow: commit [1f6585e91e163b9d97ed9927d0e76c62b9e8c3c6](https://github.com/mucholocco86/laborat-rio_renpy/commit/1f6585e91e163b9d97ed9927d0e76c62b9e8c3c6).
+- Run do workflow: [39214386042](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214386042); resultado ainda em execução na última consulta.
+- **PENDENTE:** verificar se o load conclui e ler `X52_NOTIFICATION_SAVE_AFTER_LOAD`; este probe cobre load na mesma sessão e uma screen com action, não novo processo nem o pacote URM completo.
+
