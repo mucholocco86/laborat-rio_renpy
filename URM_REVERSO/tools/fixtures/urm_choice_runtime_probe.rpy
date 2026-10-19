@@ -1623,8 +1623,7 @@ label urm_x52_notification_fresh_save_start:
     $ renpy.quit()
 
 label urm_x52_notification_fresh_load_start:
-    if not renpy.can_load("urm-probe-x52-notification-fresh-process"):
-        raise Exception("Fresh-process probe save slot was not found.")
+    $ assert renpy.can_load("urm-probe-x52-notification-fresh-process")
     $ print("X52_NOTIFICATION_FRESH_LOAD_BEFORE", type(urm_probe_urm.ProbeNotifications).__name__, type(urm_probe_urm.ProbeNotifications.notifications).__name__, [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
     $ renpy.session["_urm_x52_notification_fresh_load_marker"] = True
     $ renpy.load("urm-probe-x52-notification-fresh-process")
