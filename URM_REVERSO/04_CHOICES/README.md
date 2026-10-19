@@ -355,3 +355,8 @@ A revisão estática do save/load no documento 31 localizou outra pendência: o 
 
 
 **Callback pós-load do URM — run 39230107907:** `main.rpy` registra `afterLoad` em `config.after_load_callbacks`; o Ren'Py 7.4.11 executa esses callbacks em `_after_load`. `afterLoad` mostra `URM_overlay`, que inclui `URM_notifications`. O fixture reproduziu esse callback em processo novo: callback executado, lista vazia, screen presente e botão da notificação ausente. Esse resultado é runtime da fixture reduzida, não prova do pacote URM integral. Fontes e limites no [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md).
+
+
+**Estado `.urm` versus notificações temporárias:** a revisão de `afterLoad()` confirmou que `URMFiles.autoLoad()` carrega stores JSON do arquivo próprio do URM; a lista `NotificationsClass.notifications` permanece em outro singleton e não é serializada pelos métodos de `URMFile` examinados. O teste de callback do run 39230107907 não carregou `.urm` nem executou integralmente `afterLoad()`. Ver [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md#callback-de-load-e-arquivo-urm-são-canais-de-estado-distintos).
+
+**Limite para integração runtime completa:** o `main.rpy` convertido espera módulos dinâmicos e 17 fontes `.rpy.x52` em `0x52-URM/`; o workflow atual roda somente a fixture no jogo de teste do SDK. Nenhum `.rpy` convertido foi renomeado para forjar os assets originais. Consulte o limite e os SHAs no [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md#limite-atual-para-integração-runtime-do-urm-integral--inspeção-do-loader).
