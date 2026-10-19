@@ -352,3 +352,6 @@ A revisão estática do save/load no documento 31 localizou outra pendência: o 
 
 
 **Reconstrução da screen após load — run 39229685100:** o fixture consultou o widget identificado após load em processo novo. A screen existia, mas o botão de notificação não; a asserção passou. O SDK 7.4.11 exclui os widgets filhos do estado serializado e os reconstrói executando novamente a função da screen. Na fixture, essa reconstrução leu o singleton recém-iniciado com lista vazia. Isso fecha a lacuna do probe anterior, mas ainda não valida a screen do pacote URM integral. Fontes, linhas e limites no [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md).
+
+
+**Callback pós-load do URM — run 39230107907:** `main.rpy` registra `afterLoad` em `config.after_load_callbacks`; o Ren'Py 7.4.11 executa esses callbacks em `_after_load`. `afterLoad` mostra `URM_overlay`, que inclui `URM_notifications`. O fixture reproduziu esse callback em processo novo: callback executado, lista vazia, screen presente e botão da notificação ausente. Esse resultado é runtime da fixture reduzida, não prova do pacote URM integral. Fontes e limites no [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md).
