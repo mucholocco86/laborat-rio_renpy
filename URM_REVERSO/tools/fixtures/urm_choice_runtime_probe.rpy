@@ -1510,7 +1510,7 @@ testcase urm_x52_notification_timeout_rollback:
 # Save while the URM-shaped notification list is reachable through a visible
 # action, mutate it after save, then load and report the restored graph.
 label urm_x52_notification_save_load_start:
-    if renpy.test.testexecution.urm_x52_notification_save_reentered:
+    if renpy.session.get("_urm_x52_notification_save_reentered", False):
         jump urm_x52_notification_save_load_verify
 
     $ renpy.game.context().rollback = True
@@ -1525,10 +1525,10 @@ label urm_x52_notification_save_load_start:
     $ print("X52_NOTIFICATION_SAVE_BEFORE", type(urm_probe_urm.ProbeNotifications).__name__, type(urm_probe_urm.ProbeNotifications.notifications).__name__, [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
     $ renpy.save("urm-probe-x52-notification-roundtrip")
 
-    if renpy.test.testexecution.urm_x52_notification_save_reentered:
+    if renpy.session.get("_urm_x52_notification_save_reentered", False):
         jump urm_x52_notification_save_load_verify
 
-    $ renpy.test.testexecution.urm_x52_notification_save_reentered = True
+    $ renpy.session["_urm_x52_notification_save_reentered"] = True
     $ urm_probe_urm.ProbeNotifications.clear()
     $ urm_probe_urm.ProbeNotifications.add("Post-save notification", "before-load")
     $ print("X52_NOTIFICATION_SAVE_MUTATED_AFTER", [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
@@ -1548,5 +1548,5 @@ label urm_x52_notification_save_load_verify:
     $ renpy.quit()
 
 testcase urm_x52_notification_save_load_roundtrip:
-    $ renpy.test.testexecution.urm_x52_notification_save_reentered = False
+    $ renpy.session.pop("_urm_x52_notification_save_reentered", None)
     run Jump("urm_x52_notification_save_load_start")
