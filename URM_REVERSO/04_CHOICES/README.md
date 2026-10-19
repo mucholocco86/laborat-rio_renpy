@@ -363,3 +363,10 @@ A revisão estática do save/load no documento 31 localizou outra pendência: o 
 
 
 **Possível lacuna na marcação de `.urm` como alterado:** `freeze/unfreeze/monitor/unmonitor` editam metadados aninhados quando a variável já está lembrada, sem passar pelos mutadores externos que ativam `URMFileStore.unsaved`; `watch` e `ignore/unignore` seguem rotas que marcam a flag. Confirmado na fonte convertida; o efeito de UI está pendente. A gravação manual percorre todos os stores não vazios mesmo quando `unsaved` é falso; a hipótese é que o indicador/aviso de descarte pode não refletir a edição. Fixture isolada e workflow criados para comparar as rotas. Detalhes em [06 — stores de variáveis e monitoramento](../06_VARIABLES/01_URM_STORES_MONITORAMENTO_E_SUBSTITUICAO_DE_TEXTO.md#6-alterações-aninhadas-e-flag-unsaved-do-arquivo-urm).
+
+
+### Continuação de 2026-10-19 — consumidores de metadados `vars`/ `watched`
+
+A leitura de `afterLoad`, `StoreMonitor`, `PathDetection`, `CodeView` e das telas confirmou onde os metadados de acompanhamento são consumidos. `frozen` e `monitor` são consultados sob demanda pelo monitor; `ignored` filtra condições/código apresentados pelo URM; `watched` guarda rótulos e o painel resolve valores atuais do store. Isso separa preferências persistidas no `.urm` de estado do jogo sujeito a rollback. Veja a seção 7 do documento [Stores, monitoramento e substituição de texto](../06_VARIABLES/01_URM_STORES_MONITORAMENTO_E_SUBSTITUICAO_DE_TEXTO.md).
+
+**Pendente:** runtime integral do URM confirmando leitura dos metadados depois de `autoLoad`; cobertura do StoreMonitor por rota de escrita; e efeitos ponta a ponta no rollback. Os testes reduzidos do SDK mencionados nos documentos 22–24 não equivalem a uma execução do pacote original convertido.
