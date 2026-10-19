@@ -1550,3 +1550,47 @@ label urm_x52_notification_save_load_verify:
 testcase urm_x52_notification_save_load_roundtrip:
     $ renpy.session.pop("_urm_x52_notification_save_reentered", None)
     run Jump("urm_x52_notification_save_load_start")
+
+
+# Paired roundtrip: mutate the existing RevertableList in place after save.
+label urm_x52_notification_save_load_remove_start:
+    if renpy.session.get("_urm_x52_notification_save_remove_reentered", False):
+        jump urm_x52_notification_save_load_remove_verify
+
+    $ renpy.game.context().rollback = True
+    $ urm_probe_urm.ProbeNotifications.notifications = []
+    $ urm_probe_urm.ProbeNotifications.add("Saved notification", "before-load")
+    show screen urm_x52_notification_overlay_probe
+    pause 0.1
+
+    if renpy.can_load("urm-probe-x52-notification-remove-roundtrip"):
+        $ renpy.unlink_save("urm-probe-x52-notification-remove-roundtrip")
+
+    $ print("X52_NOTIFICATION_REMOVE_SAVE_BEFORE", [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
+    $ renpy.save("urm-probe-x52-notification-remove-roundtrip")
+
+    if renpy.session.get("_urm_x52_notification_save_remove_reentered", False):
+        jump urm_x52_notification_save_load_remove_verify
+
+    $ renpy.session["_urm_x52_notification_save_remove_reentered"] = True
+    $ urm_probe_urm.ProbeNotifications.notifications.remove(urm_probe_urm.ProbeNotifications.notifications[0])
+    $ urm_probe_urm.ProbeNotifications.add("Post-save notification", "after-remove")
+    $ print("X52_NOTIFICATION_REMOVE_SAVE_MUTATED_AFTER", [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
+    $ renpy.load("urm-probe-x52-notification-remove-roundtrip")
+
+label urm_x52_notification_save_load_remove_verify:
+    python:
+        owner = urm_probe_urm.ProbeNotifications
+        notifications = getattr(owner, "notifications", None)
+        if notifications is None:
+            result_type = "missing"
+            result_labels = []
+        else:
+            result_type = type(notifications).__name__
+            result_labels = [getattr(n, "label", "<missing-label>") for n in notifications]
+        print("X52_NOTIFICATION_REMOVE_SAVE_AFTER_LOAD", type(owner).__name__, result_type, result_labels, renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+    $ renpy.quit()
+
+testcase urm_x52_notification_save_load_remove_roundtrip:
+    $ renpy.session.pop("_urm_x52_notification_save_remove_reentered", None)
+    run Jump("urm_x52_notification_save_load_remove_start")
