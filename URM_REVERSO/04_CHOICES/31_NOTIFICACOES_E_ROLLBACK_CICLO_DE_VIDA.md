@@ -372,3 +372,12 @@ X52_NOTIFICATION_SAVE_AFTER_LOAD ProbeNotificationsClass RevertableList [u'Post-
 Os runs [39214386042](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214386042) e [39214615646](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214615646) falharam somente por controle de reentrada do fixture e não produziram evidência pós-load. O run 39214784786 é o primeiro resultado válido desse probe.
 
 - **PENDENTE:** comparar com `remove()` in-place sobre a lista existente; executar em processo novo; carregar o URM integralmente e conferir se objetos `Notification` e owner têm a mesma semântica de serialização em runtime.
+
+
+### Probe pareado de save/load para remove in-place
+
+O teste anterior altera o atributo com `clear()` após o save e observa que o load na mesma sessão manteve a nova lista. Para separar esse resultado da semântica de `RevertableList`, foi acrescentado um roundtrip pareado: salva a lista existente com `Saved notification`; após o save, remove esse objeto da mesma lista in-place e acrescenta `Post-save notification`; carrega o slot e reporta os labels e o tipo da lista.
+
+- Fixture commit [05f7603ca0e4b6243cbc04dbb5b62071e043081c](https://github.com/mucholocco86/laborat-rio_renpy/commit/05f7603ca0e4b6243cbc04dbb5b62071e043081c).
+- Workflow commit [937afcdf65a3e7cd05892ab973a0975c13e69329](https://github.com/mucholocco86/laborat-rio_renpy/commit/937afcdf65a3e7cd05892ab973a0975c13e69329).
+- **PENDENTE:** run acionado pelo workflow update, incluindo os marcadores `X52_NOTIFICATION_REMOVE_SAVE_AFTER_LOAD`.
