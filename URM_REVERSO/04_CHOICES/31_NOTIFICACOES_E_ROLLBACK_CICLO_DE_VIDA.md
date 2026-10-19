@@ -400,3 +400,12 @@ X52_NOTIFICATION_REMOVE_SAVE_AFTER_LOAD ProbeNotificationsClass RevertableList [
 A comparação não mostrou diferença entre atribuir lista nova e mutar a atual no caso de load na mesma sessão. A diferença anterior entre `clear()` (não revertido) e `remove()` (revertido) permanece válida para rollback de gameplay, mas não se transfere automaticamente para load de save. O experimento seguinte precisa começar um processo Ren'Py novo e carregar o slot criado pelo processo anterior.
 
 - **PENDENTE:** fresh-process load do mesmo slot; teste do URM integral; separar como snapshots de lista alcançáveis são serializados e reconstituídos.
+
+
+### Probe entre processos separados em preparação
+
+Como os dois roundtrips na mesma sessão mantiveram o estado pós-save, a fixture foi estendida para um teste com dois processos Ren'Py separados e o mesmo diretório de jogo descartável: o primeiro cria o slot com `Saved notification`, remove o elemento in-place, acrescenta `Post-save notification` e encerra; o segundo inicia com o singleton recém-criado por init, carrega o mesmo slot e registra o conteúdo restaurado.
+
+- Fixture commit [e2a8406a48a6635e2221bd3bf34043c87ebeeec5](https://github.com/mucholocco86/laborat-rio_renpy/commit/e2a8406a48a6635e2221bd3bf34043c87ebeeec5).
+- Workflow commit [83f22cd90357dd5b64cd727415972bc39b6248c0](https://github.com/mucholocco86/laborat-rio_renpy/commit/83f22cd90357dd5b64cd727415972bc39b6248c0).
+- **PENDENTE:** confirmar que o slot está visível ao segundo processo e ler os marcadores `X52_NOTIFICATION_FRESH_LOAD_BEFORE/AFTER`.
