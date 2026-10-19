@@ -265,7 +265,7 @@ Isso permite duas rotas possíveis, ainda não distinguidas em runtime: (a) a in
 | Fonte | Símbolos / intervalo | Blob SHA |
 |---|---|---|
 | SDK 7.4.11 `renpy/loadsave.py` | `save`, linhas 373–410; `load`, linha 762 em diante | `c8b831ebfd5487f11a1d4dde8c87cde7f7ed93e3` |
-| SDK 7.4.11 `renpy/python.py` | `StoreBackup`, linha 260 em diante; `clean_stores`, linha 323; `RollbackLog.get_roots`, linhas 1757–1777; `freeze/unfreeze` | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+| SDK 7.4.11 `renpy/python.py` | `store_dicts/store_modules`, linhas 205–207; `StoreBackup`, linha 260 em diante; `clean_stores`, linha 323; `RollbackLog.get_roots`, linhas 1757–1777; `freeze/unfreeze` | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
 | SDK 7.4.11 `renpy/display/screen.py` | `ScreenDisplayable`, linhas 290–315+; `nosave` exclui widgets/filhos; `after_setstate` reconstrói | `cf7997b04c3b17a337809f58aa6591ccd58a15a7` |
 | URM convertido `classes/main.rpy` | instanciação de `Notifications`, linha 38 | `14f93406d2946eaed664ed72c1d47063984ce24f` |
 | URM convertido `framework/modules/01utils.rpy` | `x52NonPicklable.__getstate__/__setstate__`, linhas 10–21 | `e558a2d5a5137608e542238a1d81fd65e6db349d` |
