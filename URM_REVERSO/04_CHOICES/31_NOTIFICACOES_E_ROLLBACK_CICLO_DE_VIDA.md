@@ -544,3 +544,30 @@ A conferência do caminho de carga confirma por que os probes de notificação p
 | README `2_URM_X52_CONVERTIDO` | localização/propósito da árvore convertida | `9b23130ab12cf47964b179ba1129528d8720bb47` |
 | `.github/workflows/urm-choice-runtime-probe.yml` | cópia do jogo base e instalação exclusiva da fixture | `4fb78bb48cf695cde87ec0f9d7f84df0aa6bef64` |
 | README `1_URM_ORIGINAL` | instrução para preservar material original | `362d0c0f675ffd6cdf06da804ea57fad0307ef7e` |
+
+
+### Callback de load e arquivo .urm são canais de estado distintos
+
+A inspeção do callback real revelou que `afterLoad()` também chama `URMFiles.autoLoad()`. Segui essa chamada para separar o estado persistido pelo URM da lista temporária de notificações:
+
+- `URMFilesClass.autoLoad()` só tenta carregar `Settings.lastLoadedFile` quando o arquivo atual não tem alterações pendentes e o nome do arquivo salvo difere.
+- `URMFilesClass.load()` lê o `.urm` mais recente da pasta `game/` ou do diretório de saves do URM; o formato é um ZIP com entradas JSON, carregadas como `URMFileStore`.
+- `URMFile.save()` grava as entradas presentes em `URMFile._stores` como arquivos JSON dentro do ZIP. Os stores `vars`, `watched`, `labels` e `replacements` são estruturas de dados das ferramentas do URM.
+- Separadamente, `main.rpy` cria `Notifications = NotificationsClass()`; `NotificationsClass.__init__()` cria `self.notifications = []`. `add`, `remove` e `clear` operam nessa lista. Nos caminhos examinados não há chamada que acrescente essa lista/objetos ao `URMFile` ou aos stores JSON.
+
+**CONFIRMADO NA FONTE URM CONVERTIDA:** `afterLoad()` tem dois efeitos relevantes: reabrir a interface e chamar `autoLoad()` para o arquivo de configuração/estado das ferramentas. O conteúdo `.urm` percorre o grafo `URMFiles.file → stores → JSON`; a lista de avisos pertence ao objeto singleton `Notifications` e não aparece nesse caminho de serialização observado.
+
+**INFERÊNCIA delimitada:** carregar o último `.urm` pode restaurar metadados das ferramentas (por exemplo, variáveis lembradas/monitoradas e outras configurações presentes nos stores), mas a fonte examinada não indica que isso repovoe notificações pendentes. A ausência de uma chamada nos caminhos examinados não exclui extensões externas ou código dinâmico ainda não analisado.
+
+**Correção de escopo para o run 39230107907:** o probe reproduziu o callback e a reabertura de uma screen que consulta a lista; não reproduziu `StoreMonitor.init()`, ajustes de tema, `URMFiles.autoLoad()` nem telas de boas-vindas/atualização. Portanto, seu resultado continua sendo runtime da fixture reduzida; o exame estático do callback completo mostra que o autoLoad tem um canal separado da lista, mas não transforma o probe em integração URM.
+
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** `.urm` armazena stores serializados em JSON; `NotificationsClass.notifications` fica em outro objeto e não é serializada pelos métodos observados de `URMFile`.
+- **CONFIRMADO NO SDK 7.4.11:** save nativo e restauração do rollback usam as estruturas do Ren'Py examinadas anteriormente; não se deve usar o arquivo `.urm` como sinônimo de save nativo.
+- **PENDENTE:** validar em runtime a carga de um `.urm` real e uma edição de variável/condição associada; verificar se algum store dinâmico do URM acrescenta referência indireta à lista de notificações.
+
+| Fonte | Símbolos / evidência | Blob SHA |
+|---|---|---|
+| URM convertido `classes/notifications.rpy` | `NotificationsClass`, `Notification`, lista e métodos add/remove/clear | `3283ec4b1615967a71ad21cc34670bf8158ab96d` |
+| URM convertido `classes/URMFiles.rpy` | `autoLoad`, `load`, `URMFile.save/load`, `URMFileStore.toJSON` | `888aba28d9d2e7870d8c4e6526417390179cd326` |
+| URM convertido `classes/vars.rpy` | `VarsStoreClass.store/watchedStore` vinculados aos stores do URMFile | `57482937e14f215dac0ecb22a62da8ad160cba58` |
+| URM convertido `classes/main.rpy` | instanciação de `Notifications`; chamada a `URMFiles.autoLoad()` em `afterLoad` | `14f93406d2946eaed664ed72c1d47063984ce24f` |
