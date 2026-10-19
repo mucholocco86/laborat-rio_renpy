@@ -1417,6 +1417,7 @@ testcase urm_x52_displayed_notification_list_rollback:
 # clear() probe mirrors NotificationsClass.clear(): replace the owner's list
 # attribute rather than mutating the existing RevertableList in place.
 label urm_x52_notification_clear_rollback_start:
+    $ renpy.game.context().rollback = True
     $ urm_probe_urm.ProbeNotifications.notifications = []
     $ urm_probe_urm.ProbeNotifications.add("Before clear", "clear_rollback_probe")
     show screen urm_x52_notification_overlay_probe
@@ -1444,6 +1445,7 @@ testcase urm_x52_notification_clear_rollback:
 
 # remove() probe mutates the existing RevertableList in place, unlike clear().
 label urm_x52_notification_remove_rollback_start:
+    $ renpy.game.context().rollback = True
     $ urm_probe_urm.ProbeNotifications.notifications = []
     $ urm_probe_urm.ProbeNotifications.add("Before remove", "remove_rollback_probe")
     show screen urm_x52_notification_overlay_probe
