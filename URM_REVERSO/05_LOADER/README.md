@@ -22,3 +22,8 @@ Próximas questões:
 4. investigar o ajuste de `renpy.game.script.digest` quando o archive não é localizado.
 
 A existência de um loader URM não significa que seus sufixos sejam recursos nativos do Ren'Py. Um futuro loader WF deve ter especificação e testes próprios.
+
+
+## Limite atual da validação runtime
+
+A fixture de notificações roda no jogo de teste do SDK e não carrega os módulos dinâmicos do URM. O `classes/main.rpy` convertido solicita 17 arquivos `.rpy.x52` em `0x52-URM/`, além da expansão do catálogo declarada em `framework/bootstrap.rpy`. Os caminhos presumidos para `01utils.x52rpy`, `URM_styles.rpy.x52` e `screens/watchpanel.rpy.x52` sob a árvore publicada de material original retornaram 404; isso não prova que não exista uma cópia em outro local. Por segurança metodológica, nenhum `.rpy` convertido será renomeado para simular esses assets. Os limites e SHAs consultados estão registrados no [documento 31 de notificações e rollback](../04_CHOICES/31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md#limite-atual-para-integração-runtime-do-urm-integral--inspeção-do-loader).
