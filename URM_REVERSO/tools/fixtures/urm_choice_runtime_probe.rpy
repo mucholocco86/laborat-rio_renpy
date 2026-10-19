@@ -1525,6 +1525,9 @@ label urm_x52_notification_save_load_start:
     $ print("X52_NOTIFICATION_SAVE_BEFORE", type(urm_probe_urm.ProbeNotifications).__name__, type(urm_probe_urm.ProbeNotifications.notifications).__name__, [n.label for n in urm_probe_urm.ProbeNotifications.notifications])
     $ renpy.save("urm-probe-x52-notification-roundtrip")
 
+    if renpy.test.testexecution.urm_x52_notification_save_reentered:
+        jump urm_x52_notification_save_load_verify
+
     $ renpy.test.testexecution.urm_x52_notification_save_reentered = True
     $ urm_probe_urm.ProbeNotifications.clear()
     $ urm_probe_urm.ProbeNotifications.add("Post-save notification", "before-load")
