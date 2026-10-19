@@ -60,3 +60,30 @@ O callback Python (`vars.rpy` 540–563) ativa `renpy.game.context().force_check
 5. Rastrear se o estado de `watch`, `monitor`, `freeze` é restaurado ao abrir arquivos `.urm` e quando as interfaces os leem.
 
 **Classificação:** fatos marcados como confirmados referem-se à fonte convertida. **Nenhum resultado de execução nem equivalência entre SDKs foi afirmado.**
+
+
+## 6. Rastreamento de alterações aninhadas no store `vars` — revisão estática
+
+A inspeção do store `.urm` revelou uma diferença entre alterar a entrada externa e alterar um metadado dentro da entrada:
+
+- `URMFileStore` mantém a flag `unsaved` e a altera nos métodos externos `__setitem__`, `__delitem__`, `update` e `clear` (`URMFiles.rpy`, 194–215).
+- Ao carregar JSON, `URMFile.load()` envolve cada store em `URMFileStore`, usando `object_pairs_hook=OrderedDict` para os mapas JSON (`URMFiles.rpy`, 367). Os mapas por variável são objetos aninhados, não o próprio `URMFileStore` externo.
+- `VarsStore.freeze()` e `monitor()` só chamam `remember()` quando a variável ainda não está cadastrada. Para variável já lembrada, alteram diretamente `self.store[varName]['frozen']` ou `['monitor']`; `unfreeze()` e `unmonitor()` removem essas chaves aninhadas (`vars.rpy`, 46–69). Essas quatro rotas não chamam `self.store.unsaved = True`.
+- Em contraste, `watch()` atribui uma chave de primeiro nível a `watchedStore`, ativando `URMFileStore.__setitem__`; `ignore()` e `unignore()` definem explicitamente `self.store.unsaved = True` (`vars.rpy`, 79–119).
+- `URMFile.unsaved` deriva das flags dos stores (`URMFiles.rpy`, 260–275). A UI mostra o asterisco conforme `file.unsaved` (`screens/main.rpy`, 135–137); `clear()` e a abertura do seletor de arquivo também consultam essa flag antes de descartar ou trocar o estado (`URMFiles.rpy`, 66–70 e 93–103).
+
+### Consequência delimitada
+
+**CONFIRMADO NA FONTE URM CONVERTIDA:** se a entrada da variável já existe e o store começa com `unsaved=False`, os caminhos de `freeze`, `unfreeze`, `monitor` e `unmonitor` alteram uma estrutura aninhada sem executar nenhum dos métodos externos que marcam o store como alterado; eles também não contêm marcação explícita. Na leitura estática, portanto, esses caminhos podem deixar `URMFile.unsaved` falso apesar da mudança do metadado. Se a variável ainda não foi lembrada, a chamada a `remember()` cria/substitui a entrada externa e marca `unsaved=True`; esse caso é diferente.
+
+**HIPÓTESE de efeito na interface/persistência:** para um arquivo `.urm` carregado com variável já lembrada, alternar freeze/monitor pode não acender o indicador de alteração e pode não acionar as proteções baseadas em `file.unsaved`. Isso pode resultar em metadados não gravados ao fechar/trocar de arquivo sem salvar. A conclusão depende do comportamento real dessas classes e dos caminhos de UI em runtime.
+
+**PENDENTE DE RUNTIME:** preparar fixture isolada Ren’Py 7.4.11 com `URMFileStore` reduzido e um registro já carregado; comparar as flags `unsaved` após freeze/monitor/unfreeze/unmonitor versus watch/ignore. Em seguida, validar o indicador/aviso de troca de arquivo com o pacote real, se os assets dinâmicos estiverem disponíveis. Nenhuma fonte original ou implementação Wells deve ser alterada.
+
+| Fonte | Símbolos / linhas | Blob SHA |
+|---|---|---|
+| URM convertido `classes/vars.rpy` | `freeze`, `unfreeze`, `monitor`, `unmonitor`, `watch`, `ignore`, `unignore` (46–119) | `57482937e14f215dac0ecb22a62da8ad160cba58` |
+| URM convertido `classes/URMFiles.rpy` | leitura JSON (367); `URMFileStore` (194–215); agregação `unsaved` (260–275); `autoLoad/clear/Load` (61–103) | `888aba28d9d2e7870d8c4e6526417390179cd326` |
+| URM convertido `screens/main.rpy` | indicador de arquivo alterado (135–137) | `ceb5dc63b3691a4b6244345e1c5a3e3b9d149291` |
+| URM convertido `screens/vars.rpy` | tabela `vars`, ações freeze/monitor/watch/edit (115–178) | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
+| URM convertido `screens/watchpanel.rpy` | leitura dinâmica dos nomes acompanhados e `Var(varName).getButtonValue()` (89–103) | `8cc83f00838ed409183e85e4ebdb37ddf4433823` |
