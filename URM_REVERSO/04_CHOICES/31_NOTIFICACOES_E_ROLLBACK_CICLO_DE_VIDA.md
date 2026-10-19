@@ -442,3 +442,40 @@ A tentativa anterior [39215399305](https://github.com/mucholocco86/laborat-rio_r
 - **HIPÓTESE:** o singleton init-only não faz parte das roots restauradas e mantém o estado inicial do novo processo.
 - **PENDENTE:** inspecionar o conteúdo/ações da screen carregada; repetir com o pacote URM integral; comparar um objeto modificado em store root e um singleton init-only; confirmar exatamente quais objetos/atributos entram no arquivo save e quais permanecem apenas em runtime.
 
+
+
+### Reconstrução da screen após load — run 39229685100
+
+A execução [39229685100](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39229685100) passou com uma checagem adicional da screen. O fixture deu um ID explícito ao botão de notificação e, após o load em processo novo, consultou esse widget via `renpy.display.screen.get_widget`.
+
+Marcador:
+
+```text
+X52_NOTIFICATION_FRESH_LOAD_AFTER ProbeNotificationsClass RevertableList [] True False
+```
+
+Os últimos valores indicam: screen encontrada (`True`); widget de ação da notificação encontrado (`False`). A fixture exigiu que esse widget estivesse ausente e terminou com código 0.
+
+#### O que o SDK explica
+
+Na implementação 7.4.11:
+
+- `renpy/display/screen.py`, `ScreenDisplayable.nosave`, exclui `child`, `children`, `widgets`, transforms e caches da serialização da screen.
+- `ScreenDisplayable.after_setstate()` relocaliza a definição da screen por nome, limpa `child`, recria coleções de widgets e deixa a fase em `UPDATE`.
+- `ScreenDisplayable.update()` executa novamente `self.screen.function(**self.scope)`, reconstruindo os widgets.
+- `get_displayable()/get_widget()` chama `screen.update()` quando `screen.child is None`, depois procura o ID solicitado em `screen.widgets`.
+
+**CONFIRMADO NO SDK 7.4.11 (fonte):** a presença de um `ScreenDisplayable` após load não implica que seu antigo widget/action tenha sido preservado. O displayable da screen pode ser restaurado e os filhos regenerados pela função da screen.
+
+**OBSERVADO EM RUNTIME (fixture reduzida, fresh-process load):** a consulta de widget forçou a reconstrução e não encontrou o botão porque o novo singleton estava com a lista vazia. Isso demonstra o caminho de reconstrução no harness e responde à questão que o run 39215564208 deixava em aberto. Não valida o pacote URM integral.
+
+**Interpretação delimitada:** a screen do fixture não recebe notificações em argumentos salvos; sua definição percorre a lista no singleton de módulo. Ao ser reconstruída no segundo processo, ela encontrou a lista atual vazia e, portanto, não criou o botão. Esse resultado é compatível com o comportamento que se espera do padrão `URM_notifications`, mas a equivalência permanece inferência até carregar a screen e classes originais do URM em runtime.
+
+O commit da fixture é [e1102f73ae6ca75096026f6720eee8d41d6f8ec4](https://github.com/mucholocco86/laborat-rio_renpy/commit/e1102f73ae6ca75096026f6720eee8d41d6f8ec4).
+
+| Fonte | Símbolos / linhas | Blob SHA |
+|---|---|---|
+| Ren'Py 7.4.11 `renpy/display/screen.py` | `ScreenDisplayable.nosave`, `after_setstate` (290–328); `update` (568–676); `get_displayable/get_widget` (1292–1332) | `cf7997b04c3b17a337809f58aa6591ccd58a15a7` |
+| Ren'Py 7.4.11 `renpy/display/core.py` | `SceneLists.after_setstate` (799–820) | `14c920f9fe8c95627a698bd56a1e61c7f4b02074` |
+
+- **PENDENTE:** repetir com o pacote URM real e inspecionar o resultado visual/interativo da screen após load; verificar separadamente telas com argumentos/scope contendo referências explícitas a objetos de notificação.
