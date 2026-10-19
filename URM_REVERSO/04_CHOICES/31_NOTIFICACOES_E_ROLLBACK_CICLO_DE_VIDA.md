@@ -271,3 +271,24 @@ Isso permite duas rotas possíveis, ainda não distinguidas em runtime: (a) a in
 | URM convertido `classes/main.rpy` | instanciação de `Notifications`, linha 38 | `14f93406d2946eaed664ed72c1d47063984ce24f` |
 | URM convertido `framework/modules/01utils.rpy` | `x52NonPicklable.__getstate__/__setstate__`, linhas 10–21 | `e558a2d5a5137608e542238a1d81fd65e6db349d` |
 
+
+
+### Revisão dos probes clear/remove: falha de configuração do harness (2026-10-19)
+
+Os runs [39161531256](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39161531256), [39170207046](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39170207046) e [39177581946](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39177581946) falharam no mesmo passo: o probe de `clear()`. Os logs mostram que os passos anteriores passaram, inclusive o probe com screen visível. O passo de `remove()` e o de timeout ficaram *skipped* por causa da falha anterior.
+
+O erro foi lançado durante `renpy.rollback(...)`, antes do label de verificação:
+
+```text
+Exception: Couldn't find a place to stop rolling back. Perhaps the script changed in an incompatible way?
+```
+
+Inspeção comparativa do fixture encontrou uma diferença de setup: os labels de `clear()` e `remove()` não definiam `renpy.game.context().rollback = True`. O probe anterior de screen ativa, que passou, habilitava rollback no contexto inicial. Assim, a falha não mede se a substituição do atributo ou a mutação `remove()` foi revertida; a conclusão sobre esses dois mecanismos permanece pendente.
+
+A fixture foi corrigida no commit [8ee3804dadb2320f574ef6550f71f38ba10e9bac](https://github.com/mucholocco86/laborat-rio_renpy/commit/8ee3804dadb2320f574ef6550f71f38ba10e9bac): ambos os labels agora habilitam rollback antes de preparar a lista e checkpoint. Essa alteração corrige apenas o harness experimental. **Aguardar e inspecionar o run acionado por esse commit antes de classificar os resultados de clear/remove;** o timeout também depende da conclusão do fluxo para deixar de ser skipped.
+
+- **OBSERVADO EM RUNTIME:** nos três runs acima, os probes prévios ao clear concluíram; o rollback explícito do probe de clear não encontrou local de parada; remove/timeout foram skipped.
+- **CONFIRMADO NA INSPEÇÃO DO FIXTURE:** rollback estava habilitado no probe de screen e no timeout, mas ausente nos labels de clear/remove.
+- **HIPÓTESE DE CAUSA:** a ausência dessa configuração causou a falta de local de parada. A correção está no commit indicado, mas requer novo run para validar.
+- **PENDENTE:** resultado runtime válido de clear, remove e timeout thread após a correção.
+
