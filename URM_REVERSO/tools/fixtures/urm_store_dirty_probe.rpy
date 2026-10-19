@@ -22,7 +22,7 @@ init python:
     class DirtyProbeVarsStore:
         def __init__(self, store, watched_store=None):
             self.store = store
-            self.watched_store = watched_store or DirtyProbeURMFileStore()
+            self.watched_store = watched_store if watched_store is not None else DirtyProbeURMFileStore()
 
         def has(self, name):
             return name in self.store
