@@ -1392,7 +1392,9 @@ testcase urm_x52_rooted_notification_list_rollback:
 screen urm_x52_notification_overlay_probe():
     vbox:
         for notif in urm_probe_urm.ProbeNotifications.notifications:
-            textbutton notif.label action notif
+            textbutton notif.label:
+                id "urm_x52_notification_action_probe"
+                action notif
 
 
 label urm_x52_notification_screen_rollback_start:
@@ -1638,7 +1640,11 @@ label urm_x52_notification_fresh_load_verify:
         else:
             result_type = type(notifications).__name__
             result_labels = [getattr(n, "label", "<missing-label>") for n in notifications]
-        print("X52_NOTIFICATION_FRESH_LOAD_AFTER", type(owner).__name__, result_type, result_labels, renpy.get_screen("urm_x52_notification_overlay_probe") is not None)
+        screen = renpy.get_screen("urm_x52_notification_overlay_probe")
+        widget = renpy.display.screen.get_widget("urm_x52_notification_overlay_probe", "urm_x52_notification_action_probe")
+        print("X52_NOTIFICATION_FRESH_LOAD_AFTER", type(owner).__name__, result_type, result_labels, screen is not None, widget is not None)
+        if widget is not None:
+            raise Exception("Expected the rebuilt notification screen to have no action widget when its list is empty.")
     $ renpy.quit()
 
 testcase urm_x52_notification_fresh_process_save:
