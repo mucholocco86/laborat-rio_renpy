@@ -381,3 +381,22 @@ O teste anterior altera o atributo com `clear()` após o save e observa que o lo
 - Fixture commit [05f7603ca0e4b6243cbc04dbb5b62071e043081c](https://github.com/mucholocco86/laborat-rio_renpy/commit/05f7603ca0e4b6243cbc04dbb5b62071e043081c).
 - Workflow commit [937afcdf65a3e7cd05892ab973a0975c13e69329](https://github.com/mucholocco86/laborat-rio_renpy/commit/937afcdf65a3e7cd05892ab973a0975c13e69329).
 - **PENDENTE:** run acionado pelo workflow update, incluindo os marcadores `X52_NOTIFICATION_REMOVE_SAVE_AFTER_LOAD`.
+
+
+### Roundtrip pareado com remove in-place — run 39215118198
+
+O run [39215118198](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39215118198) concluiu **SUCCESS** nos dois testes de save/load. O segundo caso registrou:
+
+```text
+X52_NOTIFICATION_REMOVE_SAVE_BEFORE [u'Saved notification']
+X52_NOTIFICATION_REMOVE_SAVE_MUTATED_AFTER [u'Post-save notification']
+X52_NOTIFICATION_REMOVE_SAVE_AFTER_LOAD ProbeNotificationsClass RevertableList [u'Post-save notification'] True
+```
+
+**OBSERVADO EM RUNTIME (fixture reduzida, mesma sessão):** tanto a reatribuição via `clear()` quanto a mutação in-place (`remove` e `add`) mantiveram `Post-save notification` depois do load. A lista era `RevertableList` e a screen permaneceu ativa. Assim, neste desenho, o load não restaurou a lista ao conteúdo registrado no momento do save, nem quando o objeto da lista permaneceu o mesmo.
+
+**INFERÊNCIA limitada:** isso é compatível com o comportamento do `StoreBackup` raso e com o singleton de init ainda vivo durante load na mesma sessão; contudo, o resultado não isola toda a identidade dos objetos internos nem prova que a lista/screen do URM integral age igual. O teste faz o load do save criado naquele mesmo processo e mostra o estado de owner/lista reapós o retorno.
+
+A comparação não mostrou diferença entre atribuir lista nova e mutar a atual no caso de load na mesma sessão. A diferença anterior entre `clear()` (não revertido) e `remove()` (revertido) permanece válida para rollback de gameplay, mas não se transfere automaticamente para load de save. O experimento seguinte precisa começar um processo Ren'Py novo e carregar o slot criado pelo processo anterior.
+
+- **PENDENTE:** fresh-process load do mesmo slot; teste do URM integral; separar como snapshots de lista alcançáveis são serializados e reconstituídos.
