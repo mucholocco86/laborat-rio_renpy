@@ -344,3 +344,5 @@ A análise estática do timeout, também registrada no [documento 31](31_NOTIFIC
 
 
 Foi incluído também o testcase `urm_x52_notification_timeout_rollback` para medir uma remoção de `RevertableList` dentro de `renpy.invoke_in_thread`, seguida por rollback ao checkpoint anterior. Fixture commit [b4de1e4c476668f27da51775c48536f82fe16f91](https://github.com/mucholocco86/laborat-rio_renpy/commit/b4de1e4c476668f27da51775c48536f82fe16f91); workflow commit [4ffdae65e48c42dad9c314c62fd1c68b78e78c63](https://github.com/mucholocco86/laborat-rio_renpy/commit/4ffdae65e48c42dad9c314c62fd1c68b78e78c63). O teste é reduzido e seu resultado runtime ainda não foi consultado.
+
+A revisão estática do save/load no documento 31 localizou outra pendência: o SDK salva roots do store e RollbackLog, enquanto o singleton de notificações é criado em init e sua classe customiza o estado de serialização para não restaurar atributos. Cópias rasas do StoreBackup e a reconstrução de ScreenDisplayable deixam abertas rotas diferentes para load na mesma sessão e novo processo. Ainda não há conclusão runtime sobre notificações em saves; ver a matriz e as limitações no documento 31.
