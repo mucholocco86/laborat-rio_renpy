@@ -409,3 +409,6 @@ Como os dois roundtrips na mesma sessão mantiveram o estado pós-save, a fixtur
 - Fixture commit [e2a8406a48a6635e2221bd3bf34043c87ebeeec5](https://github.com/mucholocco86/laborat-rio_renpy/commit/e2a8406a48a6635e2221bd3bf34043c87ebeeec5).
 - Workflow commit [83f22cd90357dd5b64cd727415972bc39b6248c0](https://github.com/mucholocco86/laborat-rio_renpy/commit/83f22cd90357dd5b64cd727415972bc39b6248c0).
 - **PENDENTE:** confirmar que o slot está visível ao segundo processo e ler os marcadores `X52_NOTIFICATION_FRESH_LOAD_BEFORE/AFTER`.
+
+
+O run [39215399305](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39215399305) não executou os testes: o parser Ren'Py interrompeu a compilação na linha do `raise` Python solto dentro de um `if` de script. A fixture foi corrigida para usar `$ assert renpy.can_load(...)`, commit [403f67b801d5a44c81fa93b23e5007fb43dce6d4](https://github.com/mucholocco86/laborat-rio_renpy/commit/403f67b801d5a44c81fa93b23e5007fb43dce6d4). Esse run é falha de sintaxe do harness e não fornece evidência de runtime; aguardar o run seguinte.
