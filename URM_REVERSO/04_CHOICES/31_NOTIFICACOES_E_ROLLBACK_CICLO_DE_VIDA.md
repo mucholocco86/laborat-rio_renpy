@@ -244,3 +244,29 @@ Esse teste mede se o SDK reduzido registra e restaura uma mutação `RevertableL
 - **Evidência estática preservada:** `invoke_in_thread` permite poucas operações na thread; `mutator` escreve em `renpy.game.log.mutated`; `RollbackLog.complete` repete a iteração do mapa em certos `RuntimeError`.
 - **Fixture:** testcase `urm_x52_notification_timeout_rollback`, commit [b4de1e4c476668f27da51775c48536f82fe16f91](https://github.com/mucholocco86/laborat-rio_renpy/commit/b4de1e4c476668f27da51775c48536f82fe16f91).
 - **Workflow:** passo “Run x52 notification timeout thread rollback probe”, commit [4ffdae65e48c42dad9c314c62fd1c68b78e78c63](https://github.com/mucholocco86/laborat-rio_renpy/commit/4ffdae65e48c42dad9c314c62fd1c68b78e78c63).
+
+### Save/load nativo: interação com o singleton (revisão estática)
+
+O fluxo do SDK adiciona uma hipótese importante para o ciclo de vida entre saves:
+
+1. `renpy.loadsave.save` chama `RollbackLog.freeze`, depois serializa `(roots, log)`.
+2. `freeze` chama `complete(False)`, obtém `get_roots()` e remove snapshots inalcançáveis.
+3. `get_roots()` inclui variáveis de StoreDict que entraram em `ever_been_changed` desde init; alteração interna de uma lista aninhada não equivale, por si, a reatribuir a variável do store.
+4. `clean_stores()`, chamado durante `RollbackLog.unfreeze` no load, restaura o backup dos stores. `StoreBackup` copia cada dicionário de store de forma rasa (`dict(d)`), mantendo referências a objetos mutáveis.
+5. O URM cria `x52URM.Notifications` durante init. A classe-base define `__getstate__` como dicionário vazio e `__setstate__` sem restauração de atributos; se o objeto for efetivamente pickled, seus atributos não são reconstruídos por esses métodos.
+
+Isso permite duas rotas possíveis, ainda não distinguidas em runtime: (a) a instância init-only permanece pela referência rasa do store durante o load na mesma sessão, mantendo seu estado de lista corrente; (b) referências alcançáveis pelo contexto/log entram no arquivo de save, onde a serialização customizada da classe pode omitir atributos. A screen também participa: `ScreenDisplayable` exclui `child`/widgets da serialização e reconstrói a screen após carregar, então a action pode ser refeita a partir do estado corrente do singleton em vez de preservar a action serializada.
+
+- **CONFIRMADO NO SDK 7.4.11:** save serializa roots + RollbackLog; roots são limitadas a variáveis marcadas como alteradas; StoreBackup é cópia rasa; ScreenDisplayable não salva os widgets e reconstrói sua árvore.
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** o singleton é criado em init; `x52NonPicklable` descarta atributos em seu protocolo de estado.
+- **HIPÓTESE:** o comportamento de notificações após carregar um save depende de quais snapshots do log/contexto continuam alcançáveis e do ponto em que a screen é reconstruída. A simples presença de `__getstate__` não demonstra que `Notifications` é serializada.
+- **PENDENTE:** runtime comparando (1) aviso ainda ativo no momento de salvar, (2) timeout remove depois do save, (3) load do slot, (4) processo novo versus load na mesma sessão, e (5) save/load sem overlay visível.
+
+| Fonte | Símbolos / intervalo | Blob SHA |
+|---|---|---|
+| SDK 7.4.11 `renpy/loadsave.py` | `save`, linhas 373–410; `load`, linha 762 em diante | `c8b831ebfd5487f11a1d4dde8c87cde7f7ed93e3` |
+| SDK 7.4.11 `renpy/python.py` | `StoreBackup`, linha 260 em diante; `clean_stores`, linha 323; `RollbackLog.get_roots`, linhas 1757–1777; `freeze/unfreeze` | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+| SDK 7.4.11 `renpy/display/screen.py` | `ScreenDisplayable`, linhas 290–315+; `nosave` exclui widgets/filhos; `after_setstate` reconstrói | `cf7997b04c3b17a337809f58aa6591ccd58a15a7` |
+| URM convertido `classes/main.rpy` | instanciação de `Notifications`, linha 38 | `14f93406d2946eaed664ed72c1d47063984ce24f` |
+| URM convertido `framework/modules/01utils.rpy` | `x52NonPicklable.__getstate__/__setstate__`, linhas 10–21 | `e558a2d5a5137608e542238a1d81fd65e6db349d` |
+
