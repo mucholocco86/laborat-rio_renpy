@@ -252,8 +252,8 @@ O fluxo do SDK adiciona uma hipótese importante para o ciclo de vida entre save
 1. `renpy.loadsave.save` chama `RollbackLog.freeze`, depois serializa `(roots, log)`.
 2. `freeze` chama `complete(False)`, obtém `get_roots()` e remove snapshots inalcançáveis.
 3. `get_roots()` inclui variáveis de StoreDict que entraram em `ever_been_changed` desde init; alteração interna de uma lista aninhada não equivale, por si, a reatribuir a variável do store.
-4. `clean_stores()`, chamado durante `RollbackLog.unfreeze` no load, restaura o backup dos stores. `StoreBackup` copia cada dicionário de store de forma rasa (`dict(d)`), mantendo referências a objetos mutáveis. O SDK também comenta que `store_dicts` e `store_modules` não são reinicializados durante reload; isso sustenta a continuidade de identidade dos módulos na mesma sessão, mas não resolve sozinho quais mutações aninhadas o rollback do save restaura.
-5. O URM cria `x52URM.Notifications` durante init. A classe-base define `__getstate__` como dicionário vazio e `__setstate__` sem restauração de atributos; se o objeto for efetivamente pickled, seus atributos não são reconstruídos por esses métodos.
+4. `renpy/main.py` chama `make_clean_stores()` depois de executar todo o init. Como o URM instancia `x52URM.Notifications` em init, esse backup limpo contém a referência ao singleton.
+5. `clean_stores()`, chamado durante `RollbackLog.unfreeze` no load, restaura o backup dos stores. `StoreBackup` copia cada dicionário de store de forma rasa (`dict(d)`), mantendo a referência ao mesmo objeto; isso não copia nem restaura por si só a lista aninhada. O SDK também comenta que `store_dicts` e `store_modules` não são reinicializados durante reload. Essas evidências sustentam continuidade do objeto na mesma sessão, mas não resolvem quais snapshots do RollbackLog carregado restauram a lista. A classe-base define `__getstate__` como dicionário vazio e `__setstate__` sem restauração de atributos; se o objeto for efetivamente pickled, seus atributos não são reconstruídos por esses métodos.
 
 Isso permite duas rotas possíveis, ainda não distinguidas em runtime: (a) a instância init-only permanece pela referência rasa do store durante o load na mesma sessão, mantendo seu estado de lista corrente; (b) referências alcançáveis pelo contexto/log entram no arquivo de save, onde a serialização customizada da classe pode omitir atributos. A screen também participa: `ScreenDisplayable` exclui `child`/widgets da serialização e reconstrói a screen após carregar, então a action pode ser refeita a partir do estado corrente do singleton em vez de preservar a action serializada.
 
@@ -265,6 +265,7 @@ Isso permite duas rotas possíveis, ainda não distinguidas em runtime: (a) a in
 | Fonte | Símbolos / intervalo | Blob SHA |
 |---|---|---|
 | SDK 7.4.11 `renpy/loadsave.py` | `save`, linhas 373–410; `load`, linha 762 em diante | `c8b831ebfd5487f11a1d4dde8c87cde7f7ed93e3` |
+| SDK 7.4.11 `renpy/main.py` | `make_clean_stores()` após o init, linha 621 | `e72bd59109ee72e36f124424fcbdd4761aab60ae` |
 | SDK 7.4.11 `renpy/python.py` | `store_dicts/store_modules`, linhas 205–207; `StoreBackup`, linha 260 em diante; `clean_stores`, linha 323; `RollbackLog.get_roots`, linhas 1757–1777; `freeze/unfreeze` | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
 | SDK 7.4.11 `renpy/display/screen.py` | `ScreenDisplayable`, linhas 290–315+; `nosave` exclui widgets/filhos; `after_setstate` reconstrói | `cf7997b04c3b17a337809f58aa6591ccd58a15a7` |
 | URM convertido `classes/main.rpy` | instanciação de `Notifications`, linha 38 | `14f93406d2946eaed664ed72c1d47063984ce24f` |
