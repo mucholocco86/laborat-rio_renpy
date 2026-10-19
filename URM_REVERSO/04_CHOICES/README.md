@@ -349,3 +349,6 @@ A revisão estática do save/load no documento 31 localizou outra pendência: o 
 
 
 **Save/load de notificações em processo novo — run 39215564208:** o processo que criou o save registrou a lista com `Saved notification`; ao carregar o mesmo slot em outro processo, o singleton iniciado por `init` tinha lista vazia antes e depois do load, embora a screen de probe aparecesse ativa. Isso é evidência runtime da fixture reduzida; não esclarece se os displayables/action guardados pela screen apontam para objetos salvos nem comprova o comportamento do pacote URM integral. A interpretação de que o singleton init-only ficou fora das roots serializadas permanece hipótese. Ver [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md).
+
+
+**Reconstrução da screen após load — run 39229685100:** o fixture consultou o widget identificado após load em processo novo. A screen existia, mas o botão de notificação não; a asserção passou. O SDK 7.4.11 exclui os widgets filhos do estado serializado e os reconstrói executando novamente a função da screen. Na fixture, essa reconstrução leu o singleton recém-iniciado com lista vazia. Isso fecha a lacuna do probe anterior, mas ainda não valida a screen do pacote URM integral. Fontes, linhas e limites no [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md).
