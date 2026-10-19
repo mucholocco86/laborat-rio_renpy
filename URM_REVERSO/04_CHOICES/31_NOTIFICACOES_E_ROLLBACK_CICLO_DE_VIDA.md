@@ -526,12 +526,12 @@ A ordem dos campos pós-load é tipo do owner, tipo da lista, labels, screen exi
 A conferência do caminho de carga confirma por que os probes de notificação permanecem fixtures reduzidas:
 
 - **classes/main.rpy** chama `x52MF2.load(['dialogs','api','inputs','tooltips'], 'x52URM', '0x52-URM/framework')`. O catálogo em **framework/bootstrap.rpy** expande esses módulos e dependências para arquivos `.x52rpy`, `.x52` e recursos auxiliares.
-- No bloco **init 999** de **classes/main.rpy**, há 17 chamadas explícitas a `loadFile` para telas/estilos em `0x52-URM/`, incluindo `screens/watchpanel.rpy.x52` e `screens/choices.rpy.x52`. Depois, o código registra `afterLoad` em `config.after_load_callbacks`.
+- No bloco **init 999** de **classes/main.rpy**, há 18 chamadas explícitas a `loadFile` em `0x52-URM/` — 17 arquivos de tela em `screens/` e 1 arquivo de estilos (`URM_styles.rpy.x52`), incluindo `screens/watchpanel.rpy.x52` e `screens/choices.rpy.x52`. Depois, o código registra `afterLoad` em `config.after_load_callbacks`.
 - A árvore convertida examinada contém `.rpy` organizados em `classes/` e `screens/`; o README da área diz que ela preserva a estrutura do pacote `MOD_ANALISE`. Essa árvore de inspeção não corresponde, por si só, aos caminhos `.x52` solicitados pelo loader.
 - As tentativas de buscar no repositório os caminhos exatos `1_URM_ORIGINAL/0x52-URM/framework/modules/01utils.x52rpy`, `1_URM_ORIGINAL/0x52-URM/URM_styles.rpy.x52` e `1_URM_ORIGINAL/0x52-URM/screens/watchpanel.rpy.x52` retornaram 404. Isso confirma somente que esses caminhos presumidos não estão publicados ali; não prova que nenhum archive ou cópia equivalente exista em outro lugar do laboratório.
 - O workflow de runtime `urm-choice-runtime-probe.yml` copia `renpy-7.4.11-sdk/the_question` para o runner temporário e acrescenta `urm_choice_runtime_probe.rpy`. Ele não copia nem carrega o pacote `.x52` do URM.
 
-**CONFIRMADO NA FONTE URM CONVERTIDA:** `classes/main.rpy` depende em runtime de módulos dinâmicos e das 17 fontes de tela/estilo. O callback real `afterLoad` também inicializa StoreMonitor, aplica ajustes visuais, chama `URMFiles.autoLoad()` e pode abrir telas de boas-vindas/atualização. A fixture anterior reproduziu apenas o aspecto relevante para a lista e screen de notificações, não essa rotina integral.
+**CONFIRMADO NA FONTE URM CONVERTIDA:** `classes/main.rpy` depende em runtime de módulos dinâmicos, 17 fontes de tela e 1 arquivo de estilos. O callback real `afterLoad` também inicializa StoreMonitor, aplica ajustes visuais, chama `URMFiles.autoLoad()` e pode abrir telas de boas-vindas/atualização. A fixture anterior reproduziu apenas o aspecto relevante para a lista e screen de notificações, não essa rotina integral.
 
 **CONFIRMADO NO LOADER URM:** `framework/bootstrap.rpy` seleciona `.x52t` quando disponível; caso contrário, lê `.x52`/`.x52rpy` e chama `renpy.load_string()`. Renomear ou copiar arbitrariamente `.rpy` convertidos para os nomes `.x52` não demonstraria o carregamento do pacote original e mudaria a fonte submetida ao parser.
 
@@ -539,7 +539,7 @@ A conferência do caminho de carga confirma por que os probes de notificação p
 
 | Fonte | Símbolos / evidência | Blob SHA |
 |---|---|---|
-| URM convertido `classes/main.rpy` | `x52MF2.load`, lista de 17 `loadFile`, registro do callback e corpo de `afterLoad` | `14f93406d2946eaed664ed72c1d47063984ce24f` |
+| URM convertido `classes/main.rpy` | `x52MF2.load`, lista de 18 `loadFile` (17 telas + 1 estilo), registro do callback e corpo de `afterLoad` | `14f93406d2946eaed664ed72c1d47063984ce24f` |
 | URM original/convertido `framework/bootstrap.rpy` | catálogo, expansão e `loadFile` | `9d72267c2d86c68aa9dac1fee94652c891a611fe` |
 | README `2_URM_X52_CONVERTIDO` | localização/propósito da árvore convertida | `9b23130ab12cf47964b179ba1129528d8720bb47` |
 | `.github/workflows/urm-choice-runtime-probe.yml` | cópia do jogo base e instalação exclusiva da fixture | `4fb78bb48cf695cde87ec0f9d7f84df0aa6bef64` |
