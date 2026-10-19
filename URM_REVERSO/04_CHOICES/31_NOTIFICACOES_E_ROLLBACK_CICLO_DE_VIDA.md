@@ -479,3 +479,43 @@ O commit da fixture é [e1102f73ae6ca75096026f6720eee8d41d6f8ec4](https://github
 | Ren'Py 7.4.11 `renpy/display/core.py` | `SceneLists.after_setstate` (799–820) | `14c920f9fe8c95627a698bd56a1e61c7f4b02074` |
 
 - **PENDENTE:** repetir com o pacote URM real e inspecionar o resultado visual/interativo da screen após load; verificar separadamente telas com argumentos/scope contendo referências explícitas a objetos de notificação.
+
+
+### Callback nativo de load do URM e probe correspondente — run 39230107907
+
+A leitura cruzada revelou que a integração URM tem um caminho explícito de load:
+
+1. Em `classes/main.rpy`, `afterLoad()` chama `renpy.show_screen('URM_overlay')`, configura o quickmenu e inicializa o StoreMonitor.
+2. No fim do carregamento dos módulos, a fonte convertida registra `x52URM.afterLoad` em `renpy.config.after_load_callbacks`.
+3. `screens/main.rpy` define `URM_overlay` e inclui `use URM_notifications`.
+4. Em `screens/watchpanel.rpy`, `URM_notifications` percorre `x52URM.Notifications.notifications` e constrói um botão para cada objeto `Notification`.
+5. No SDK 7.4.11, `loadsave.load()` chama `RollbackLog.unfreeze(roots, label="_after_load")`; o label comum `_after_load` executa cada função de `config.after_load_callbacks` antes de saltar para um eventual label do jogo chamado `after_load`.
+
+Isso separa duas rotas que têm nomes parecidos: o callback de labels `LabelMon` também chama uma função URM quando o label é `start`, mas o caminho nativo de pós-load é `config.after_load_callbacks`, que executa `afterLoad` no label interno `_after_load`.
+
+A fixture foi atualizada para registrar um callback antes de carregar o save em processo novo. Ele marca sua execução e chama `show_screen` para a screen reduzida que percorre a lista global do owner, reproduzindo o aspecto do URM relevante para esse teste. Fixture commit [7df9808eed40d0297c54fa3d0f1dfa22f23dc39c](https://github.com/mucholocco86/laborat-rio_renpy/commit/7df9808eed40d0297c54fa3d0f1dfa22f23dc39c).
+
+O run [39230107907](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39230107907) concluiu **SUCCESS** e registrou:
+
+```text
+X52_NOTIFICATION_FRESH_LOAD_BEFORE ProbeNotificationsClass RevertableList []
+X52_NOTIFICATION_FRESH_LOAD_AFTER ProbeNotificationsClass RevertableList [] True False True
+```
+
+A ordem dos campos pós-load é tipo do owner, tipo da lista, labels, screen existente, botão encontrado, callback executado. A fixture exigiu callback executado e widget ausente; ambas as condições passaram.
+
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** `afterLoad` reabre a overlay; a overlay usa `URM_notifications`; essa screen consulta o singleton e gera widgets a partir de sua lista.
+- **CONFIRMADO NO SDK 7.4.11:** load transfere para `_after_load`; esse label executa `config.after_load_callbacks`; screen displayables reconstruídos atualizam seus widgets a partir da função da screen.
+- **OBSERVADO EM RUNTIME (fixture reduzida):** no caminho de callback pós-load em processo novo, o callback executou, o singleton permaneceu vazio e a screen não produziu o widget identificado.
+- **INFERÊNCIA forte, sem integração do pacote original:** para o mesmo grafo e padrão de tela, o URM tende a reabrir a overlay sem recuperar notificações temporárias cuja lista não veio do save. A conclusão sobre o pacote integral depende de validar loader, classes originais carregadas e screen compilada do URM em runtime.
+- **PENDENTE:** executar esse mesmo fluxo com o URM real carregado; observar se o callback e a lista são afetados por algum outro módulo, autoLoad, estado persistent ou comportamento específico do loader X52MF2.
+
+| Fonte | Símbolos / linhas | Blob SHA |
+|---|---|---|
+| URM convertido `classes/main.rpy` | `afterLoad` (54–69); registro de callback (217–218) | `14f93406d2946eaed664ed72c1d47063984ce24f` |
+| URM convertido `classes/labels.rpy` | `LabelMonClass.init/labelCalled` (131–151) | `96713d0297cf1bedeb9232502aa0d631d2a0780e` |
+| URM convertido `screens/main.rpy` | definição de `URM_overlay`, inclusão de `URM_notifications` | `ceb5dc63b3691a4b6244345e1c5a3e3b9d149291` |
+| URM convertido `screens/watchpanel.rpy` | `URM_notifications`, iteração e botões de notificação (260–353) | `8cc83f00838ed409183e85e4ebdb37ddf4433823` |
+| Ren'Py 7.4.11 `renpy/loadsave.py` | `load`, chamada a `unfreeze(..., label="_after_load")` (762–771) | `c8b831ebfd5487f11a1d4dde8c87cde7f7ed93e3` |
+| Ren'Py 7.4.11 `renpy/common/00start.rpy` | label `_after_load`, loop de callbacks (84–120) | `96649d2d56b1262313375fef56646ec0db327ed2` |
+| Ren'Py 7.4.11 `renpy/display/screen.py` | reconstrução de `ScreenDisplayable`, `get_widget` | `cf7997b04c3b17a337809f58aa6591ccd58a15a7` |
