@@ -74,7 +74,7 @@ A leitura cruzada de `VarsStoreClass` com `URMFileStore` mostra que os metadados
 
 **CONFIRMADO NA FONTE URM CONVERTIDA:** quando o registro externo já existe e começa limpo, as quatro alterações aninhadas de freeze/monitor não passam por uma rotina que marque o store externo como alterado. Quando a variável ainda não é lembrada, `freeze`/`monitor` primeiro chamam `remember`, cuja atribuição externa marca `unsaved`; esse cenário não tem o mesmo resultado estático.
 
-**HIPÓTESE de consequência:** uma mudança de freeze/monitor num registro já lembrado pode não acender o indicador de arquivo alterado e pode não acionar proteções que dependem de `file.unsaved`, deixando o metadado sem salvamento ou vulnerável a substituição em certos fluxos de troca. Isso ainda precisa de validação em runtime e de confirmação do caminho específico da interface.
+**HIPÓTESE de consequência:** uma mudança de freeze/monitor num registro já lembrado pode não acender o indicador de arquivo alterado e pode não acionar proteções que dependem de `file.unsaved`. Isso pode ocultar alterações e permitir descarte/troca sem o aviso esperado em certos caminhos. Não significa que o botão Salvar ignore a alteração: `URMFile.save()` percorre e serializa todos os stores não vazios sem condicionar a escrita a `unsaved`. Portanto, a suspeita diz respeito à detecção de alterações e aos avisos, não à capacidade de uma gravação manual explícita. A validação runtime do aviso de UI permanece pendente.
 
 ### Probe reduzida criada
 
