@@ -57,7 +57,7 @@ O callback Python (`vars.rpy` 540–563) ativa `renpy.game.context().force_check
 2. Criar cenários de `freeze` com atribuição direta, `SetField`, mutação de objetos, rollback e load de save; observar o que de fato é bloqueado.
 3. Testar `replacements` com Choice, `say`, personagem dinâmico, texto traduzido e labels duplicadas; comparar `Menu.items` e legenda exibida.
 4. Verificar se outras stores são adicionadas fora dos consumidores aqui inspecionados; não afirmar inventário global completo.
-5. Rastrear se o estado de `watch`, `monitor`, `freeze` é restaurado ao abrir arquivos `.urm` e quando as interfaces os leem.
+5. Validar em runtime os metadados carregados de `.urm`, em especial se alterações aninhadas de `freeze`/`monitor` ficam fora da flag `unsaved` e do aviso de troca de arquivo.
 
 **Classificação:** fatos marcados como confirmados referem-se à fonte convertida. **Nenhum resultado de execução nem equivalência entre SDKs foi afirmado.**
 
@@ -87,3 +87,34 @@ A inspeção do store `.urm` revelou uma diferença entre alterar a entrada exte
 | URM convertido `screens/main.rpy` | indicador de arquivo alterado (135–137) | `ceb5dc63b3691a4b6244345e1c5a3e3b9d149291` |
 | URM convertido `screens/vars.rpy` | tabela `vars`, ações freeze/monitor/watch/edit (115–178) | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
 | URM convertido `screens/watchpanel.rpy` | leitura dinâmica dos nomes acompanhados e `Var(varName).getButtonValue()` (89–103) | `8cc83f00838ed409183e85e4ebdb37ddf4433823` |
+
+
+## 6. Alterações aninhadas e flag `unsaved` do arquivo URM
+
+A leitura cruzada de `VarsStoreClass` com `URMFileStore` mostra que os metadados de uma variável são mapas aninhados dentro do store externo `vars`:
+
+- Ao abrir um store JSON, `URMFile.load()` converte os objetos JSON aninhados em `OrderedDict` e envolve somente o mapa externo com `URMFileStore` (`classes/URMFiles.rpy`, linha 367).
+- `URMFileStore.__setitem__`, `__delitem__`, `update` e `clear` são os métodos que mantêm sua flag `unsaved` (`classes/URMFiles.rpy`, linhas 194–215).
+- Para uma variável que já existe em `VarsStore.store`, `freeze`, `unfreeze`, `monitor` e `unmonitor` escrevem/apagam chaves no objeto aninhado `store[varName]` (`classes/vars.rpy`, linhas 46–69). Essas linhas não chamam os métodos de primeiro nível de `URMFileStore` nem atribuem explicitamente `store.unsaved = True`.
+- Em contraste, `watch` grava/remova a chave de primeiro nível no store `watched`; `ignore` e `unignore` definem explicitamente `store.unsaved = True` (`classes/vars.rpy`, linhas 79–119).
+- A flag agregada `URMFiles.file.unsaved` controla o asterisco da interface e é lida pelos caminhos `clear`, seletor `Load` e `autoLoad` (`classes/URMFiles.rpy`, linhas 61–103 e 260–275; `screens/main.rpy`, linhas 135–137).
+
+**CONFIRMADO NA FONTE URM CONVERTIDA:** quando o registro externo já existe e começa limpo, as quatro alterações aninhadas de freeze/monitor não passam por uma rotina que marque o store externo como alterado. Quando a variável ainda não é lembrada, `freeze`/`monitor` primeiro chamam `remember`, cuja atribuição externa marca `unsaved`; esse cenário não tem o mesmo resultado estático.
+
+**HIPÓTESE de consequência:** uma mudança de freeze/monitor num registro já lembrado pode não acender o indicador de arquivo alterado e pode não acionar proteções que dependem de `file.unsaved`, deixando o metadado sem salvamento ou vulnerável a substituição em certos fluxos de troca. Isso ainda precisa de validação em runtime e de confirmação do caminho específico da interface.
+
+### Probe reduzida criada
+
+Para separar o comportamento de mapa aninhado do pacote URM integral, foi criada a fixture `tools/fixtures/urm_store_dirty_probe.rpy` e o workflow isolado `.github/workflows/urm-store-dirty-probe.yml`. O testcase compara freeze/unfreeze/monitor/unmonitor sobre registro existente com watch/ignore/unignore e freeze de variável nova. A fixture replica apenas os métodos relevantes; não importa nem executa fontes do pacote URM.
+
+- Fixture commit: `2a080230d69616225744b0461dd2fb263ff65ad3`.
+- Workflow commit: `26b747ce272213b39c4b1010b6081379d4e850eb`.
+- **PENDENTE DE RUNTIME:** o resultado do testcase precisa ser obtido e revisto antes de classificá-lo como observado no SDK 7.4.11.
+
+| Fonte | Símbolos / linhas | Blob SHA |
+|---|---|---|
+| URM convertido `classes/vars.rpy` | `freeze`, `unfreeze`, `monitor`, `unmonitor`, `watch`, `ignore`, `unignore` (46–119) | `57482937e14f215dac0ecb22a62da8ad160cba58` |
+| URM convertido `classes/URMFiles.rpy` | parsing JSON (124, 367); `URMFileStore` e mutadores (194–215); `autoLoad/clear/Load` (61–103); flag agregada (260–275) | `888aba28d9d2e7870d8c4e6526417390179cd326` |
+| URM convertido `screens/main.rpy` | indicador `unsaved` (135–137) | `ceb5dc63b3691a4b6244345e1c5a3e3b9d149291` |
+| URM convertido `screens/vars.rpy` | tabela e ações de variáveis (115–178) | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
+| URM convertido `screens/watchpanel.rpy` | leitura da lista assistida e valor atual por `Var(varName)` (89–103) | `8cc83f00838ed409183e85e4ebdb37ddf4433823` |
