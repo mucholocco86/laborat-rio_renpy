@@ -1663,3 +1663,33 @@ testcase urm_x52_notification_fresh_process_save:
 testcase urm_x52_notification_fresh_process_load:
     $ renpy.session.pop("_urm_x52_notification_fresh_load_marker", None)
     run Jump("urm_x52_notification_fresh_load_start")
+
+
+# Reproduce the URM_var_changed "Revert" action: SetVarValue(var, newValue=prevVal).
+# A separate route marker represents a gameplay effect that manual reassignment
+# should not undo; native rollback is a different operation.
+default urm_notification_revert_value = 10
+default urm_notification_revert_prev = 10
+default urm_notification_revert_route = 0
+
+label urm_notification_revert_assignment_start:
+    $ renpy.game.context().rollback = True
+    $ urm_notification_revert_value = 10
+    $ urm_notification_revert_prev = 10
+    $ urm_notification_revert_route = 0
+    $ renpy.checkpoint("before-notification-revert-probe")
+    $ urm_notification_revert_value = 20
+    $ urm_notification_revert_route = 1
+    $ print("NOTIFICATION_REVERT_BEFORE", urm_notification_revert_value, urm_notification_revert_route, urm_notification_revert_prev)
+    $ urm_probe_urm.SetVarValue(urm_probe_urm.Var("urm_notification_revert_value"), None, None, newValue=urm_notification_revert_prev)()
+    $ print("NOTIFICATION_REVERT_AFTER", urm_notification_revert_value, urm_notification_revert_route)
+    python:
+        if urm_notification_revert_value != 10:
+            raise Exception("Expected the reduced Revert action to assign the previous value.")
+        if urm_notification_revert_route != 1:
+            raise Exception("Manual Revert unexpectedly reset the unrelated gameplay route marker.")
+    $ renpy.quit()
+
+
+testcase urm_notification_revert_is_manual_assignment:
+    run Jump("urm_notification_revert_assignment_start")
