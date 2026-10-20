@@ -380,3 +380,7 @@ O documento [26 — Choices, CodeView e ações de variáveis](26_CHOICES_CODEVI
 ### Continuação de 2026-10-20 — notificação e ação “Revert”
 
 O documento [27 — Notificação de variável, ação Revert e persistência](27_NOTIFICACAO_REVERT_E_PERSISTENCIA.md) confirma na fonte convertida que o botão Revert reatribui prevVal via SetVarValue; ele não executa renpy.rollback(). A lista de notificações é mantida em memória no circuito examinado, enquanto notificationTimeout é uma configuração persistida por Settings. A sobrevivência da notificação em save/load nativo ainda depende de validação runtime.
+
+### Continuação de 2026-10-20 — ação Revert e ciclo de vida de notificações
+
+O run [39379101294](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39379101294) passou na fixture reduzida para a ação Revert: valor 20 → 10, com marcador independente de rota preservado em 1. Isso confirma no harness 7.4.11 que a ação reproduzida é uma atribuição sem retroceder o fluxo. A atualização também consolida os probes anteriores de rollback e save/load de notificações, distinguindo mesma sessão de processo novo. **A integração do pacote URM completo, rollback posterior ao Revert e seus efeitos combinados permanecem pendentes.** Detalhes, SHAs e limites no [documento 27](27_NOTIFICACAO_REVERT_E_PERSISTENCIA.md) e no [documento 31](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md).
