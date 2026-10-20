@@ -1,0 +1,62 @@
+name: URM notification Revert probe
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'URM_REVERSO/tools/fixtures/urm_choice_runtime_probe.rpy'
+      - '.github/workflows/urm-notification-revert-probe.yml'
+      - 'renpy-7.4.11-sdk/renpy/**'
+      - 'renpy-7.4.11-sdk/the_question/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: urm-notification-revert-probe
+  cancel-in-progress: true
+
+jobs:
+  notification-revert:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out laboratory
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb xauth libgl1 libglu1-mesa libx11-6 libxext6 libxrender1 libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1 libasound2
+
+      - name: Prepare disposable game copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_root="${RUNNER_TEMP}/urm-notification-revert-probe"
+          rm -rf "$probe_root"
+          cp -a renpy-7.4.11-sdk/the_question "$probe_root"
+          cp URM_REVERSO/tools/fixtures/urm_choice_runtime_probe.rpy "$probe_root/game/zz_urm_choice_runtime_probe.rpy"
+          chmod +x renpy-7.4.11-sdk/renpy.sh
+          chmod +x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+          test -f "$probe_root/game/zz_urm_choice_runtime_probe.rpy"
+          test -x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+
+      - name: Run Revert-as-assignment probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START notification Revert probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-notification-revert-probe" test urm_notification_revert_is_manual_assignment
+          result=$?
+          echo "END notification Revert probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
