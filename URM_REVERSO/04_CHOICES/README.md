@@ -370,3 +370,8 @@ A revisão estática do save/load no documento 31 localizou outra pendência: o 
 A leitura de `afterLoad`, `StoreMonitor`, `PathDetection`, `CodeView` e das telas confirmou onde os metadados de acompanhamento são consumidos. `frozen` e `monitor` são consultados sob demanda pelo monitor; `ignored` filtra condições/código apresentados pelo URM; `watched` guarda rótulos e o painel resolve valores atuais do store. Isso separa preferências persistidas no `.urm` de estado do jogo sujeito a rollback. Veja a seção 7 do documento [Stores, monitoramento e substituição de texto](../06_VARIABLES/01_URM_STORES_MONITORAMENTO_E_SUBSTITUICAO_DE_TEXTO.md).
 
 **Pendente:** runtime integral do URM confirmando leitura dos metadados depois de `autoLoad`; cobertura do StoreMonitor por rota de escrita; e efeitos ponta a ponta no rollback. Os testes reduzidos do SDK mencionados nos documentos 22–24 não equivalem a uma execução do pacote original convertido.
+
+
+### Continuação de 2026-10-19 — interface de Choices para edição de variáveis
+
+O documento [26 — Choices, CodeView e ações de variáveis](26_CHOICES_CODEVIEW_ACOES_DE_VARIAVEIS_E_LIMITES.md) delimita quais controles são alcançados a partir da Choice. O CodeView pode abrir a edição do valor e Remember/Watch; Freeze/Monitor/Ignore ficam na tabela geral. A edição altera o store ativo e é diferente dos metadados `.urm`. Uma fixture reduzida já observou rollback de escalar editado por screen; a integração com o URM completo permanece pendente.
