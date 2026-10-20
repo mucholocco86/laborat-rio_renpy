@@ -69,3 +69,36 @@ A mesma distinção vale para StatesClass: o mapa _states mostrado na fonte pert
 ## Próximo teste reduzido recomendado
 
 No SDK 7.4.11, gerar uma notificação sintética com valor anterior conhecido; comparar três ações isoladas: fechar a notificação, clicar Revert, e acionar rollback nativo. Registrar valor do store, fronteira/contexto e existência da notificação antes/depois. Em outro cenário, salvar e carregar com uma notificação pendente, observando a screen e o objeto. Esse teste separa a semântica da ação Revert da persistência visual da lista sem executar ou modificar o pacote integral do URM.
+
+## Atualização de runtime — fixtures reduzidas (2026-10-20)
+
+Esta seção atualiza as pendências de runtime acima com resultados posteriores. Ela **não** substitui os limites de escopo indicados no restante do documento.
+
+### Ação “Revert”
+
+A fixture reproduziu a chamada da tela: `SetVarValue(Var(...), newValue=prevVal)()`. No run [39379101294](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39379101294), o valor corrente começou em 20, com marcador independente de rota em 1 e valor anterior 10. Após a ação, o valor passou a 10 e o marcador permaneceu 1 (`20 / rota 1 / prev 10 → 10 / rota 1`). O teste passou no SDK 7.4.11.
+
+**Classificação:** observado em runtime numa fixture reduzida; confirma que a reprodução da ação faz uma atribuição e não retrocede o fluxo ou desfaz o marcador de rota. Isso corrobora a leitura estática, mas não é um teste da tela nem do pacote integral do URM. A interação dessa atribuição com um rollback posterior e com os deltas internos do log continua pendente.
+
+### Notificações: resultados de save/load e rollback já registrados
+
+O documento [31 — Ciclo de vida das notificações do URM e rollback](31_NOTIFICACOES_E_ROLLBACK_CICLO_DE_VIDA.md) e os runs associados já fecharam parte da antiga pendência:
+
+- **Mesma sessão:** nos runs [39214784786](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39214784786) e [39215118198](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39215118198), após salvar e mutar a lista em seguida, o load reduziu a lista ao item pós-save observado pela fixture, em vez de restaurar o item que existia no instante do save. É um resultado específico da rota testada, não uma regra universal para qualquer objeto URM.
+- **Processo novo:** nos runs [39215564208](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39215564208), [39229685100](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39229685100) e [39230107907](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39230107907), o singleton da fixture começou vazio após init e permaneceu vazio depois do load; a screen foi reconstruída sem o botão que representaria a notificação. O último teste reproduziu um callback pós-load, mas não carregou o pacote dinâmico original do URM nem seu arquivo `.urm`.
+- **Rollback da lista:** o run [39205520906](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39205520906) comparou `clear()` e remoção in-place, além do timeout reduzido. Com a screen ativa, `clear()` deixou a lista vazia após rollback; `remove()` restaurou o item; a remoção temporizada também foi revertida na execução controlada. Esses resultados pertencem ao harness reduzido e não demonstram concorrência geral nem integração com a `NotificationsClass` real.
+
+Assim, a antiga formulação “save/load pendente” precisa ser lida como **save/load reduzido parcialmente observado; integração do URM integral pendente**. O singleton, o callback e a screen da fixture reproduzem partes do circuito, não o loader real e os módulos `.x52` do URM.
+
+### Fontes de evidência e limites
+
+- Fixture e workflow do teste “Revert”: fixture commit [8d08fa82d3a7e3bdd2862c2dd8ddd2a60c538524](https://github.com/mucholocco86/laborat-rio_renpy/commit/8d08fa82d3a7e3bdd2862c2dd8ddd2a60c538524) e workflow commit [ee18b6cbb823cf7f91cdf6ac69173d43e58fae40](https://github.com/mucholocco86/laborat-rio_renpy/commit/ee18b6cbb823cf7f91cdf6ac69173d43e58fae40).
+- A fixture é uma reprodução reduzida no SDK Ren’Py 7.4.11. Não editou o Wells estável, `wells_beta/`, o SDK ou fontes originais do URM.
+- Continua pendente executar o pacote convertido completo: o loader exige módulos e telas dinâmicas `.rpy.x52` que não estão presentes no jogo reduzido. Também falta testar a atribuição Revert seguida por rollback em diferentes pontos do histórico, bem como a interação com freeze/monitor e save/load do jogo real.
+
+### Classificação atualizada
+
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** Revert encaminha `prevVal` para `SetVarValue`; não chama `renpy.rollback()`.
+- **OBSERVADO EM RUNTIME (fixture reduzida, SDK 7.4.11):** a ação reproduzida reatribui 10 ao valor corrente 20 e conserva o marcador de rota 1.
+- **OBSERVADO EM RUNTIME (fixtures reduzidas):** há diferenças entre rollback de `clear()` e remoção in-place da lista, e entre load na mesma sessão e load em processo novo, conforme casos e runs acima.
+- **PENDENTE:** comportamento da screen e dos objetos da `NotificationsClass` no pacote integral, além do rollback posterior à ação Revert e suas combinações com save/load e metadados de monitoramento.
