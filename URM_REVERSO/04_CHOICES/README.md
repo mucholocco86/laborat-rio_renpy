@@ -375,3 +375,8 @@ A leitura de `afterLoad`, `StoreMonitor`, `PathDetection`, `CodeView` e das tela
 ### Continuação de 2026-10-19 — interface de Choices para edição de variáveis
 
 O documento [26 — Choices, CodeView e ações de variáveis](26_CHOICES_CODEVIEW_ACOES_DE_VARIAVEIS_E_LIMITES.md) delimita quais controles são alcançados a partir da Choice. O CodeView pode abrir a edição do valor e Remember/Watch; Freeze/Monitor/Ignore ficam na tabela geral. A edição altera o store ativo e é diferente dos metadados `.urm`. Uma fixture reduzida já observou rollback de escalar editado por screen; a integração com o URM completo permanece pendente.
+
+
+### Continuação de 2026-10-20 — notificação e ação “Revert”
+
+O documento [27 — Notificação de variável, ação Revert e persistência](27_NOTIFICACAO_REVERT_E_PERSISTENCIA.md) confirma na fonte convertida que o botão Revert reatribui prevVal via SetVarValue; ele não executa renpy.rollback(). A lista de notificações é mantida em memória no circuito examinado, enquanto notificationTimeout é uma configuração persistida por Settings. A sobrevivência da notificação em save/load nativo ainda depende de validação runtime.
