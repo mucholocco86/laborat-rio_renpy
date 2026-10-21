@@ -1818,6 +1818,10 @@ default urm_revert_monitor_callback_count = 0
 default urm_revert_monitor_value_after = None
 default urm_revert_monitor_value_after_callback = None
 default urm_revert_monitor_handler_value = None
+default urm_revert_context_force_after_callback = None
+default urm_revert_log_force_after_callback = None
+default urm_revert_context_force_seen_next = None
+default urm_revert_log_force_seen_next = None
 
 init python:
     def urm_revert_monitor_callback():
@@ -1840,7 +1844,11 @@ init python:
             # Observe the first callback delivery only; a later Python node may
             # otherwise see the same uncycled delta again in this reduced probe.
             renpy.store.urm_revert_monitor_callback_enabled = False
+        print("REVERT_CHECKPOINT_CALLBACK_BEFORE", renpy.game.context().force_checkpoint, renpy.game.log.force_checkpoint if renpy.game.log else None)
         renpy.game.context().force_checkpoint = True
+        renpy.store.urm_revert_context_force_after_callback = renpy.game.context().force_checkpoint
+        renpy.store.urm_revert_log_force_after_callback = renpy.game.log.force_checkpoint if renpy.game.log else None
+        print("REVERT_CHECKPOINT_CALLBACK_AFTER", renpy.game.context().force_checkpoint, renpy.game.log.force_checkpoint if renpy.game.log else None)
 
 screen urm_revert_monitor_action_probe():
     modal True
@@ -1867,6 +1875,10 @@ label urm_revert_monitor_start:
     $ urm_revert_monitor_callback_new = None
     $ urm_revert_monitor_callback_count = 0
     $ urm_revert_monitor_handler_value = None
+    $ urm_revert_context_force_after_callback = None
+    $ urm_revert_log_force_after_callback = None
+    $ urm_revert_context_force_seen_next = None
+    $ urm_revert_log_force_seen_next = None
     $ urm_notify_probe_records = []
     $ urm_probe_urm._monitored_names.clear()
     $ urm_probe_urm._frozen_names.clear()
@@ -1883,7 +1895,10 @@ label urm_revert_monitor_start:
     pause 0.5
     $ urm_revert_monitor_value_after = urm_revert_monitor_value
     $ urm_revert_monitor_value_after_callback = urm_revert_monitor_value
+    $ urm_revert_context_force_seen_next = renpy.game.context().force_checkpoint
+    $ urm_revert_log_force_seen_next = renpy.game.log.force_checkpoint if renpy.game.log else None
     $ print("REVERT_MONITOR_AFTER_ACTION", urm_revert_monitor_value_after, urm_revert_monitor_value_after_callback, urm_revert_monitor_callback_delta, urm_revert_monitor_callback_old, urm_revert_monitor_callback_new, list(urm_notify_probe_records), urm_revert_monitor_callback_count)
+    $ print("REVERT_CHECKPOINT_NEXT_NODE", urm_revert_context_force_seen_next, urm_revert_log_force_seen_next)
     if urm_revert_monitor_rollback_mode:
         if urm_revert_monitor_frozen_mode:
             python:
