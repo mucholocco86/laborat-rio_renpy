@@ -118,3 +118,33 @@ jobs:
           result=$?
           echo "END Revert monitor callback rollback probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+      - name: Run frozen Revert monitor callback without rollback
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START frozen Revert monitor callback probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-notification-revert-probe" test urm_notification_revert_frozen_monitor_callback
+          result=$?
+          echo "END frozen Revert monitor callback probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
+
+      - name: Run frozen Revert monitor callback with rollback
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START frozen Revert monitor callback rollback probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-notification-revert-probe" test urm_notification_revert_frozen_monitor_callback_with_rollback
+          result=$?
+          echo "END frozen Revert monitor callback rollback probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
