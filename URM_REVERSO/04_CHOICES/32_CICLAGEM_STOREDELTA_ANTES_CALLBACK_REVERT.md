@@ -98,3 +98,41 @@ Esse encadeamento explica a ausência da mudança no callback sem implicar que e
 - Workflow: commit [58c79fc5b1e44e546e31c12d011d986512c96480](https://github.com/mucholocco86/laborat-rio_renpy/commit/58c79fc5b1e44e546e31c12d011d986512c96480).
 - Run: [39663561168](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39663561168), conclusão **SUCCESS**.
 - Contexto anterior: [25 — Callback, edição por screen e restauração por rollback](25_CALLBACK_ROLLBACK_STOREDELTA_GAMEPLAY.md) e [27 — Notificação, Revert e persistência](27_NOTIFICACAO_REVERT_E_PERSISTENCIA.md).
+## Combinação de Revert, freeze, monitor e callback natural
+
+**Run:** [39664217382](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39664217382), conclusão **SUCCESS**. A fixture ampliada exercitou a ação reduzida Revert com a variável congelada e monitorada, primeiro sem rollback e depois com rollback habilitado.
+
+### Sem rollback
+
+Log relevante:
+
+```text
+REVERT_GET_CHANGES_TARGET False 20 10 urm_revert_monitor_callback/execute/...
+REVERT_MONITOR_CALLBACK_DELTA 20 10
+REVERT_MONITOR_CALLBACK_HANDLED 20 0
+REVERT_MONITOR_AFTER_ACTION 10 True 20 10 [] 2
+```
+
+A callback recebeu o delta `20→10`. O handler reduzido viu `frozen=True`, chamou a edição URM reduzida para restaurar o valor anterior e, dentro do handler, o valor voltou a `20`. Nenhuma notificação foi registrada, consistente com freeze ter precedência sobre monitor na classe reduzida. Porém, depois que a interação retornou ao label, a leitura foi `10`. Logo, o efeito de restauração do handler não persistiu até esse ponto do fluxo. A causa dessa diferença temporal ainda não foi localizada; ela não deve ser descrita como um freeze que efetivamente bloqueou a atribuição, pois a atribuição para `20` ocorreu durante a callback.
+
+### Com rollback habilitado
+
+Log relevante:
+
+```text
+REVERT_GET_CHANGES_TARGET True 20 10 complete/begin/run/...
+REVERT_MONITOR_AFTER_ACTION 10 False None None [] 2
+REVERT_MONITOR_AFTER_ROLLBACK 20 False []
+```
+
+O delta foi ciclado por `get_changes(True)` antes da callback, portanto o handler congelado não foi chamado. O valor permaneceu em `10` após a ação e o rollback explícito restaurou `20`. Não houve registro de notificação.
+
+## Classificação e limites
+
+- **OBSERVADO EM RUNTIME — fixture reduzida:** com freeze + monitor e sem rollback, callback recebe `20→10`; handler registra internamente que reatribuiu `20`, sem notificação; depois da interação o valor é `10`.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** com freeze + monitor e rollback, callback não recebe o delta; valor fica `10` após a ação e rollback retorna a `20`.
+- **CONFIRMADO NA FONTE REDUZIDA:** o handler prioriza freeze sobre monitor; em freeze tenta restaurar `oldVal` por `Var.setValue`.
+- **PENDENTE:** identificar por que o valor escrito como `20` dentro da callback aparece como `10` depois da interação; confirmar se a mesma sequência ocorre com `StoreMonitor`, `VarsStore` e NotificationClass integrais do URM.
+- **Limitação:** `_frozen_names`/`_monitored_names` são sets Python simples no harness, não os stores `.urm` reais. A fixture reproduz o circuito relevante, mas não carrega o pacote URM via loader.
+
+A fixture e o workflow foram atualizados nos commits [32842a1aeb254e2c22d410302129c6927b8a6058](https://github.com/mucholocco86/laborat-rio_renpy/commit/32842a1aeb254e2c22d410302129c6927b8a6058) e [3ba4c679033c8a4bc75eb4b30caa0a2e2beedeb6](https://github.com/mucholocco86/laborat-rio_renpy/commit/3ba4c679033c8a4bc75eb4b30caa0a2e2beedeb6). O primeiro run após incluir a asserção inicial falhou porque revelou a diferença temporal; a fixture foi então instrumentada para separar o valor escrito dentro do handler da leitura após a interação. O run final acima passou com essas duas observações registradas.
