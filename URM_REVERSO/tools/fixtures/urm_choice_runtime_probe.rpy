@@ -1705,11 +1705,13 @@ default urm_notification_revert_rollback_route = 0
 
 label urm_notification_revert_rollback_start:
     $ renpy.game.context().rollback = True
+    $ renpy.store._rollback = True
     $ urm_notification_revert_rollback_value = 10
     $ urm_notification_revert_rollback_prev = 10
     $ urm_notification_revert_rollback_route = 0
     $ urm_notification_revert_rollback_value = 20
     $ urm_notification_revert_rollback_route = 1
+    $ print("NOTIFICATION_REVERT_ROLLBACK_GATES", renpy.store._rollback, renpy.game.context().rollback, renpy.config.rollback_enabled)
     $ renpy.checkpoint("immediately-before-revert")
     $ urm_probe_urm.SetVarValue(urm_probe_urm.Var("urm_notification_revert_rollback_value"), None, None, newValue=urm_notification_revert_rollback_prev)()
     $ print("NOTIFICATION_REVERT_ROLLBACK_PRE", urm_notification_revert_rollback_value, urm_notification_revert_rollback_route)
