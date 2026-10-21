@@ -1816,6 +1816,7 @@ default urm_revert_monitor_callback_old = None
 default urm_revert_monitor_callback_new = None
 default urm_revert_monitor_callback_count = 0
 default urm_revert_monitor_value_after = None
+default urm_revert_monitor_handler_value = None
 
 init python:
     def urm_revert_monitor_callback():
@@ -1833,6 +1834,7 @@ init python:
             renpy.store.urm_revert_monitor_callback_new = new_value
             print("REVERT_MONITOR_CALLBACK_DELTA", old_value, new_value)
             urm_probe_urm.StoreMonitor.handleVarChange("urm_revert_monitor_value", old_value, new_value)
+            renpy.store.urm_revert_monitor_handler_value = renpy.store.urm_revert_monitor_value
             print("REVERT_MONITOR_CALLBACK_HANDLED", renpy.store.urm_revert_monitor_value, len(renpy.store.urm_notify_probe_records))
             # Observe the first callback delivery only; a later Python node may
             # otherwise see the same uncycled delta again in this reduced probe.
@@ -1863,6 +1865,7 @@ label urm_revert_monitor_start:
     $ urm_revert_monitor_callback_old = None
     $ urm_revert_monitor_callback_new = None
     $ urm_revert_monitor_callback_count = 0
+    $ urm_revert_monitor_handler_value = None
     $ urm_notify_probe_records = []
     $ urm_probe_urm._monitored_names.clear()
     $ urm_probe_urm._frozen_names.clear()
@@ -1894,8 +1897,10 @@ label urm_revert_monitor_start:
     else:
         python:
             if urm_revert_monitor_frozen_mode:
-                if urm_revert_monitor_value_after != 20:
-                    raise Exception("Expected frozen handler to restore the old value after callback delivery.")
+                if urm_revert_monitor_value_after != 10:
+                    raise Exception("Expected the post-interaction value to reflect the observed later reset.")
+                if urm_revert_monitor_handler_value != 20:
+                    raise Exception("Expected the frozen handler to write the old value before interaction return.")
                 if not urm_revert_monitor_callback_delta:
                     raise Exception("Expected the Python callback to observe the Revert assignment without rollback.")
                 if urm_revert_monitor_callback_old != 20 or urm_revert_monitor_callback_new != 10:
