@@ -102,3 +102,31 @@ Assim, a antiga formulação “save/load pendente” precisa ser lida como **sa
 - **OBSERVADO EM RUNTIME (fixture reduzida, SDK 7.4.11):** a ação reproduzida reatribui 10 ao valor corrente 20 e conserva o marcador de rota 1.
 - **OBSERVADO EM RUNTIME (fixtures reduzidas):** há diferenças entre rollback de `clear()` e remoção in-place da lista, e entre load na mesma sessão e load em processo novo, conforme casos e runs acima.
 - **PENDENTE:** comportamento da screen e dos objetos da `NotificationsClass` no pacote integral, além do rollback posterior à ação Revert e suas combinações com save/load e metadados de monitoramento.
+## Atualização runtime — “Revert” atravessado por rollback (2026-10-21)
+
+A primeira execução do novo teste falhou porque a fixture habilitava `context.rollback`, mas deixava `renpy.store._rollback=False`. O teste imprimiu valor 10/rota 0 ao chegar à verificação: a chamada de rollback recuou além do ponto que o cenário pretendia testar. A fonte de `renpy.checkpoint(data, keep_rollback, hard)` no SDK 7.4.11 confirma a causa: o argumento efetivo é `renpy.store._rollback and hard`; assim, com `_rollback=False`, o checkpoint solicitado com `hard=True` vira soft. O run [39560687256](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39560687256) é registrado como tentativa inválida para a pergunta sobre fronteira, não como evidência de que a atribuição não seja reversível.
+
+Na repetição, a fixture ativou `renpy.store._rollback`, `context.rollback` e `config.rollback_enabled`, verificando esses três valores antes do checkpoint. No run [39560909296](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39560909296), a sequência foi:
+
+```text
+checkpoint: valor 20, rota 1
+ação Revert reduzida: valor 10, rota 1
+rollback nativo para o checkpoint: valor 20, rota 1
+```
+
+O teste passou. **OBSERVADO EM RUNTIME na fixture reduzida do SDK 7.4.11:** a atribuição correspondente ao Revert entrou no estado reversível e o rollback até o checkpoint imediatamente anterior restaurou o valor anterior à atribuição. O marcador de rota já presente naquele checkpoint permaneceu 1. Portanto, o botão não faz rollback por si; uma chamada posterior ao rollback nativo pode desfazer a atribuição do botão conforme a fronteira alcançada.
+
+### Limites deste resultado
+
+- O probe reproduz `SetVarValue(Var(...), newValue=prevVal)` com uma variável escalar raiz; não executa a screen `URM_var_changed` nem a `NotificationsClass` do pacote integral.
+- O teste estabelece deliberadamente um checkpoint hard imediatamente antes da atribuição. Ele não determina quais fronteiras de rollback ficam disponíveis em todo jogo nem o número de interações que o jogador precisaria recuar.
+- Não foram combinados neste caso save/load, freeze, monitoramento ou outras mutações posteriores.
+- A primeira execução expôs uma condição do harness: para criar checkpoint hard na fixture, foi necessário habilitar também o store global `_rollback`, além do `Context.rollback`.
+
+### Artefatos
+
+- Fixture: commit [aff996dd95da4056c086b0ac76a0250b14499acd](https://github.com/mucholocco86/laborat-rio_renpy/commit/aff996dd95da4056c086b0ac76a0250b14499acd).
+- Workflow com os dois probes: commit [c7cc72e3f4d07f3a568a986eaa61024b9cab1a78](https://github.com/mucholocco86/laborat-rio_renpy/commit/c7cc72e3f4d07f3a568a986eaa61024b9cab1a78).
+- SDK 7.4.11, `renpy/exports.py`, `checkpoint()`, blob SHA `781b35b31522dafc6a24e7c3212d206c7bd6dfa5`.
+
+**Classificação atualizada:** Revert como reatribuição permanece confirmado na fonte convertida e observado em runtime reduzido; a reversibilidade da atribuição por rollback até um checkpoint hard imediatamente anterior também foi observada na fixture. A validação da screen/URM integral e os cruzamentos com monitor, freeze, save/load e fronteiras de gameplay permanecem pendentes.
