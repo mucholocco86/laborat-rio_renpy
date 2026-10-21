@@ -156,3 +156,27 @@ Assim, sem rollback, o handler de freeze reatribui `20`; a leitura no nó Python
 - **PENDENTE:** validar o mesmo circuito com os stores e classes integrais do URM carregados pelo loader.
 
 Fixture atualizada no commit [f0d1cdd298dfd990e4281c9bb91b579a3e5b214e](https://github.com/mucholocco86/laborat-rio_renpy/commit/f0d1cdd298dfd990e4281c9bb91b579a3e5b214e); run [39665745692](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39665745692) concluiu **SUCCESS**.
+## Transferência de `Context.force_checkpoint` para o log
+
+O fixture recebeu observação adicional no run [39669205656](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39669205656) para acompanhar os dois flags nas fronteiras da callback e do próximo nó.
+
+### O que o SDK faz
+
+Em `Context.run()`, quando `context.force_checkpoint` está ativo, o próximo nó força `RollbackLog.begin(force=True)`. Se o rollback daquele contexto está habilitado, o fluxo então transfere o pedido para `renpy.game.log.force_checkpoint = True` e limpa `context.force_checkpoint`. Em `RollbackLog.complete()`, um `force_checkpoint` pendente é consumido por `checkpoint(hard=False)`: é um checkpoint soft, não a marcação de rollback fixo.
+
+O callback real do URM convertido segue esta ordem: define `context.force_checkpoint = True` e depois consulta `StoreDict.get_changes(False)`. A atribuição fica antes da leitura e é executada em todas as chamadas do callback, inclusive quando o delta está vazio. Só depois disso percorre as mudanças, quando houver.
+
+### O que o trace viu
+
+Com rollback desabilitado no harness, o flag ficou no contexto (`context=True`, `log=False`), pois `Context.run()` não transfere o pedido quando `self.rollback` está falso. Esse modo serve apenas para contrastar o mecanismo e não modela gameplay.
+
+Com rollback habilitado, a primeira callback começou com ambos os flags falsos e deixou `context=True`. No nó seguinte, o SDK consumiu esse pedido: antes da callback desse próximo nó, a fixture observou `context=False`, `log=True`. Isso confirma a transferência para `RollbackLog.force_checkpoint`. Como o callback reduzido continua definindo o flag mesmo sem delta, as callbacks Python subsequentes podem voltar a enfileirar pedidos; a fixture registrou essa repetição, mas não contou de modo independente quantos checkpoints soft foram materializados.
+
+### Classificação
+
+- **CONFIRMADO NO SDK 7.4.11 — fonte:** `Context.run()` converte o flag do contexto em `RollbackLog.force_checkpoint` quando rollback está ativo; `RollbackLog.complete()` converte esse flag em `checkpoint(hard=False)`.
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** `_m1_vars__pythonCallback` define o flag antes de consultar `get_changes`, mesmo quando a consulta não retorna mudanças utilizáveis.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** com rollback ativo, a flag passa de contexto para log entre o callback de um nó e a execução/callback do nó seguinte.
+- **PENDENTE:** instrumentar o número e os limites dos checkpoints soft efetivamente criados em gameplay real; validar o padrão com o callback e loader do URM integral.
+
+Referências de fonte: SDK `renpy/execution.py` (`Context.run`, aprox. linhas 515–550; blob `547f73b26dad0fe08fda6333e5f4b60c97cf8772`); SDK `renpy/python.py` (`RollbackLog.begin/complete`, blob `c5eb2819a3e4ee096dbf01130d70a77f9b623484`); URM convertido `classes/vars.rpy` (`_m1_vars__pythonCallback`, blob `57482937e14f215dac0ecb22a62da8ad160cba58`). Fixture probe commit [13cd486d01150046ec9e15052a386e14cd8899bc](https://github.com/mucholocco86/laborat-rio_renpy/commit/13cd486d01150046ec9e15052a386e14cd8899bc).
