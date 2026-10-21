@@ -1782,3 +1782,111 @@ label urm_notification_revert_frozen_verify:
 testcase urm_notification_revert_frozen_and_monitored:
     run Jump("urm_notification_revert_frozen_start")
     label urm_notification_revert_frozen_verify
+
+# Natural callback probes for the reduced URM notification Revert action.
+# The callback reads StoreDict.get_changes(False), as the converted URM does.
+default urm_revert_monitor_value = 20
+default urm_revert_monitor_prev = 10
+default urm_revert_monitor_rollback_mode = False
+default urm_revert_monitor_callback_enabled = False
+default urm_revert_monitor_callback_delta = False
+default urm_revert_monitor_callback_old = None
+default urm_revert_monitor_callback_new = None
+default urm_revert_monitor_callback_count = 0
+default urm_revert_monitor_value_after = None
+
+init python:
+    def urm_revert_monitor_callback():
+        if not renpy.store.urm_revert_monitor_callback_enabled:
+            return
+        changes = renpy.store.__dict__.get_changes(False)
+        if isinstance(changes, tuple):
+            changes = changes[0]
+        renpy.store.urm_revert_monitor_callback_count += 1
+        if "urm_revert_monitor_value" in changes:
+            old_value = changes["urm_revert_monitor_value"]
+            new_value = renpy.store.urm_revert_monitor_value
+            renpy.store.urm_revert_monitor_callback_delta = True
+            renpy.store.urm_revert_monitor_callback_old = old_value
+            renpy.store.urm_revert_monitor_callback_new = new_value
+            print("REVERT_MONITOR_CALLBACK_DELTA", old_value, new_value)
+            urm_probe_urm.StoreMonitor.handleVarChange("urm_revert_monitor_value", old_value, new_value)
+            print("REVERT_MONITOR_CALLBACK_HANDLED", renpy.store.urm_revert_monitor_value, len(renpy.store.urm_notify_probe_records))
+            # Observe the first callback delivery only; a later Python node may
+            # otherwise see the same uncycled delta again in this reduced probe.
+            renpy.store.urm_revert_monitor_callback_enabled = False
+        renpy.game.context().force_checkpoint = True
+
+screen urm_revert_monitor_action_probe():
+    modal True
+    zorder 200
+
+    frame:
+        xalign 0.5
+        yalign 0.5
+
+        textbutton "Apply notification Revert":
+            action urm_probe_urm.SetVarValue(
+                urm_probe_urm.Var("urm_revert_monitor_value"),
+                Hide("urm_revert_monitor_action_probe"),
+                "errorMessage",
+                newValue=urm_revert_monitor_prev,
+            )
+
+label urm_revert_monitor_start:
+    $ urm_revert_monitor_value = 20
+    $ urm_revert_monitor_prev = 10
+    $ urm_revert_monitor_callback_enabled = False
+    $ urm_revert_monitor_callback_delta = False
+    $ urm_revert_monitor_callback_old = None
+    $ urm_revert_monitor_callback_new = None
+    $ urm_revert_monitor_callback_count = 0
+    $ urm_notify_probe_records = []
+    $ urm_probe_urm._monitored_names.clear()
+    $ urm_probe_urm._frozen_names.clear()
+    $ urm_probe_urm.VarsStore.monitor("urm_revert_monitor_value")
+    if urm_revert_monitor_rollback_mode:
+        $ renpy.game.context().rollback = True
+        $ renpy.store._rollback = True
+        $ renpy.checkpoint("before-notification-revert-monitor")
+    $ renpy.config.python_callbacks.append(urm_revert_monitor_callback)
+    $ urm_revert_monitor_callback_enabled = True
+    show screen urm_revert_monitor_action_probe
+    pause 0.5
+    $ urm_revert_monitor_value_after = urm_revert_monitor_value
+    $ print("REVERT_MONITOR_AFTER_ACTION", urm_revert_monitor_value_after, urm_revert_monitor_callback_delta, urm_revert_monitor_callback_old, urm_revert_monitor_callback_new, list(urm_notify_probe_records), urm_revert_monitor_callback_count)
+    if urm_revert_monitor_rollback_mode:
+        $ renpy.rollback(force=True, checkpoints=1, label="urm_revert_monitor_rollback_verify")
+    else:
+        python:
+            if urm_revert_monitor_value_after != 10:
+                raise Exception("Expected notification Revert to assign prevVal in the monitored case.")
+            if not urm_revert_monitor_callback_delta:
+                raise Exception("Expected the Python callback to observe the Revert assignment without rollback.")
+            if urm_revert_monitor_callback_old != 20 or urm_revert_monitor_callback_new != 10:
+                raise Exception("Expected the callback to receive the 20->10 Revert delta.")
+            if len(urm_notify_probe_records) != 1:
+                raise Exception("Expected one reduced StoreMonitor notification for the observed Revert delta.")
+        $ renpy.quit()
+
+label urm_revert_monitor_rollback_start:
+    $ urm_revert_monitor_rollback_mode = True
+    jump urm_revert_monitor_start
+
+label urm_revert_monitor_rollback_verify:
+    $ print("REVERT_MONITOR_AFTER_ROLLBACK", urm_revert_monitor_value, urm_revert_monitor_callback_delta, list(urm_notify_probe_records))
+    python:
+        if urm_revert_monitor_value != 20:
+            raise Exception("Expected rollback to restore the value at the pre-Revert checkpoint.")
+    $ renpy.quit()
+
+testcase urm_notification_revert_monitor_callback:
+    $ urm_revert_monitor_rollback_mode = False
+    run Jump("urm_revert_monitor_start")
+    "Apply notification Revert"
+
+testcase urm_notification_revert_monitor_callback_with_rollback:
+    $ urm_revert_monitor_rollback_mode = True
+    run Jump("urm_revert_monitor_rollback_start")
+    "Apply notification Revert"
+    label urm_revert_monitor_rollback_verify
