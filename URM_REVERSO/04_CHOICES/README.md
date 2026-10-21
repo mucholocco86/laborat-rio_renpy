@@ -396,3 +396,7 @@ No run [39562762194](https://github.com/mucholocco86/laborat-rio_renpy/actions/r
 ### Continuação de 2026-10-21 — localização da ciclagem do delta
 
 O trace instrumentado no run [39663561168](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39663561168) observou `get_changes(True)` retornando o delta `20→10` na pilha `RollbackLog.complete → begin → Context.run`, antes do callback Python. Com rollback desabilitado, `get_changes(False)` da callback recebeu o mesmo delta. Isso localiza por que o callback perde a mudança sem que ela saia do histórico reversível. A fixture envolve wrapper delegante do método original; SDK e URM integral não foram modificados. Detalhes, fontes e limitações no [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
+
+### Continuação de 2026-10-21 — freeze + monitor + callback natural após Revert
+
+O run [39664217382](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39664217382) passou os dois novos casos da fixture reduzida. Sem rollback, callback recebeu `20→10`; o handler frozen escreveu `20` durante a callback e não notificou, mas a leitura após a interação foi novamente `10`. Com rollback, callback não recebeu o delta e o rollback restaurou `20`. A razão para a diferença temporal no caso sem rollback segue pendente. A fixture usa metadados de freeze/monitor simplificados, não os stores `.urm` integrais. Ver detalhes e limites no [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
