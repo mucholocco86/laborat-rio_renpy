@@ -1,0 +1,100 @@
+# 32 — Ciclagem do StoreDict antes da callback após Revert
+
+**Data:** 2026-10-21  
+**Escopo:** localizar em runtime reduzido quando o delta produzido pela ação Revert deixa de estar disponível a `StoreMonitor` com rollback habilitado.  
+**SDK:** Ren’Py 7.4.11.  
+**Evidência:** inspeção das fontes do SDK e do URM convertido, mais instrumentação runtime numa fixture isolada.  
+**Proteções:** a instrumentação delega ao método original e só registra; não altera arquivos do SDK, fontes URM originais, `wells/` ou `wells_beta/`.
+
+## Resultado
+
+A diferença observada anteriormente entre callback com e sem rollback foi rastreada até a fronteira de execução do próximo nó Ren’Py:
+
+```text
+ação de screen altera StoreDict
+        ↓
+retorno da interação ao Context.run
+        ↓
+RollbackLog.begin() para o próximo nó
+        ↓
+RollbackLog.complete(begin=True)
+        ↓
+StoreDict.get_changes(True): captura delta e avança StoreDict.old
+        ↓
+execução do próximo nó Python
+        ↓
+callback URM chama get_changes(False): delta já não aparece
+```
+
+Sem rollback habilitado, não há esse `begin()` do log neste percurso. A callback no fim do nó Python seguinte ainda encontra o delta com `get_changes(False)`.
+
+## Evidência runtime
+
+O wrapper da fixture chamou o método original `StoreDict.get_changes` sem alterar seus argumentos ou retorno. Quando a chave alvo era retornada, registrou `cycle`, valor antigo, valor atual e a pilha de chamadas. O teste natural usou a ação de screen reduzida equivalente a `SetVarValue(var, newValue=prevVal)`, com `20→10`.
+
+### Rollback desabilitado
+
+Log relevante no run [39663561168](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39663561168):
+
+```text
+REVERT_GET_CHANGES_TARGET False 20 10 urm_revert_monitor_callback/execute/run/...
+REVERT_MONITOR_CALLBACK_DELTA 20 10
+REVERT_MONITOR_CALLBACK_HANDLED 10 1
+```
+
+A callback consumiu a visão do delta sem ciclar `old`; o handler monitorado registrou uma mudança.
+
+### Rollback habilitado
+
+Log relevante no mesmo run:
+
+```text
+REVERT_GET_CHANGES_TARGET True 20 10 complete/begin/run/run_context/call_in_new_context/...
+REVERT_MONITOR_AFTER_ACTION 10 False None None [] ...
+REVERT_MONITOR_AFTER_ROLLBACK 20 False []
+```
+
+O trace mostra que o delta 20→10 foi retornado numa chamada com `cycle=True` dentro de `complete/begin`, antes da consulta da callback. A callback não encontrou a chave, não criou registro e o valor ficou em 10 até o rollback restaurá-lo para 20.
+
+### Ruído de inicialização separado
+
+O log também contém linhas `REVERT_GET_CHANGES_TARGET True <StoreDeleted> 20 ...`. Elas correspondem à criação/marcação inicial da variável da fixture, não à atribuição Revert. Para a conclusão, a linha relevante é a que registra `True 20 10`.
+
+## Confronto com o SDK 7.4.11
+
+### StoreDict
+
+`StoreDict.get_changes(cycle)` compara `self.old` com o store atual. Se `cycle=True`, troca `self.old` pela captura atual (`new`) e atualiza `ever_been_changed`; com `cycle=False`, retorna as diferenças sem avançar `old`. Após o ciclo verdadeiro, a próxima consulta pode retornar vazio para a mesma mutação, pois a base de comparação já inclui o valor novo.
+
+### RollbackLog.begin e complete
+
+`RollbackLog.begin()` roda antes de um nó. Quando o contexto permite rollback e o método decide criar um novo registro (por interação anterior, checkpoint ou `force=True`), chama `self.complete(True)` para fechar o registro anterior. `RollbackLog.complete(begin=True)` passa `begin` a `StoreDict.get_changes(begin)`, portanto pede `cycle=True`.
+
+### Context.run e callback Python
+
+`Context.run()` chama `renpy.game.log.begin(...)` no início do nó quando o rollback está ativo e a política determina atualizar o log. Depois o nó executa. `renpy.ast.Python.execute()` chama `renpy.config.python_callbacks` no `finally`, ao término do nó Python fora da fase de init. Assim, no caso observado, a ciclagem pelo log precede a callback que consulta o delta.
+
+Esse encadeamento explica a ausência da mudança no callback sem implicar que ela saiu do histórico reversível: `complete(True)` arquiva a mudança no registro corrente, enquanto `get_changes(False)` é apenas uma consulta à diferença ainda aberta desde o último `begin` do StoreDict. O runtime confirma que rollback posterior restaurou o valor.
+
+## Classificação
+
+- **CONFIRMADO NO SDK 7.4.11 — fonte:** `get_changes(True)` avança `StoreDict.old`; `complete(begin=True)` pede esse ciclo; `RollbackLog.begin()` chama `complete(True)` quando inicia novo registro; `Context.run()` inicia o registro antes da execução do nó; `ast.Python.execute()` chama callbacks no fim do nó.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** delta 20→10 foi capturado em `get_changes(True)` na pilha `complete/begin/run...` com rollback habilitado; a callback subsequente não o encontrou; rollback restaurou 20.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** sem rollback, a callback viu 20→10 por `get_changes(False)` e o handler gerou um registro.
+- **INTERPRETAÇÃO corroborada:** o log reversível capturou o delta antes da callback; a ausência do delta no callback não significa ausência da mutação no histórico.
+- **PENDENTE:** confirmar a mesma sequência com o StoreMonitor e a `NotificationsClass` integrais do URM carregados pelo loader, e identificar diferenças para ações executadas em outras posições do fluxo.
+
+## Fontes e reprodução
+
+| Fonte | Símbolos / intervalos | Blob SHA |
+|---|---|---|
+| SDK `renpy/python.py` | `StoreDict.get_changes` (aprox. 128–183), `RollbackLog.begin` (aprox. 1620–1685), `RollbackLog.complete` (1707–1755) | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+| SDK `renpy/execution.py` | `Context.run` (aprox. 500–555 e finalização do loop) | `547f73b26dad0fe08fda6333e5f4b60c97cf8772` |
+| SDK `renpy/ast.py` | `Python.execute` e chamada de `python_callbacks` (aprox. 925–945) | `d81ffc13f28f0b7442ba6905f1745ee838f7b185` |
+| URM convertido `classes/vars.rpy` | `_m1_vars__pythonCallback`, `handleVarChange`, `Var.setValue` | `57482937e14f215dac0ecb22a62da8ad160cba58` |
+| URM convertido `screens/vars.rpy` | `URM_var_changed`, botão `Revert` | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
+
+- Fixture instrumentada: commit [87cafd440572151f1d30c58758818e8cdc7d69d8](https://github.com/mucholocco86/laborat-rio_renpy/commit/87cafd440572151f1d30c58758818e8cdc7d69d8).
+- Workflow: commit [58c79fc5b1e44e546e31c12d011d986512c96480](https://github.com/mucholocco86/laborat-rio_renpy/commit/58c79fc5b1e44e546e31c12d011d986512c96480).
+- Run: [39663561168](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39663561168), conclusão **SUCCESS**.
+- Contexto anterior: [25 — Callback, edição por screen e restauração por rollback](25_CALLBACK_ROLLBACK_STOREDELTA_GAMEPLAY.md) e [27 — Notificação, Revert e persistência](27_NOTIFICACAO_REVERT_E_PERSISTENCIA.md).
