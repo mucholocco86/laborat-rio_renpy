@@ -60,3 +60,17 @@ jobs:
           result=$?
           echo "END notification Revert probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+      - name: Run Revert then native rollback probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START notification Revert rollback probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-notification-revert-probe" test urm_notification_revert_then_native_rollback
+          result=$?
+          echo "END notification Revert rollback probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
