@@ -130,3 +130,32 @@ O teste passou. **OBSERVADO EM RUNTIME na fixture reduzida do SDK 7.4.11:** a at
 - SDK 7.4.11, `renpy/exports.py`, `checkpoint()`, blob SHA `781b35b31522dafc6a24e7c3212d206c7bd6dfa5`.
 
 **Classificação atualizada:** Revert como reatribuição permanece confirmado na fonte convertida e observado em runtime reduzido; a reversibilidade da atribuição por rollback até um checkpoint hard imediatamente anterior também foi observada na fixture. A validação da screen/URM integral e os cruzamentos com monitor, freeze, save/load e fronteiras de gameplay permanecem pendentes.
+## Atualização runtime — Revert em variável congelada e monitorada (2026-10-21)
+
+A fixture reduziu `Var.setValue` com a mesma estrutura relevante da fonte URM: consulta se a variável está congelada, remove temporariamente essa flag, atribui o valor e reaplica a flag em `finally`. O caso também marcou a variável como monitorada, pois a implementação de `StoreMonitor.handleVarChange` testa primeiro `isFrozen` e só depois `isMonitored`.
+
+No run [39561988378](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39561988378), a sequência observada foi:
+
+```text
+antes: valor 20, rota 1
+após ação Revert reduzida: valor 10, frozen=True, notificações=0
+após chamar StoreMonitor.handleVarChange(nome, 20, 10): valor 20, notificações=0, frozen=True
+```
+
+**OBSERVADO EM RUNTIME na fixture reduzida:** a atribuição de Revert pode alterar uma variável marcada como frozen pela rota própria de `Var.setValue`, e a flag é reaplicada. Quando o handler recebe explicitamente o delta `20→10`, a regra frozen restaura o valor antigo informado e retorna antes do ramo de notificação; logo, a configuração monitorada não produz aviso nesse caso.
+
+### Limite sobre a callback
+
+Este probe chamou diretamente `StoreMonitor.handleVarChange` com um delta conhecido. Ele **não** demonstrou que `renpy.config.python_callbacks` necessariamente entrega esse delta depois da ação Revert. A disponibilidade do delta depende do ciclo `StoreDict.get_changes`/checkpoint; testes anteriores mostraram que a callback pode não encontrá-lo com rollback habilitado. Portanto, a consequência comprovada é condicional: **se** o handler receber uma mudança enquanto a variável está frozen, ele prioriza freeze, restaura o valor antigo recebido e não notifica.
+
+Também não se testou aqui o pacote integral, a screen real, nem o rollback após o handler. O caso de rollback de Revert sem freeze está no run [39560909296](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39560909296); integrar ambos os mecanismos em um percurso real continua pendente.
+
+### Artefatos e classificação
+
+- Fixture isolada: commit [235718c545673a83f79c8eb32a3645d621bddddf](https://github.com/mucholocco86/laborat-rio_renpy/commit/235718c545673a83f79c8eb32a3645d621bddddf).
+- Workflow: commit [cc3ce013ba6fe869642fdb62c78d734bfed54520](https://github.com/mucholocco86/laborat-rio_renpy/commit/cc3ce013ba6fe869642fdb62c78d734bfed54520).
+- Fonte convertida: `classes/vars.rpy`, `StoreMonitorClass.handleVarChange` e `Var.setValue`, blob SHA `57482937e14f215dac0ecb22a62da8ad160cba58`; tela real `screens/vars.rpy`, `URM_var_changed`, blob SHA `7959b2c0e6249df0edbb9ebe683481d46e4537e1`.
+
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** `handleVarChange` dá precedência a frozen sobre monitor; `Var.setValue` remove e reaplica temporariamente freeze.
+- **OBSERVADO EM RUNTIME (fixture reduzida):** ação Revert reduziu valor frozen de 20 para 10 e preservou a flag; entrega explícita do delta ao handler o restaurou para 20 sem notificação.
+- **PENDENTE:** se e quando a callback real encontra o delta gerado pela ação Revert, e o efeito combinado dessa callback com rollback/save-load na execução integral.
