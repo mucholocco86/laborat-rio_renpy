@@ -1809,6 +1809,7 @@ init python:
 default urm_revert_monitor_value = 20
 default urm_revert_monitor_prev = 10
 default urm_revert_monitor_rollback_mode = False
+default urm_revert_monitor_frozen_mode = False
 default urm_revert_monitor_callback_enabled = False
 default urm_revert_monitor_callback_delta = False
 default urm_revert_monitor_callback_old = None
@@ -1865,6 +1866,8 @@ label urm_revert_monitor_start:
     $ urm_notify_probe_records = []
     $ urm_probe_urm._monitored_names.clear()
     $ urm_probe_urm._frozen_names.clear()
+    if urm_revert_monitor_frozen_mode:
+        $ urm_probe_urm.VarsStore.freeze("urm_revert_monitor_value")
     $ urm_probe_urm.VarsStore.monitor("urm_revert_monitor_value")
     if urm_revert_monitor_rollback_mode:
         $ renpy.game.context().rollback = True
@@ -1877,17 +1880,39 @@ label urm_revert_monitor_start:
     $ urm_revert_monitor_value_after = urm_revert_monitor_value
     $ print("REVERT_MONITOR_AFTER_ACTION", urm_revert_monitor_value_after, urm_revert_monitor_callback_delta, urm_revert_monitor_callback_old, urm_revert_monitor_callback_new, list(urm_notify_probe_records), urm_revert_monitor_callback_count)
     if urm_revert_monitor_rollback_mode:
+        if urm_revert_monitor_frozen_mode:
+            python:
+                if urm_revert_monitor_value_after != 10:
+                    raise Exception("Expected Revert assignment to remain until rollback when callback delta is cycled.")
+                if urm_revert_monitor_callback_delta:
+                    raise Exception("Expected the callback to miss the delta already cycled by RollbackLog.")
+                if not urm_probe_urm.VarsStore.isFrozen("urm_revert_monitor_value"):
+                    raise Exception("Expected the variable to remain frozen before rollback.")
+                if len(urm_notify_probe_records) != 0:
+                    raise Exception("Expected no notification when the callback receives no delta.")
         $ renpy.rollback(force=True, checkpoints=1, label="urm_revert_monitor_rollback_verify")
     else:
         python:
-            if urm_revert_monitor_value_after != 10:
-                raise Exception("Expected notification Revert to assign prevVal in the monitored case.")
-            if not urm_revert_monitor_callback_delta:
-                raise Exception("Expected the Python callback to observe the Revert assignment without rollback.")
-            if urm_revert_monitor_callback_old != 20 or urm_revert_monitor_callback_new != 10:
-                raise Exception("Expected the callback to receive the 20->10 Revert delta.")
-            if len(urm_notify_probe_records) != 1:
-                raise Exception("Expected one reduced StoreMonitor notification for the observed Revert delta.")
+            if urm_revert_monitor_frozen_mode:
+                if urm_revert_monitor_value_after != 20:
+                    raise Exception("Expected frozen handler to restore the old value after callback delivery.")
+                if not urm_revert_monitor_callback_delta:
+                    raise Exception("Expected the Python callback to observe the Revert assignment without rollback.")
+                if urm_revert_monitor_callback_old != 20 or urm_revert_monitor_callback_new != 10:
+                    raise Exception("Expected the callback to receive the 20->10 Revert delta.")
+                if not urm_probe_urm.VarsStore.isFrozen("urm_revert_monitor_value"):
+                    raise Exception("Expected handler to preserve frozen status.")
+                if len(urm_notify_probe_records) != 0:
+                    raise Exception("Expected freeze to suppress notification.")
+            else:
+                if urm_revert_monitor_value_after != 10:
+                    raise Exception("Expected notification Revert to assign prevVal in the monitored case.")
+                if not urm_revert_monitor_callback_delta:
+                    raise Exception("Expected the Python callback to observe the Revert assignment without rollback.")
+                if urm_revert_monitor_callback_old != 20 or urm_revert_monitor_callback_new != 10:
+                    raise Exception("Expected the callback to receive the 20->10 Revert delta.")
+                if len(urm_notify_probe_records) != 1:
+                    raise Exception("Expected one reduced StoreMonitor notification for the observed Revert delta.")
         $ renpy.quit()
 
 label urm_revert_monitor_rollback_start:
@@ -1899,15 +1924,32 @@ label urm_revert_monitor_rollback_verify:
     python:
         if urm_revert_monitor_value != 20:
             raise Exception("Expected rollback to restore the value at the pre-Revert checkpoint.")
+        if urm_revert_monitor_frozen_mode and not urm_probe_urm.VarsStore.isFrozen("urm_revert_monitor_value"):
+            raise Exception("Expected frozen metadata to remain set in the reduced harness.")
     $ renpy.quit()
 
 testcase urm_notification_revert_monitor_callback:
     $ urm_revert_monitor_rollback_mode = False
+    $ urm_revert_monitor_frozen_mode = False
     run Jump("urm_revert_monitor_start")
     "Apply notification Revert"
 
 testcase urm_notification_revert_monitor_callback_with_rollback:
     $ urm_revert_monitor_rollback_mode = True
+    $ urm_revert_monitor_frozen_mode = False
+    run Jump("urm_revert_monitor_rollback_start")
+    "Apply notification Revert"
+    label urm_revert_monitor_rollback_verify
+
+testcase urm_notification_revert_frozen_monitor_callback:
+    $ urm_revert_monitor_rollback_mode = False
+    $ urm_revert_monitor_frozen_mode = True
+    run Jump("urm_revert_monitor_start")
+    "Apply notification Revert"
+
+testcase urm_notification_revert_frozen_monitor_callback_with_rollback:
+    $ urm_revert_monitor_rollback_mode = True
+    $ urm_revert_monitor_frozen_mode = True
     run Jump("urm_revert_monitor_rollback_start")
     "Apply notification Revert"
     label urm_revert_monitor_rollback_verify
