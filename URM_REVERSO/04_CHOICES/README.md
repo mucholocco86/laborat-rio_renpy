@@ -390,3 +390,6 @@ No run [39560909296](https://github.com/mucholocco86/laborat-rio_renpy/actions/r
 ### Continuação de 2026-10-21 — Revert, freeze e monitor
 
 O run [39561988378](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39561988378) passou na fixture reduzida: Revert mudou 20→10 mantendo `frozen=True`; ao entregar ao handler o delta 20→10, `StoreMonitor` restaurou 20 e não gerou notificação, pois freeze tem precedência sobre monitor. O teste chamou o handler diretamente com delta conhecido; **não** prova que a callback real sempre receba o delta após Revert. A disponibilidade do delta, o rollback combinado e a execução do URM integral seguem pendentes. Detalhes e artefatos no adendo do [documento 27](27_NOTIFICACAO_REVERT_E_PERSISTENCIA.md).
+### Continuação de 2026-10-21 — callback natural após Revert
+
+No run [39562762194](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39562762194), o probe da ação por screen observou dois comportamentos no SDK 7.4.11 reduzido: sem rollback, a callback leu `20→10` e o monitor registrou a mudança; com rollback habilitado, ela não recebeu o delta, não criou registro e o valor 10 persistiu até rollback restaurar 20. A notificação visual real do URM e a causa exata da ausência do delta continuam pendentes. Detalhes e limites no adendo do [documento 27](27_NOTIFICACAO_REVERT_E_PERSISTENCIA.md).
