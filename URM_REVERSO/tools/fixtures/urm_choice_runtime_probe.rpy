@@ -1783,6 +1783,27 @@ testcase urm_notification_revert_frozen_and_monitored:
     run Jump("urm_notification_revert_frozen_start")
     label urm_notification_revert_frozen_verify
 
+init python:
+    # Diagnostic wrapper for this disposable fixture only. It delegates to
+    # the SDK implementation unchanged and reports only when the target
+    # variable's StoreDict delta is returned.
+    _urm_probe_original_get_changes = renpy.python.StoreDict.get_changes
+
+    def _urm_probe_trace_get_changes(self, cycle):
+        result = _urm_probe_original_get_changes(self, cycle)
+        changes = result[0] if isinstance(result, tuple) else result
+        if self is renpy.store.__dict__ and "urm_revert_monitor_value" in changes:
+            frame = sys._getframe(1)
+            callers = []
+            while frame is not None and len(callers) < 6:
+                callers.append(frame.f_code.co_name)
+                frame = frame.f_back
+            print("REVERT_GET_CHANGES_TARGET", cycle, changes["urm_revert_monitor_value"], renpy.store.urm_revert_monitor_value, "/".join(callers))
+        return result
+
+    renpy.python.StoreDict.get_changes = _urm_probe_trace_get_changes
+
+
 # Natural callback probes for the reduced URM notification Revert action.
 # The callback reads StoreDict.get_changes(False), as the converted URM does.
 default urm_revert_monitor_value = 20
