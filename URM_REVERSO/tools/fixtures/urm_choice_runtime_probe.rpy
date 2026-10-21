@@ -1816,6 +1816,7 @@ default urm_revert_monitor_callback_old = None
 default urm_revert_monitor_callback_new = None
 default urm_revert_monitor_callback_count = 0
 default urm_revert_monitor_value_after = None
+default urm_revert_monitor_value_after_callback = None
 default urm_revert_monitor_handler_value = None
 
 init python:
@@ -1881,7 +1882,8 @@ label urm_revert_monitor_start:
     show screen urm_revert_monitor_action_probe
     pause 0.5
     $ urm_revert_monitor_value_after = urm_revert_monitor_value
-    $ print("REVERT_MONITOR_AFTER_ACTION", urm_revert_monitor_value_after, urm_revert_monitor_callback_delta, urm_revert_monitor_callback_old, urm_revert_monitor_callback_new, list(urm_notify_probe_records), urm_revert_monitor_callback_count)
+    $ urm_revert_monitor_value_after_callback = urm_revert_monitor_value
+    $ print("REVERT_MONITOR_AFTER_ACTION", urm_revert_monitor_value_after, urm_revert_monitor_value_after_callback, urm_revert_monitor_callback_delta, urm_revert_monitor_callback_old, urm_revert_monitor_callback_new, list(urm_notify_probe_records), urm_revert_monitor_callback_count)
     if urm_revert_monitor_rollback_mode:
         if urm_revert_monitor_frozen_mode:
             python:
@@ -1898,9 +1900,11 @@ label urm_revert_monitor_start:
         python:
             if urm_revert_monitor_frozen_mode:
                 if urm_revert_monitor_value_after != 10:
-                    raise Exception("Expected the post-interaction value to reflect the observed later reset.")
+                    raise Exception("Expected the pre-callback snapshot to retain the Revert value.")
+                if urm_revert_monitor_value_after_callback != 20:
+                    raise Exception("Expected the next Python node to observe the frozen handler's restoration.")
                 if urm_revert_monitor_handler_value != 20:
-                    raise Exception("Expected the frozen handler to write the old value before interaction return.")
+                    raise Exception("Expected the frozen handler to write the old value.")
                 if not urm_revert_monitor_callback_delta:
                     raise Exception("Expected the Python callback to observe the Revert assignment without rollback.")
                 if urm_revert_monitor_callback_old != 20 or urm_revert_monitor_callback_new != 10:
