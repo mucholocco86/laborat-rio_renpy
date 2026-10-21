@@ -1764,15 +1764,19 @@ label urm_notification_revert_frozen_start:
             raise Exception("Expected frozen-variable handling to restore the supplied old value.")
         if urm_notify_probe_records:
             raise Exception("A frozen variable should take precedence over monitor notification in this handler.")
-    $ renpy.rollback(force=False, checkpoints=1, label="urm_notification_revert_frozen_verify")
+    jump urm_notification_revert_frozen_verify
 
 label urm_notification_revert_frozen_verify:
-    $ print("FROZEN_REVERT_AFTER_ROLLBACK", urm_notification_revert_frozen_value, urm_notification_revert_frozen_route, urm_probe_urm.VarsStore.isFrozen("urm_notification_revert_frozen_value"))
+    $ print("FROZEN_REVERT_AFTER_HANDLER", urm_notification_revert_frozen_value, urm_notification_revert_frozen_route, urm_probe_urm.VarsStore.isFrozen("urm_notification_revert_frozen_value"), len(urm_notify_probe_records))
     python:
         if urm_notification_revert_frozen_value != 20:
-            raise Exception("Expected rollback to restore the value at the hard checkpoint.")
+            raise Exception("Expected the frozen handler to restore the supplied previous value.")
         if urm_notification_revert_frozen_route != 1:
-            raise Exception("Expected rollback to preserve the route at the hard checkpoint.")
+            raise Exception("The handler should leave the unrelated route marker unchanged.")
+        if not urm_probe_urm.VarsStore.isFrozen("urm_notification_revert_frozen_value"):
+            raise Exception("Expected the frozen flag to remain active.")
+        if urm_notify_probe_records:
+            raise Exception("Expected freeze handling to suppress monitor notification.")
     $ renpy.quit()
 
 testcase urm_notification_revert_frozen_and_monitored:
