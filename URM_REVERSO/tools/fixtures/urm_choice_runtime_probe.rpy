@@ -1693,3 +1693,37 @@ label urm_notification_revert_assignment_start:
 
 testcase urm_notification_revert_is_manual_assignment:
     run Jump("urm_notification_revert_assignment_start")
+
+
+# Revert followed by native rollback: checkpoint after the gameplay route has
+# advanced but immediately before the reduced Revert assignment. Rolling back
+# one checkpoint should restore the value seen at that boundary while keeping
+# the route marker already present there.
+default urm_notification_revert_rollback_value = 10
+default urm_notification_revert_rollback_prev = 10
+default urm_notification_revert_rollback_route = 0
+
+label urm_notification_revert_rollback_start:
+    $ renpy.game.context().rollback = True
+    $ urm_notification_revert_rollback_value = 10
+    $ urm_notification_revert_rollback_prev = 10
+    $ urm_notification_revert_rollback_route = 0
+    $ urm_notification_revert_rollback_value = 20
+    $ urm_notification_revert_rollback_route = 1
+    $ renpy.checkpoint("immediately-before-revert")
+    $ urm_probe_urm.SetVarValue(urm_probe_urm.Var("urm_notification_revert_rollback_value"), None, None, newValue=urm_notification_revert_rollback_prev)()
+    $ print("NOTIFICATION_REVERT_ROLLBACK_PRE", urm_notification_revert_rollback_value, urm_notification_revert_rollback_route)
+    $ renpy.rollback(force=False, checkpoints=1, label="urm_notification_revert_rollback_verify")
+
+label urm_notification_revert_rollback_verify:
+    $ print("NOTIFICATION_REVERT_ROLLBACK_AT_VERIFY", urm_notification_revert_rollback_value, urm_notification_revert_rollback_route)
+    python:
+        if urm_notification_revert_rollback_value != 20:
+            raise Exception("Expected rollback to undo the Revert assignment and restore the checkpoint value 20.")
+        if urm_notification_revert_rollback_route != 1:
+            raise Exception("Rollback across the Revert checkpoint unexpectedly changed the earlier route marker.")
+    $ renpy.quit()
+
+testcase urm_notification_revert_then_native_rollback:
+    run Jump("urm_notification_revert_rollback_start")
+    label urm_notification_revert_rollback_verify
