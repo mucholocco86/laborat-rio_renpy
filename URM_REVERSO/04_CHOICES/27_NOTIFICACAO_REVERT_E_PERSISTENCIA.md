@@ -159,3 +159,28 @@ Também não se testou aqui o pacote integral, a screen real, nem o rollback ap�
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** `handleVarChange` dá precedência a frozen sobre monitor; `Var.setValue` remove e reaplica temporariamente freeze.
 - **OBSERVADO EM RUNTIME (fixture reduzida):** ação Revert reduziu valor frozen de 20 para 10 e preservou a flag; entrega explícita do delta ao handler o restaurou para 20 sem notificação.
 - **PENDENTE:** se e quando a callback real encontra o delta gerado pela ação Revert, e o efeito combinado dessa callback com rollback/save-load na execução integral.
+## Atualização runtime — callback natural após “Revert” (2026-10-21)
+
+Foi acrescentado um probe que aciona a ação reduzida de Revert por botão de screen e deixa `renpy.config.python_callbacks` processar o fluxo normalmente. A callback da fixture lê `StoreDict.get_changes(False)` e chama `StoreMonitor.handleVarChange`, como no circuito convertido. Os casos distinguem rollback desabilitado no contexto de teste e rollback de gameplay habilitado.
+
+| Modo | Delta visto pela callback | Resultado de `handleVarChange` | Valor final do probe |
+|---|---|---|---|
+| Sem rollback | sim: `20→10` | um registro de monitor/notificação, com `prevVal=20` e `newVal=10` | `10` |
+| Com rollback | não | nenhum registro | `10` antes do rollback; `20` após voltar ao checkpoint |
+
+Os dois casos passaram no workflow [39562762194](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39562762194). Nos logs do primeiro, a callback recebeu o delta 20→10 e produziu um registro; no segundo, os campos de delta ficaram vazios e a lista de registros permaneceu vazia, enquanto o rollback nativo restaurou o valor do checkpoint.
+
+**OBSERVADO EM RUNTIME (fixture reduzida, SDK 7.4.11):** sem rollback habilitado, o Revert pela screen alterou o store; a callback posterior detectou essa atribuição e a rota monitorada registrou uma nova mudança. Com rollback habilitado, a callback não recebeu o delta neste percurso; o valor continuou reatribuído até o rollback, que restaurou 20. Isso reforça que notificação do StoreMonitor e reversibilidade do store são canais distintos.
+
+### Interpretação limitada
+
+Na fonte convertida, `handleVarChange` para variável monitorada cria uma notificação cuja ação abre `URM_var_changed` com o valor antigo. Portanto, o registro `20→10` reproduzido sem rollback é coerente com a possibilidade de o próprio Revert gerar uma notificação subsequente sobre a reversão do valor. O teste usou um coletor reduzido, não a tela nem a classe `NotificationsClass` real; não demonstra a aparência, recursão visual ou tempo de vida dessa notificação no URM integral.
+
+A diferença entre callback com/sem rollback é compatível com os probes anteriores sobre `get_changes(False)` e checkpoints, mas não identifica por si só toda a causa interna do delta ausente. O SDK fecha mudanças no `RollbackLog` e pode ciclar o StoreDict em outros pontos; instrumentação direta desses registros durante este percurso ficou fora deste probe.
+
+### Fontes, commits e pendências
+
+- Fixture: commit [548cfecca85d01334ff9c7bdce8d3633cf122b84](https://github.com/mucholocco86/laborat-rio_renpy/commit/548cfecca85d01334ff9c7bdce8d3633cf122b84).
+- Workflow: commit [58c79fc5b1e44e546e31c12d011d986512c96480](https://github.com/mucholocco86/laborat-rio_renpy/commit/58c79fc5b1e44e546e31c12d011d986512c96480).
+- Fontes URM convertidas: `classes/vars.rpy` (`_m1_vars__pythonCallback`, `handleVarChange`, `Var.setValue`) e `screens/vars.rpy` (`URM_var_changed`), SHAs listados acima.
+- **PENDENTE:** verificar a lista/tela real de notificações ao Revert ser monitorado; instrumentar o ponto exato em que `get_changes` deixa de retornar o delta com rollback; testar variável simultaneamente frozen/monitored nesse percurso natural; reproduzir com o loader e pacote integral.
