@@ -1729,3 +1729,52 @@ label urm_notification_revert_rollback_verify:
 testcase urm_notification_revert_then_native_rollback:
     run Jump("urm_notification_revert_rollback_start")
     label urm_notification_revert_rollback_verify
+
+# Frozen + monitored Revert interaction. This separates the direct Var.setValue
+# write from StoreMonitor.handleVarChange's later decision if a 20->10 delta is
+# delivered to it. The handler prioritizes frozen over monitored.
+default urm_notification_revert_frozen_value = 20
+default urm_notification_revert_frozen_prev = 10
+default urm_notification_revert_frozen_route = 0
+
+label urm_notification_revert_frozen_start:
+    $ renpy.game.context().rollback = True
+    $ renpy.store._rollback = True
+    $ urm_notification_revert_frozen_value = 20
+    $ urm_notification_revert_frozen_prev = 10
+    $ urm_notification_revert_frozen_route = 1
+    $ urm_notify_probe_records = []
+    $ urm_probe_urm._frozen_names.clear()
+    $ urm_probe_urm._monitored_names.clear()
+    $ urm_probe_urm.VarsStore.freeze("urm_notification_revert_frozen_value")
+    $ urm_probe_urm.VarsStore.monitor("urm_notification_revert_frozen_value")
+    $ renpy.checkpoint("before-frozen-notification-revert")
+    $ print("FROZEN_REVERT_BEFORE", urm_notification_revert_frozen_value, urm_notification_revert_frozen_route)
+    $ urm_probe_urm.SetVarValue(urm_probe_urm.Var("urm_notification_revert_frozen_value"), None, None, newValue=urm_notification_revert_frozen_prev)()
+    $ print("FROZEN_REVERT_AFTER_ACTION", urm_notification_revert_frozen_value, urm_probe_urm.VarsStore.isFrozen("urm_notification_revert_frozen_value"), len(urm_notify_probe_records))
+    python:
+        if urm_notification_revert_frozen_value != 10:
+            raise Exception("Expected Revert to assign prevVal even while the variable is frozen.")
+        if not urm_probe_urm.VarsStore.isFrozen("urm_notification_revert_frozen_value"):
+            raise Exception("Expected Var.setValue to reapply the frozen flag after Revert.")
+        # Model the later StoreMonitor handler only when it receives this delta.
+        urm_probe_urm.StoreMonitor.handleVarChange("urm_notification_revert_frozen_value", 20, 10)
+        print("FROZEN_REVERT_AFTER_MONITOR_HANDLER", urm_notification_revert_frozen_value, len(urm_notify_probe_records), urm_probe_urm.VarsStore.isFrozen("urm_notification_revert_frozen_value"))
+        if urm_notification_revert_frozen_value != 20:
+            raise Exception("Expected frozen-variable handling to restore the supplied old value.")
+        if urm_notify_probe_records:
+            raise Exception("A frozen variable should take precedence over monitor notification in this handler.")
+    $ renpy.rollback(force=False, checkpoints=1, label="urm_notification_revert_frozen_verify")
+
+label urm_notification_revert_frozen_verify:
+    $ print("FROZEN_REVERT_AFTER_ROLLBACK", urm_notification_revert_frozen_value, urm_notification_revert_frozen_route, urm_probe_urm.VarsStore.isFrozen("urm_notification_revert_frozen_value"))
+    python:
+        if urm_notification_revert_frozen_value != 20:
+            raise Exception("Expected rollback to restore the value at the hard checkpoint.")
+        if urm_notification_revert_frozen_route != 1:
+            raise Exception("Expected rollback to preserve the route at the hard checkpoint.")
+    $ renpy.quit()
+
+testcase urm_notification_revert_frozen_and_monitored:
+    run Jump("urm_notification_revert_frozen_start")
+    label urm_notification_revert_frozen_verify
