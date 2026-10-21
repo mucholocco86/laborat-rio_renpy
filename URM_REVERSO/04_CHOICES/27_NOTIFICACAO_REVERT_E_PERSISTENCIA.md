@@ -187,3 +187,7 @@ A diferença entre callback com/sem rollback é compatível com os probes anteri
 ### Fechamento da pendência de ciclagem do delta
 
 O trace do run [39663561168](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39663561168) localizou a captura do delta no caminho `RollbackLog.complete(True) → StoreDict.get_changes(True)`, chamado por `RollbackLog.begin()` antes do próximo nó. A callback posterior não vê a mudança porque `StoreDict.old` já avançou. Veja [32 — Ciclagem do StoreDict antes da callback após Revert](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md). Isso fecha a localização do mecanismo na fixture/SDK 7.4.11, mas a integração runtime do StoreMonitor e das notificações do URM integral continua pendente.
+
+### Continuação de 2026-10-21 — freeze + monitor + callback natural após Revert
+
+O run [39664217382](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39664217382) passou os dois novos casos da fixture reduzida. Sem rollback, callback recebeu `20→10`; o handler frozen escreveu `20` durante a callback e não notificou, mas a leitura após a interação foi novamente `10`. Com rollback, callback não recebeu o delta e o rollback restaurou `20`. A razão para a diferença temporal no caso sem rollback segue pendente. A fixture usa metadados de freeze/monitor simplificados, não os stores `.urm` integrais. Ver detalhes e limites no [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
