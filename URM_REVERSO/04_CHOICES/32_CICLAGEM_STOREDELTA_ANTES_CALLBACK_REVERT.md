@@ -136,3 +136,23 @@ O delta foi ciclado por `get_changes(True)` antes da callback, portanto o handle
 - **Limitação:** `_frozen_names`/`_monitored_names` são sets Python simples no harness, não os stores `.urm` reais. A fixture reproduz o circuito relevante, mas não carrega o pacote URM via loader.
 
 A fixture e o workflow foram atualizados nos commits [32842a1aeb254e2c22d410302129c6927b8a6058](https://github.com/mucholocco86/laborat-rio_renpy/commit/32842a1aeb254e2c22d410302129c6927b8a6058) e [3ba4c679033c8a4bc75eb4b30caa0a2e2beedeb6](https://github.com/mucholocco86/laborat-rio_renpy/commit/3ba4c679033c8a4bc75eb4b30caa0a2e2beedeb6). O primeiro run após incluir a asserção inicial falhou porque revelou a diferença temporal; a fixture foi então instrumentada para separar o valor escrito dentro do handler da leitura após a interação. O run final acima passou com essas duas observações registradas.
+## Correção da leitura temporal — callback altera o valor depois do snapshot
+
+O run adicional [39665745692](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39665745692) corrigiu a interpretação da seção anterior. No SDK 7.4.11, `renpy.ast.Python.execute()` executa o bytecode e chama `renpy.config.python_callbacks` dentro do bloco `finally`. Por isso, no label, a atribuição `urm_revert_monitor_value_after = urm_revert_monitor_value` captura `10` antes que a callback processe o delta. O valor dessa variável auxiliar não era uma leitura posterior ao handler.
+
+A fixture agora atribui outra auxiliar no próximo nó Python, depois que a callback já terminou. O log passou a mostrar:
+
+```text
+REVERT_MONITOR_CALLBACK_DELTA 20 10
+REVERT_MONITOR_CALLBACK_HANDLED 20 0
+REVERT_MONITOR_AFTER_ACTION 10 20 True 20 10 [] 2
+```
+
+Assim, sem rollback, o handler de freeze reatribui `20`; a leitura no nó Python seguinte confirma que o valor permanece `20`. Nenhuma notificação é criada. Com rollback habilitado, o ciclo de `StoreDict` ainda impede o callback de receber o delta, e o rollback explícito restaura `20` a partir do checkpoint.
+
+- **CONFIRMADO NO SDK 7.4.11:** callbacks Python são chamados no `finally` de `Python.execute()`, após o bytecode daquele nó.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** snapshot antes da callback é `10`; leitura no nó seguinte, depois do handler, é `20`.
+- **Correção:** a hipótese anterior de que outro mecanismo recolocava `10` após a callback estava baseada numa auxiliar lida antes da execução da callback e fica retirada.
+- **PENDENTE:** validar o mesmo circuito com os stores e classes integrais do URM carregados pelo loader.
+
+Fixture atualizada no commit [f0d1cdd298dfd990e4281c9bb91b579a3e5b214e](https://github.com/mucholocco86/laborat-rio_renpy/commit/f0d1cdd298dfd990e4281c9bb91b579a3e5b214e); run [39665745692](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39665745692) concluiu **SUCCESS**.
