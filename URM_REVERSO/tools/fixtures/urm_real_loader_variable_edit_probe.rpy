@@ -74,10 +74,14 @@ init python:
             return _urm_edit_probe_original_complete(self, begin)
         finally:
             if tracing:
+                current_changes = self.current.stores.get("store", {})
+                has_target = "urm_edit_probe_value" in current_changes
                 print("URM_EDIT_COMPLETE_END", begin,
                       "log_force", self.force_checkpoint,
                       "context_force", renpy.game.context().force_checkpoint,
                       "did_interaction", self.did_interaction,
+                      "target_in_record", has_target,
+                      "record_old", current_changes.get("urm_edit_probe_value"),
                       "current", renpy.game.context().current)
 
     renpy.python.RollbackLog.complete = _urm_edit_probe_trace_complete
