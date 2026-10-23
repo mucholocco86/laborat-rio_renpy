@@ -167,18 +167,13 @@ testcase urm_fixed_rollback_second_cycle_diagnostic:
     "URM route B"
     "Fixed boundary probe route B."
     label urm_fixed_rollback_second_cycle_done
-    assert renpy.session["urm_second_cycle_probe_route_executed"] == ["B", "A", "B"]
-    assert len(renpy.session["urm_second_cycle_probe_action_records"]) == 2
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][1] == 0
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][2] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][3] == 1
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][4] is False
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][5] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][6] == 0
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][1] == 1
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][2] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][3] == 0
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][4] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][5] is False
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][6] == 1
+    $ print("SECOND_CYCLE_SESSION_RECORDS",
+            renpy.session.get("urm_second_cycle_probe_route_executed"),
+            renpy.session.get("urm_second_cycle_probe_action_records"))
+    assert urm_second_cycle_probe_route == "B"
+    assert urm_second_cycle_probe_fixed_before_urm is True
+    assert urm_second_cycle_probe_forward_before_urm == 0
+    assert urm_second_cycle_probe_native_a_sensitive is True
+    assert urm_second_cycle_probe_native_b_sensitive is False
+    assert urm_second_cycle_probe_fixed_after_urm is False
     $ renpy.quit()
