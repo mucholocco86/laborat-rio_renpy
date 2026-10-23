@@ -48,6 +48,9 @@ init python:
                   "boundary", self.fixed_rollback_boundary,
                   "forward", self.forward_info())
 
+    # Install the diagnostic wrapper; previously it was defined but never assigned.
+    renpy.python.RollbackLog.rollback = _urm_edit_probe_trace_rollback
+
 label urm_real_loader_variable_edit_start:
     $ urm_edit_probe_value = 1
     $ urm_edit_probe_route_value = None
@@ -139,9 +142,25 @@ testcase urm_real_loader_variable_edit_runtime:
             urm_edit_probe_route_value, renpy.in_fixed_rollback(),
             renpy.can_rollback())
     type PAGEUP
+    $ print("URM_EDIT_AFTER_PAGEUP_1", urm_edit_probe_value,
+            urm_edit_probe_route_value, renpy.in_fixed_rollback(),
+            renpy.can_rollback(), renpy.game.log.rollback_limit,
+            renpy.game.context().current, renpy.game.log.forward_info())
     type PAGEUP
+    $ print("URM_EDIT_AFTER_PAGEUP_2", urm_edit_probe_value,
+            urm_edit_probe_route_value, renpy.in_fixed_rollback(),
+            renpy.can_rollback(), renpy.game.log.rollback_limit,
+            renpy.game.context().current, renpy.game.log.forward_info())
     type PAGEUP
+    $ print("URM_EDIT_AFTER_PAGEUP_3", urm_edit_probe_value,
+            urm_edit_probe_route_value, renpy.in_fixed_rollback(),
+            renpy.can_rollback(), renpy.game.log.rollback_limit,
+            renpy.game.context().current, renpy.game.log.forward_info())
     type PAGEUP
+    $ print("URM_EDIT_AFTER_PAGEUP_4", urm_edit_probe_value,
+            urm_edit_probe_route_value, renpy.in_fixed_rollback(),
+            renpy.can_rollback(), renpy.game.log.rollback_limit,
+            renpy.game.context().current, renpy.game.log.forward_info())
     $ print("URM_EDIT_AFTER_ROLLBACK_SWEEP", urm_edit_probe_value,
             urm_edit_probe_route_value, renpy.in_fixed_rollback(),
             renpy.can_rollback(), renpy.game.log.rollback_limit,
