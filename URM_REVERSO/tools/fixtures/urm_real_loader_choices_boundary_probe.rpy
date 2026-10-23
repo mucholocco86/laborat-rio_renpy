@@ -2,6 +2,7 @@
 # Exercises the real overlay notification, URM_choices screen and URMChoice.Action.
 
 default urm_real_loader_probe_route = None
+default urm_real_loader_probe_choices_screen_shown = False
 
 init python:
     def urm_real_loader_probe_dump(tag):
@@ -15,6 +16,18 @@ init python:
               "current", renpy.game.context().current,
               "context_rollback", renpy.game.context().rollback,
               "store_rollback", renpy.store._rollback)
+
+    _urm_real_loader_probe_original_show_screen = renpy.show_screen
+
+    def _urm_real_loader_probe_trace_show_screen(name, *args, **kwargs):
+        if name == "URM_choices":
+            renpy.store.urm_real_loader_probe_choices_screen_shown = True
+            print("REAL_URM_CHOICES_SCREEN_SHOWN", name,
+                  "fixed", renpy.game.log.rollback_is_fixed,
+                  "current", renpy.game.context().current)
+        return _urm_real_loader_probe_original_show_screen(name, *args, **kwargs)
+
+    renpy.show_screen = _urm_real_loader_probe_trace_show_screen
 
     _urm_real_loader_probe_original_rollback = renpy.python.RollbackLog.rollback
     _urm_real_loader_probe_original_choice_return = renpy.ui.ChoiceReturn.__call__
@@ -49,6 +62,7 @@ init python:
 
 label urm_real_loader_choices_boundary_start:
     $ urm_real_loader_probe_route = None
+    $ urm_real_loader_probe_choices_screen_shown = False
     $ renpy.config.fix_rollback_without_choice = False
 
     # Keep rollback enabled in the isolated test context; the subsequent menu,
@@ -101,5 +115,6 @@ testcase urm_real_loader_choices_boundary_runtime:
     "Full URM loader continuation checkpoint."
     $ urm_real_loader_probe_dump("AFTER_URM_SELECTION")
     assert urm_real_loader_probe_route == "A"
+    assert urm_real_loader_probe_choices_screen_shown is True
     assert renpy.in_fixed_rollback() is False
     $ renpy.quit()
