@@ -89,7 +89,7 @@ label urm_real_loader_variable_edit_start:
                       "fixed", renpy.game.log.rollback_is_fixed,
                       "limit", renpy.game.log.rollback_limit,
                       "current", renpy.game.context().current)
-            return _urm_edit_probe_original_handle_change(self, varName, oldValue, newValue)
+            return _urm_edit_probe_original_handle_change(varName, oldValue, newValue)
 
         x52URM.Var.setValue = _urm_edit_probe_trace_set_value
         x52URM.StoreMonitor.handleVarChange = _urm_edit_probe_trace_handle_change
