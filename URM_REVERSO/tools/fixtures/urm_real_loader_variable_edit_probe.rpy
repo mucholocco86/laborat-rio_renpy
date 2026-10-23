@@ -103,7 +103,14 @@ init python:
                    getattr(renpy.store, "urm_edit_probe_trace_enabled", False))
         if tracing:
             import sys
-            caller = sys._getframe(1).f_code.co_name
+            frame = sys._getframe(1)
+            caller_chain = []
+            for _urm_edit_frame_depth in range(5):
+                if frame is None:
+                    break
+                caller_chain.append((frame.f_code.co_name, frame.f_code.co_filename, frame.f_lineno))
+                frame = frame.f_back
+            caller = caller_chain[0][0] if caller_chain else None
             changes = result[0] if isinstance(result, tuple) else result
             try:
                 has_target = "urm_edit_probe_value" in changes
@@ -118,6 +125,7 @@ init python:
                   "result_type", type(result), "delta_type", type(changes),
                   "dict_binding", repr(dict), "dict_binding_type", type(dict),
                   "direct_has_target", has_target, "caller", caller,
+                  "caller_chain", caller_chain,
                   "modify_screen_open", bool(renpy.get_screen("URM_modify_value")),
                   "delta_id", id(changes), "delta_repr", repr(changes),
                   "current", renpy.store.urm_edit_probe_value,
