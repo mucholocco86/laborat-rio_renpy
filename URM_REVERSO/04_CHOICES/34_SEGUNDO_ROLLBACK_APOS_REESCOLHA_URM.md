@@ -94,7 +94,7 @@ BOUNDARY_AFTER_MENU B False None ...
 
 Isso mostra, na fixture: fixed rollback ativo; forward index 0 (A); rollback interativo indisponível por `rollback_limit=0`; sensibilidade nativa A=True/B=False; a ação equivalente ao URM limpa o flag fixed e retorna índice 1; o menu executa a rota B. O testcase chegou à fala da rota B e falhou somente ao comparar uma lista de eventos armazenada em `renpy.session` com uma sequência cumulativa esperada. A lista não é usada como prova de seleção; a evidência direta é o trace da ação e `BOUNDARY_AFTER_MENU B`.
 
-O run de acompanhamento [39902500519](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902500519) remove essa dependência e verifica a variável de rota e os campos rollback-aware capturados na ação. A UI persistente da fixture é apenas um modo de reabrir o controle após rollback; não modela a política de esconder/abrir telas do URM real.
+O run de acompanhamento [39902500519](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902500519) concluiu **SUCCESS**. Ele verificou a rota do store como B e os dados rollback-aware da segunda ação. O log também registrou a lista de execução da fixture como `[B, B, A, A, B]`, não como um histórico simples `[B, A, B]`; os blocos são reexecutados durante rollback/replay, então um array append-only dentro do jogo não é um contador confiável de escolhas únicas. A UI persistente da fixture é apenas um modo de reabrir o controle após rollback; não modela a política de esconder/abrir telas do URM real.
 
 ### Conclusões limitadas
 
@@ -108,6 +108,6 @@ O run de acompanhamento [39902500519](https://github.com/mucholocco86/laborat-ri
 
 ## Próximo passo
 
-Continuar a sondagem já alcançada até verificar a segunda seleção. O run [39902388045](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902388045) já demonstra a segunda seleção, mas falhou na asserção da lista de `renpy.session`. Validar a nova asserção com [39902500519](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902500519). Se passar, o próximo estudo é remover a persistência artificial da tela e comparar a reabertura com o circuito real do URM, seguido de save/load.
+Continuar a sondagem já alcançada até verificar a segunda seleção. O run [39902388045](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902388045) já demonstra a segunda seleção, mas falhou na asserção da lista de `renpy.session`. Com a seleção B após o segundo fixed rollback confirmada no fixture, o próximo estudo é verificar quando a interface real do URM pode ser reaberta durante fixed rollback, carregar o URM pelo loader, e depois medir variáveis do store em ciclos de rollback e save/load.
 
 Preservar a fixture verde de um único ciclo separada e não alterar `wells/`, `wells_beta/`, fontes originais do URM ou SDKs.
