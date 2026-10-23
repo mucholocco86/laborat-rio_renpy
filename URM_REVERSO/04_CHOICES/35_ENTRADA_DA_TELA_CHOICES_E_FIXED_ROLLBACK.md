@@ -2,7 +2,7 @@
 
 **Data:** 2026-10-23  
 **Escopo:** localizar a entrada real para `URM_choices` no URM convertido e avaliar, na fonte, se a entrada é explicitamente bloqueada durante fixed rollback.  
-**Status:** circuito de entrada confirmado na fonte convertida; disponibilidade efetiva dessa interface durante fixed rollback ainda precisa de runtime com o URM carregado.
+**Status:** circuito de entrada confirmado na fonte convertida e validado em runtime integrado com as fontes originais do URM no SDK 7.4.11; veja o documento 36.
 
 ## Pergunta
 
@@ -53,16 +53,15 @@ Assim, **não devemos descrever Alt+M como o caminho direto para Choices**. A fo
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** `Alt+M` abre a interface principal, não é por si só uma chamada direta de Choices.
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** os padrões favorecem a notificação flutuante; o watchpanel começa escondido.
 - **CONFIRMADO NA FONTE URM CONVERTIDA:** as condições explícitas dos dois pontos de entrada verificam Menu atual e configurações, sem bloquear a entrada com base em fixed rollback.
-- **HIPÓTESE:** durante fixed rollback real, o overlay e a notificação permanecem acionáveis e `Show('URM_choices')` consegue sobrepor o menu restaurado. Isso ainda não foi testado com o URM carregado; comportamento de layers, foco e interação modal pode alterar o resultado.
-- **NÃO DEMONSTRADO:** o teste reduzido anterior não carregou `URM_overlay`, `URM_notifications`, a classe completa `Choices` nem o loader original do URM.
+- **OBSERVADO EM RUNTIME:** numa cópia descartável com o pacote original carregado, o wrapper de `renpy.show_screen` registrou `URM_choices` com `rollback_is_fixed=True`; o teste completo selecionou a alternativa A. Ver procedimento e limites no [documento 36](36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md).
+- **CONFIRMADO EM RUNTIME INTEGRADO:** o teste posterior carregou overlay, notificação, classe `Choices`, loader e tela originais do URM. O teste reduzido continua sendo evidência separada, mais estreita.
 
 ## Próxima validação
 
-1. Usar uma cópia descartável do jogo e o loader do URM, sem modificar o SDK ou o Wells.
-2. Criar uma fronteira real, voltar até ela e registrar `isDisplayingChoice`, `in_fixed_rollback()`, `rollback_is_fixed`, `renpy.can_rollback()` e `roll_forward_info()`.
-3. Confirmar se o cartão “Choices detected” é desenhado e se `alt_K_c` ou o botão chama `Show('URM_choices')`.
-4. Selecionar outra alternativa e confirmar o índice/label executado.
-5. Repetir com `showWatchPanel=True`, watchpanel expandido/recolhido e `showChoicesNotification=False`, separando acessibilidade do botão de comportamento da ação.
-6. Repetir com `fix_rollback_without_choice=True`; esse caso não foi testado com fronteira real.
+1. **Concluído para Alt+C:** pacote original e loader numa cópia descartável, fronteira real, screen aberta com `rollback_is_fixed=True` e alternativa A executada; ver documento 36.
+2. **Pendente:** capturar a visibilidade gráfica do cartão, pois o test runner não casou a inscrição formatada como texto.
+3. **Pendente:** repetir com botão do watchpanel, painel expandido/recolhido e `showChoicesNotification=False`.
+4. **Pendente:** repetir com `fix_rollback_without_choice=True`.
+5. **Pendente:** correlacionar com edição manual de variável e rollback após a reescolha.
 
-O resultado do documento 34 permanece limitado ao runtime de uma tela diagnóstica reduzida. Esta análise amplia a compreensão da rota de entrada, mas ainda não conclui que o URM integral esteja acessível em todo fixed rollback.
+O documento 34 permanece limitado ao teste reduzido de reescolha. O teste integrado documentado em 36 fecha a pergunta da entrada normal de Choices neste cenário específico, sem generalizar para toda configuração ou jogo.
