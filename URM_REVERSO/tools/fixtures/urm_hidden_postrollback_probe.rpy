@@ -2,15 +2,25 @@
 default urm_hidden_probe_route = None
 default urm_hidden_probe_screen_shown = False
 default urm_hidden_probe_false_item = False
+default urm_hidden_probe_screen_count = 0
+default urm_hidden_probe_reopened_after_rollback = False
 
 init python:
     _urm_hidden_probe_original_show_screen = renpy.show_screen
     def _urm_hidden_probe_show_screen(name, *args, **kwargs):
         if name == "URM_choices":
             renpy.store.urm_hidden_probe_screen_shown = True
+            renpy.store.urm_hidden_probe_screen_count += 1
             hidden = [c for c in (x52URM.Choices.currentChoices or []) if c.text == "Hidden route C"]
             renpy.store.urm_hidden_probe_false_item = bool(hidden and not hidden[0].isVisible)
-            print("HIDDEN_PROBE_SCREEN", name, "fixed", renpy.game.log.rollback_is_fixed,
+            if renpy.store.urm_hidden_probe_screen_count >= 2:
+                renpy.store.urm_hidden_probe_reopened_after_rollback = (
+                    renpy.store.urm_hidden_probe_route is None and renpy.game.log.rollback_is_fixed)
+            print("HIDDEN_PROBE_SCREEN", name, "count", renpy.store.urm_hidden_probe_screen_count,
+                  "route", renpy.store.urm_hidden_probe_route,
+                  "fixed", renpy.game.log.rollback_is_fixed,
+                  "limit", renpy.game.log.rollback_limit,
+                  "forward", renpy.game.log.forward_info(),
                   "false_item_seen", renpy.store.urm_hidden_probe_false_item,
                   "choices", [(c.text, c.isVisible, c._m1_choices__index) for c in (x52URM.Choices.currentChoices or [])])
         return _urm_hidden_probe_original_show_screen(name, *args, **kwargs)
@@ -53,6 +63,8 @@ label urm_hidden_condition_probe_start:
     $ urm_hidden_probe_route = None
     $ urm_hidden_probe_screen_shown = False
     $ urm_hidden_probe_false_item = False
+    $ urm_hidden_probe_screen_count = 0
+    $ urm_hidden_probe_reopened_after_rollback = False
     $ renpy.config.fix_rollback_without_choice = False
     $ renpy.game.context().rollback = True
     $ renpy.store._rollback = True
@@ -108,9 +120,12 @@ testcase urm_hidden_condition_probe_runtime:
     type RETURN
     "Hidden condition probe continuation."
     type RETURN
-    assert urm_hidden_probe_route is None
-    assert renpy.in_fixed_rollback() is True
-    assert renpy.can_rollback() is True
+    type alt_c
+    type alt_2
+    type RETURN
+    "Hidden probe route B."
+    assert urm_hidden_probe_route == "B"
+    assert urm_hidden_probe_reopened_after_rollback is True
     $ print("HIDDEN_POST_ROLLBACK_TESTCASE", urm_hidden_probe_route,
             renpy.game.context().current, renpy.game.log.rollback_is_fixed,
             renpy.can_rollback(), renpy.roll_forward_info())
