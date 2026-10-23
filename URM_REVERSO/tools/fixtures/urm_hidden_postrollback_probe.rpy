@@ -109,10 +109,11 @@ testcase urm_hidden_condition_probe_runtime:
     type alt_3
     type RETURN
     "Hidden probe route C."
-    "Hidden condition probe continuation."
     assert urm_hidden_probe_route == "C"
     assert urm_hidden_probe_screen_shown is True
     assert urm_hidden_probe_false_item is True
+    type RETURN
+    "Hidden condition probe continuation."
     type RETURN
     "Post rollback callback reached."
     $ print("HIDDEN_POST_ROLLBACK_TESTCASE", urm_hidden_probe_route,
