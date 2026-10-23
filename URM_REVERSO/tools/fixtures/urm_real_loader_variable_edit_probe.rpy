@@ -53,7 +53,7 @@ init python:
 
     _urm_edit_probe_original_complete = renpy.python.RollbackLog.complete
     def _urm_edit_probe_trace_complete(self, begin=False):
-        tracing = getattr(renpy.store, "urm_edit_probe_modify_seen", False)
+        tracing = getattr(renpy.store, "urm_edit_probe_trace_enabled", False)
         if tracing:
             print("URM_EDIT_COMPLETE_BEGIN", begin,
                   "log_force", self.force_checkpoint,
@@ -76,7 +76,7 @@ init python:
     def _urm_edit_probe_trace_get_changes(self, cycle, *args, **kwargs):
         result = _urm_edit_probe_original_get_changes(self, cycle, *args, **kwargs)
         tracing = (self is renpy.store.__dict__ and
-                   getattr(renpy.store, "urm_edit_probe_modify_seen", False))
+                   getattr(renpy.store, "urm_edit_probe_trace_enabled", False))
         if tracing:
             changes = result[0] if isinstance(result, tuple) else result
             has_target = isinstance(changes, dict) and "urm_edit_probe_value" in changes
@@ -97,7 +97,7 @@ init python:
     _urm_edit_probe_original_store_begin = renpy.python.StoreDict.begin
     def _urm_edit_probe_trace_store_begin(self):
         tracing = (self is renpy.store.__dict__ and
-                   getattr(renpy.store, "urm_edit_probe_modify_seen", False))
+                   getattr(renpy.store, "urm_edit_probe_trace_enabled", False))
         if tracing:
             before = self.old.as_dict().get("urm_edit_probe_value", "<missing>")
             print("URM_EDIT_STORE_BEGIN_BEFORE", before,
@@ -115,7 +115,7 @@ init python:
 
     _urm_edit_probe_original_rollback_record = renpy.python.Rollback.rollback
     def _urm_edit_probe_trace_rollback_record(self):
-        tracing = getattr(renpy.store, "urm_edit_probe_modify_seen", False)
+        tracing = getattr(renpy.store, "urm_edit_probe_trace_enabled", False)
         target_values = []
         if tracing:
             for store_name, changes in self.stores.items():
@@ -135,6 +135,7 @@ init python:
     renpy.python.Rollback.rollback = _urm_edit_probe_trace_rollback_record
 
 label urm_real_loader_variable_edit_start:
+    $ urm_edit_probe_trace_enabled = True
     $ urm_edit_probe_value = 1
     $ urm_edit_probe_route_value = None
     $ urm_edit_probe_modify_seen = False
