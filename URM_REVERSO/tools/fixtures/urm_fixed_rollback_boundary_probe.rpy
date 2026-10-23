@@ -23,6 +23,12 @@ init python:
         renpy.game.log.rollback_is_fixed = False
         rv = renpy.ui.ChoiceReturn(label, index)()
         renpy.store.urm_boundary_probe_fixed_after_urm = renpy.game.log.rollback_is_fixed
+        renpy.session["urm_boundary_probe_action_fixed"] = renpy.store.urm_boundary_probe_fixed_before_urm
+        renpy.session["urm_boundary_probe_action_forward"] = renpy.store.urm_boundary_probe_forward_before_urm
+        renpy.session["urm_boundary_probe_action_native_a_sensitive"] = renpy.store.urm_boundary_probe_native_a_sensitive
+        renpy.session["urm_boundary_probe_action_native_b_sensitive"] = renpy.store.urm_boundary_probe_native_b_sensitive
+        renpy.session["urm_boundary_probe_action_value"] = rv
+        renpy.session["urm_boundary_probe_action_fixed_after"] = renpy.store.urm_boundary_probe_fixed_after_urm
         print("BOUNDARY_URM_ACTION", renpy.store.urm_boundary_probe_fixed_before_urm,
               renpy.store.urm_boundary_probe_forward_before_urm,
               renpy.store.urm_boundary_probe_native_a_sensitive,
@@ -74,6 +80,13 @@ screen urm_boundary_probe_overlay():
 label urm_fixed_rollback_boundary_start:
     $ urm_boundary_probe_route = None
     $ urm_boundary_probe_trace_enabled = True
+    $ renpy.session["urm_boundary_probe_route_executed"] = None
+    $ renpy.session["urm_boundary_probe_action_fixed"] = None
+    $ renpy.session["urm_boundary_probe_action_forward"] = None
+    $ renpy.session["urm_boundary_probe_action_native_a_sensitive"] = None
+    $ renpy.session["urm_boundary_probe_action_native_b_sensitive"] = None
+    $ renpy.session["urm_boundary_probe_action_value"] = None
+    $ renpy.session["urm_boundary_probe_action_fixed_after"] = None
     $ urm_boundary_probe_fixed_before_urm = None
     $ urm_boundary_probe_forward_before_urm = None
     $ urm_boundary_probe_fixed_after_urm = None
@@ -91,9 +104,11 @@ label urm_fixed_rollback_boundary_start:
     menu:
         "Native route A":
             $ urm_boundary_probe_route = "A"
+            $ renpy.session["urm_boundary_probe_route_executed"] = "A"
 
         "Native route B":
             $ urm_boundary_probe_route = "B"
+            $ renpy.session["urm_boundary_probe_route_executed"] = "B"
 
     $ renpy.fix_rollback()
     $ urm_boundary_probe_boundary_after_fix = renpy.game.log.fixed_rollback_boundary
@@ -118,10 +133,11 @@ testcase urm_fixed_rollback_real_boundary_urm_override:
     "URM route A"
     "Fixed boundary probe route A."
     label urm_fixed_rollback_boundary_done
-    assert urm_boundary_probe_route == "A"
-    assert urm_boundary_probe_fixed_before_urm is True
-    assert urm_boundary_probe_forward_before_urm == 1
-    assert urm_boundary_probe_fixed_after_urm is False
-    assert urm_boundary_probe_native_a_sensitive is False
-    assert urm_boundary_probe_native_b_sensitive is True
+    assert renpy.session["urm_boundary_probe_route_executed"] == "A"
+    assert renpy.session["urm_boundary_probe_action_fixed"] is True
+    assert renpy.session["urm_boundary_probe_action_forward"] == 1
+    assert renpy.session["urm_boundary_probe_action_value"] == 0
+    assert renpy.session["urm_boundary_probe_action_fixed_after"] is False
+    assert renpy.session["urm_boundary_probe_action_native_a_sensitive"] is False
+    assert renpy.session["urm_boundary_probe_action_native_b_sensitive"] is True
     $ renpy.quit()
