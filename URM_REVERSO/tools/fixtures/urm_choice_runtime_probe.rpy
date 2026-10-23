@@ -2004,15 +2004,23 @@ label urm_soft_checkpoint_rollback_start:
     $ urm_soft_checkpoint_value = 10
     $ urm_soft_checkpoint_route = 0
     $ renpy.checkpoint("hard-before-soft-probe")
-    $ print("SOFT_CP_AFTER_HARD", urm_soft_checkpoint_value, renpy.game.log.rollback_limit, renpy.game.log.current.checkpoint, renpy.game.log.current.hard_checkpoint)
+    $ print("SOFT_CP_AFTER_HARD_REQUEST", urm_soft_checkpoint_value, renpy.game.log.rollback_limit)
+
+    menu:
+        "Advance after hard checkpoint":
+            pass
 
     $ urm_soft_checkpoint_value = 20
     $ renpy.game.log.checkpoint(hard=False)
-    $ print("SOFT_CP_AFTER_SOFT", urm_soft_checkpoint_value, renpy.game.log.rollback_limit, renpy.game.log.current.checkpoint, renpy.game.log.current.hard_checkpoint)
+    $ print("SOFT_CP_AFTER_SOFT_REQUEST", urm_soft_checkpoint_value, renpy.game.log.rollback_limit)
+
+    menu:
+        "Advance after soft checkpoint":
+            pass
 
     $ urm_soft_checkpoint_value = 30
     $ urm_soft_checkpoint_route = 1
-    $ print("SOFT_CP_BEFORE_ROLLBACK", urm_soft_checkpoint_value, urm_soft_checkpoint_route, renpy.game.log.rollback_limit)
+    $ print("SOFT_CP_LOG_BEFORE_ROLLBACK", [(rb.checkpoint, rb.hard_checkpoint) for rb in renpy.game.log.log[-6:]], renpy.game.log.rollback_limit)
     $ renpy.rollback(force=True, checkpoints=1, label="urm_soft_checkpoint_rollback_verify")
 
 label urm_soft_checkpoint_rollback_verify:
@@ -2021,6 +2029,8 @@ label urm_soft_checkpoint_rollback_verify:
 
 testcase urm_soft_checkpoint_does_not_count_as_normal_checkpoint:
     run Jump("urm_soft_checkpoint_rollback_start")
+    "Advance after hard checkpoint"
+    "Advance after soft checkpoint"
     label urm_soft_checkpoint_rollback_verify
     assert urm_soft_checkpoint_value == 10
     assert urm_soft_checkpoint_route == 0
