@@ -138,4 +138,12 @@ testcase urm_real_loader_variable_edit_runtime:
     $ print("URM_EDIT_RUNTIME_RESULT", urm_edit_probe_value,
             urm_edit_probe_route_value, renpy.in_fixed_rollback(),
             renpy.can_rollback())
+    type PAGEUP
+    type PAGEUP
+    type PAGEUP
+    type PAGEUP
+    $ print("URM_EDIT_AFTER_ROLLBACK_SWEEP", urm_edit_probe_value,
+            urm_edit_probe_route_value, renpy.in_fixed_rollback(),
+            renpy.can_rollback(), renpy.game.log.rollback_limit,
+            renpy.game.context().current, renpy.game.log.fixed_rollback_boundary)
     $ renpy.quit()
