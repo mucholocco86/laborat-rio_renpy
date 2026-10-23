@@ -449,3 +449,12 @@ O [documento 37](37_CODEVIEW_EDICAO_VARIAVEL.md) segue a rota estática `Choice 
 ### Validação integrada em 2026-10-23 — edição de variável e rollback
 
 O [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md) registra o teste do editor original do URM em jogo descartável Ren'Py 7.4.11. A tela real alterou 1→7 durante fixed rollback; a rota leu 7 e, após quatro PAGEUP, as asserções confirmaram retorno a 1 e à rota `None` ([run 39905267994](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39905267994), SUCCESS). O wrapper corrigido não registrou chamada de `handleVarChange` para esse valor. O test runner invocou o handler do hyperlink diretamente; clique visual, evento exato da restauração e save/load continuam pendentes.
+
+
+### Continuação de 2026-10-23 — PAGEUP exato da restauração
+
+O trace corrigido do [run 39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916) localizou a restauração no **terceiro PAGEUP**: os dois primeiros mantiveram valor/rota em 7; o terceiro restaurou 1/None; o quarto não mudou o estado. A fixture agora instala de fato o wrapper na classe `RollbackLog`. O [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md) foi refinado com esse resultado.
+
+### Continuação de 2026-10-23 — edição por screen e StoreMonitor
+
+O [documento 39](39_STOREMONITOR_DELTA_E_EDICAO_POR_SCREEN.md) cruza a tela original `URM_modify_value`, a callback `python_callbacks`, `Context.run`, `RollbackLog.begin/complete` e `StoreDict.get_changes`. A explicação sustentada pelas fontes e pelo probe reduzido é que o delta de uma edição de screen pode ser ciclado pelo log nativo antes do callback do próximo nó Python; a ausência de `handleVarChange` não significa ausência de captura reversível. O run integrado não instrumentou `get_changes`, então esse vínculo segue classificado como interpretação corroborada, não evento diretamente medido nesse run. Também esclarece que `force_checkpoint=True` visto dentro de `Var.setValue` não prova que a edição solicitou um checkpoint.
