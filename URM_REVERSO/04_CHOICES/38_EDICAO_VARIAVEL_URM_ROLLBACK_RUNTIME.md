@@ -18,7 +18,7 @@ O teste integrado observou a edição real da variável do jogo pela tela origin
    - `rollback_limit=0`;
    - `context.force_checkpoint=True`.
 6. A execução continuou pela alternativa escolhida, e a leitura do bloco AST e do checkpoint seguinte encontrou valor 7 e rota 7.
-7. Depois de quatro eventos PAGEUP, o fixture confirmou por asserção que o valor voltou a 1 e a variável escrita no bloco da rota voltou a `None`. O contexto terminou no nó do Menu anterior, com `rollback_is_fixed=True`, `can_rollback=False` e `rollback_limit=0`.
+7. O trace posterior por evento refinou essa sequência: PAGEUP 1 e 2 mantiveram valor/rota em 7; no PAGEUP 3, `RollbackLog.rollback()` restaurou valor 1 e rota `None`; PAGEUP 4 não alterou o estado. O contexto terminou no nó do Menu anterior, com `rollback_is_fixed=True`, `can_rollback=False` e `rollback_limit=0`. Ver [run 39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916).
 
 **Conclusão limitada ao fixture:** a edição feita pela tela do URM não foi uma alteração permanente do script nem sobreviveu à restauração do estado que cruzou o menu anterior. Ela foi observada no estado ativo durante o avanço e foi revertida junto com o estado da execução ao retornar ao menu.
 
@@ -43,7 +43,7 @@ As execuções diagnósticas anteriores tiveram erros no próprio wrapper (`take
 
 - O test runner não conseguiu focar e clicar automaticamente no token hyperlink renderizado do CodeView. Para validar o circuito sem atribuir ao runner uma capacidade que ele não demonstrou, o fixture invocou diretamente o handler original `CodeView.handleVarClicked`. Portanto, a abertura da tela e a edição são integradas/reais, mas o clique visual no hyperlink permanece pendente.
 - O teste usa um jogo de laboratório e habilita explicitamente `context.rollback=True` e `store._rollback=True`. Não generalizar a sequência para todos os jogos ou configurações.
-- Os quatro PAGEUP foram registrados como uma sequência, com estado final e asserções. O wrapper de `RollbackLog.rollback` não produziu traces por evento; logo, este teste **não localiza o PAGEUP exato** em que o valor 7 foi restaurado nem quantos registros internos foram atravessados em cada tecla.
+- O primeiro run da passada de quatro PAGEUP apenas registrou estado final. A fixture depois instalou o wrapper de `RollbackLog.rollback`; o run 39907164916 localizou a restauração no terceiro PAGEUP. Isso identifica o evento neste cenário controlado, mas não quantifica todos os registros internos atravessados dentro da chamada.
 - A observação de `context.force_checkpoint=True` durante `Var.setValue` não demonstra, por si só, que um novo checkpoint hard tenha sido criado. A semântica de checkpoint soft e o ciclo do callback Python estão documentados nos documentos 18, 19 e 32.
 - Save/load, criação de variável, freeze, monitoramento configurado via stores URM, edição durante outros pontos do menu, e edição de objetos/listas/dicionários não foram testados aqui.
 - O fixture chama `renpy.hide_screen('URM_CodeView')` explicitamente para sair do CodeView no test runner; não é evidência sobre como a interação manual fecha essa tela em todas as situações.
@@ -55,12 +55,12 @@ As execuções diagnósticas anteriores tiveram erros no próprio wrapper (`take
 | **CONFIRMADO NA FONTE URM** | CodeView registra `handleVarClicked`, que abre `URM_modify_value`; o editor usa `SetVarValue` e `Var.setValue` para escrever no store. Ver [documento 37](37_CODEVIEW_EDICAO_VARIAVEL.md). |
 | **OBSERVADO EM RUNTIME** | O pacote original carregou no Ren'Py 7.4.11; a tela de edição escreveu 1→7 durante fixed rollback; a rota leu 7; após a sequência de rollback o estado observado era 1/None. |
 | **OBSERVADO EM RUNTIME, limitado** | O método instrumentado `StoreMonitor.handleVarChange` não registrou essa variável durante a execução limpa. |
-| **PENDENTE** | Clique real no hyperlink renderizado; ponto exato de restauração por evento; save/load; outras configurações de rollback e formas de mutação. |
+| **PENDENTE** | Clique real no hyperlink renderizado; save/load; outras configurações de rollback e formas de mutação. |
 
 ## Próximos probes
 
 1. Fazer o test runner ativar o hyperlink renderizado com um mecanismo de foco compatível, sem substituir o handler direto, ou registrar essa limitação e usar teste manual reprodutível.
-2. Instrumentar as entradas reais de `RollbackLog.rollback()` com uma abordagem compatível com a assinatura do SDK e coletar um trace por PAGEUP; não inferir o evento de fronteira apenas pelo estado final.
+2. Instrumentar `StoreDict.get_changes` e as escritas/transferências de `force_checkpoint` no fixture com loader original para medir diretamente a explicação do documento 39.
 3. Testar save/load em casos separados: salvar imediatamente após editar, salvar depois de avançar e carregar o slot.
 4. Testar separadamente uma variável monitorada e uma congelada pela configuração real do URM, verificando `python_callbacks`, `get_changes`, notificação e precedência do freeze.
 5. Comparar edição antes/durante/depois do menu sem combinar esses casos em um único resultado.
