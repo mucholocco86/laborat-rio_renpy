@@ -180,3 +180,16 @@ Com rollback habilitado, a primeira callback começou com ambos os flags falsos 
 - **PENDENTE:** instrumentar o número e os limites dos checkpoints soft efetivamente criados em gameplay real; validar o padrão com o callback e loader do URM integral.
 
 Referências de fonte: SDK `renpy/execution.py` (`Context.run`, aprox. linhas 515–550; blob `547f73b26dad0fe08fda6333e5f4b60c97cf8772`); SDK `renpy/python.py` (`RollbackLog.begin/complete`, blob `c5eb2819a3e4ee096dbf01130d70a77f9b623484`); URM convertido `classes/vars.rpy` (`_m1_vars__pythonCallback`, blob `57482937e14f215dac0ecb22a62da8ad160cba58`). Fixture probe commit [13cd486d01150046ec9e15052a386e14cd8899bc](https://github.com/mucholocco86/laborat-rio_renpy/commit/13cd486d01150046ec9e15052a386e14cd8899bc).
+## Materialização do checkpoint soft — trace runtime
+
+O wrapper diagnóstico da fixture delega a `RollbackLog.checkpoint` para a implementação original e registra somente chamadas com `hard=False`, observando `current.checkpoint` antes e depois. O run [39893930678](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39893930678) passou.
+
+No testcase reduzido de callback com rollback, a instrumentação registrou 10 chamadas: uma encontrou `current.checkpoint=True` e permaneceu `True`; nove mudaram `False→True`. No caso frozen+monitor, foram 11 chamadas: uma `True→True` e dez transições `False→True`. A transição `False→True` confirma que aquele registro corrente foi marcado como checkpoint. Quando o valor já era `True`, a chamada não criou outra marca nesse mesmo registro.
+
+Esses números cobrem o trecho instrumentado do testcase, que inclui nós de preparação, callbacks Python subsequentes e a transição do rollback. Portanto, não significam 9 ou 10 checkpoints por clique nem quantificam o comportamento do URM integral. O wrapper observa o efeito sobre o registro corrente; a confirmação de que `checkpoint(hard=False)` não eleva `hard_checkpoint` vem da inspeção da implementação original do SDK.
+
+- **OBSERVADO EM RUNTIME — fixture reduzida:** chamadas soft podem marcar registros ainda não marcados; chamadas em registros já marcados não criam outra marca.
+- **CONFIRMADO NO SDK 7.4.11 — fonte:** o método retorna se `current.checkpoint` já for verdadeiro; quando marca um checkpoint com `hard=False`, não promove `current.hard_checkpoint`.
+- **PENDENTE:** isolar a contagem por fronteira de callback sem incluir nós de setup/rollback e executar o circuito com o URM integral.
+
+Fixture instrumentada no commit [d4a132ae51d53a583e1167a6d6a0f79c962f0eb5](https://github.com/mucholocco86/laborat-rio_renpy/commit/d4a132ae51d53a583e1167a6d6a0f79c962f0eb5); run [39893930678](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39893930678), **SUCCESS**.
