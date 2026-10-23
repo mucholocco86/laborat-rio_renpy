@@ -1,0 +1,60 @@
+name: URM real fixed rollback boundary probe
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'URM_REVERSO/tools/fixtures/urm_fixed_rollback_boundary_probe.rpy'
+      - '.github/workflows/urm-fixed-rollback-boundary-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: urm-fixed-rollback-boundary-probe
+  cancel-in-progress: true
+
+jobs:
+  fixed-boundary:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out laboratory
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb xauth libgl1 libglu1-mesa libx11-6 libxext6 libxrender1 libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1 libasound2
+
+      - name: Prepare disposable game copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_root="${RUNNER_TEMP}/urm-fixed-rollback-boundary-probe"
+          rm -rf "$probe_root"
+          cp -a renpy-7.4.11-sdk/the_question "$probe_root"
+          cp URM_REVERSO/tools/fixtures/urm_fixed_rollback_boundary_probe.rpy "$probe_root/game/zz_urm_fixed_rollback_boundary_probe.rpy"
+          chmod +x renpy-7.4.11-sdk/renpy.sh
+          chmod +x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+          test -f "$probe_root/game/zz_urm_fixed_rollback_boundary_probe.rpy"
+          test -x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+
+      - name: Run native choice, fixed rollback, then URM route override
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START real fixed rollback boundary probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-fixed-rollback-boundary-probe" test urm_fixed_rollback_real_boundary_urm_override
+          result=$?
+          echo "END real fixed rollback boundary probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
