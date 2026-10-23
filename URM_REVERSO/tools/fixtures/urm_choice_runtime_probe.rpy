@@ -1803,6 +1803,19 @@ init python:
 
     renpy.python.StoreDict.get_changes = _urm_probe_trace_get_changes
 
+    _urm_probe_original_rollback_checkpoint = renpy.python.RollbackLog.checkpoint
+
+    def _urm_probe_trace_rollback_checkpoint(self, data=None, keep_rollback=False, hard=True):
+        tracked = renpy.store.urm_revert_checkpoint_trace_enabled and hard is False
+        before = self.current.checkpoint if self.current is not None else None
+        result = _urm_probe_original_rollback_checkpoint(self, data, keep_rollback, hard)
+        after = self.current.checkpoint if self.current is not None else None
+        if tracked:
+            print("REVERT_SOFT_CHECKPOINT", before, after, renpy.game.context().current, self.force_checkpoint)
+        return result
+
+    renpy.python.RollbackLog.checkpoint = _urm_probe_trace_rollback_checkpoint
+
 
 # Natural callback probes for the reduced URM notification Revert action.
 # The callback reads StoreDict.get_changes(False), as the converted URM does.
@@ -1822,6 +1835,7 @@ default urm_revert_context_force_after_callback = None
 default urm_revert_log_force_after_callback = None
 default urm_revert_context_force_seen_next = None
 default urm_revert_log_force_seen_next = None
+default urm_revert_checkpoint_trace_enabled = False
 
 init python:
     def urm_revert_monitor_callback():
@@ -1879,6 +1893,7 @@ label urm_revert_monitor_start:
     $ urm_revert_log_force_after_callback = None
     $ urm_revert_context_force_seen_next = None
     $ urm_revert_log_force_seen_next = None
+    $ urm_revert_checkpoint_trace_enabled = urm_revert_monitor_rollback_mode
     $ urm_notify_probe_records = []
     $ urm_probe_urm._monitored_names.clear()
     $ urm_probe_urm._frozen_names.clear()
@@ -1944,6 +1959,7 @@ label urm_revert_monitor_rollback_start:
     jump urm_revert_monitor_start
 
 label urm_revert_monitor_rollback_verify:
+    $ urm_revert_checkpoint_trace_enabled = False
     $ print("REVERT_MONITOR_AFTER_ROLLBACK", urm_revert_monitor_value, urm_revert_monitor_callback_delta, list(urm_notify_probe_records))
     python:
         if urm_revert_monitor_value != 20:
