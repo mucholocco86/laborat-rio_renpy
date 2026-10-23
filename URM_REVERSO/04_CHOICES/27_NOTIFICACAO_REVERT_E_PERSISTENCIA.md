@@ -200,3 +200,6 @@ A fonte convertida mostra que `_m1_vars__pythonCallback` define `context.force_c
 ### Trace de 2026-10-23 — checkpoints soft
 
 O run [39893930678](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39893930678) confirmou no harness que chamadas `checkpoint(hard=False)` marcam o registro corrente quando ainda não era checkpoint e não elevam `hard_checkpoint`; chamadas repetidas em registro já marcado não criam outra marca. Foram observadas 9 e 10 transições efetivas ao longo dos dois testcases, incluindo setup e rollback. Isso não mede checkpoints por ação nem valida o URM carregado integralmente. Ver [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
+### Fonte 7.4.11 — checkpoint soft e rollback
+
+No rollback normal, `RollbackLog.rollback()` reduz a contagem solicitada somente ao atravessar `hard_checkpoint`; checkpoint soft não incrementa `rollback_limit`. O caminho greedy pode atravessar registros soft depois de encontrar o hard checkpoint alvo. O código trata `on_load=True` de modo diferente e também conta checkpoints soft. O probe runtime [39894546076](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39894546076) falhou por configuração do harness e não valida essa regra; seu testcase foi removido. Veja fonte e classificação no [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
