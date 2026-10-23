@@ -90,14 +90,13 @@ label urm_hidden_probe_after_rollback:
     $ print("HIDDEN_POST_ROLLBACK_RESULT_1", urm_hidden_probe_route,
             renpy.game.context().current, renpy.game.log.rollback_is_fixed,
             renpy.can_rollback(), renpy.roll_forward_info())
-    "Post rollback callback reached."
     $ renpy.rollback(checkpoints=1, label="urm_hidden_probe_after_rollback_2")
 
 label urm_hidden_probe_after_rollback_2:
     $ print("HIDDEN_POST_ROLLBACK_RESULT_2", urm_hidden_probe_route,
             renpy.game.context().current, renpy.game.log.rollback_is_fixed,
             renpy.can_rollback(), renpy.roll_forward_info())
-    "Second post rollback callback reached."
+    "Post rollback callback reached."
     $ renpy.quit()
 
 testcase urm_hidden_condition_probe_runtime:
@@ -116,8 +115,6 @@ testcase urm_hidden_condition_probe_runtime:
     assert urm_hidden_probe_false_item is True
     type RETURN
     "Post rollback callback reached."
-    type RETURN
-    "Second post rollback callback reached."
     $ print("HIDDEN_POST_ROLLBACK_TESTCASE", urm_hidden_probe_route,
             renpy.game.context().current, renpy.game.log.rollback_is_fixed,
             renpy.can_rollback(), renpy.roll_forward_info())
