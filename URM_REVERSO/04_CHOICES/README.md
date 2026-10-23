@@ -448,7 +448,7 @@ O [documento 37](37_CODEVIEW_EDICAO_VARIAVEL.md) segue a rota estática `Choice 
 
 ### Validação integrada em 2026-10-23 — edição de variável e rollback
 
-O [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md) registra a edição 1→7 pelo editor original em fixed rollback e a leitura 7 pela rota. O trace por tecla [39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916) localizou o retorno a 1/`None` no PAGEUP 3. Correção validada no run [39910519723](https://github.com/mucholocco86/laborat-rенpy/actions/runs/39910519723): `get_changes(True)` retornou o valor antigo 1 e `complete()` o gravou no registro aplicado no PAGEUP 3. A conclusão anterior de delta ausente foi falso negativo causado por `dict` sombreado como `RevertableDict` no contexto do fixture. Clique visual do hyperlink e save/load seguem pendentes.
+O [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md) registra a edição 1→7 pelo editor original em fixed rollback e a leitura 7 pela rota. O trace por tecla [39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916) localizou o retorno a 1/`None` no PAGEUP 3. Correção validada no run [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723): `get_changes(True)` retornou o valor antigo 1 e `complete()` o gravou no registro aplicado no PAGEUP 3. A conclusão anterior de delta ausente foi falso negativo causado por `dict` sombreado como `RevertableDict` no contexto do fixture. Clique visual do hyperlink e save/load seguem pendentes.
 
 
 ### Continuação de 2026-10-23 — PAGEUP exato da restauração
