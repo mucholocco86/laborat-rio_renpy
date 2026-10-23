@@ -473,3 +473,8 @@ O [documento 41](41_CHOICE_CONDICAO_FALSA_EXECUTADA_PELO_URM.md) registra o test
 ### Continuação de 2026-10-23 — rollback após Choice forçada
 
 O [documento 42](42_ROLLBACK_APOS_CHOICE_CONDICAO_FALSA.md) registra o runtime integrado [39924626643](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39924626643). Depois de C, cuja condição era False, o terceiro PAGEUP restaurou a rota para None e retornou ao Menu; o quarto manteve o Menu em fixed rollback, com rollback_limit zero e roll-forward no índice 2 (C). A tela original do URM reabriu nesse estado e selecionou B, cuja rota executou. As contagens são próprias da fixture 7.4.11; não generalizar para qualquer jogo ou sequência. Save/load e condição variável seguem pendentes.
+
+
+### Continuação de 2026-10-23 — condição dinâmica alterada durante a screen
+
+O [documento 43](43_CONDICAO_DINAMICA_CHOICE_EDITADA_PELO_URM.md) registra o runtime integrado [39992488601](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39992488601). Com URM_choices aberta, C começou com condição variável False; Var.setValue(True) original do URM fez a mesma Choice reportar isVisible=True; após renpy.restart_interaction(), Alt+3/Enter executou o bloco C. O teste chamou diretamente o setter e não percorreu os controles gráficos de edição; rollback do booleano nesse mesmo circuito e atualização sem reiniciar interação seguem pendentes.
