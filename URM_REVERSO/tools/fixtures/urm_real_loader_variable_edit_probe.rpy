@@ -75,15 +75,17 @@ init python:
     _urm_edit_probe_original_get_changes = renpy.python.StoreDict.get_changes
     def _urm_edit_probe_trace_get_changes(self, cycle, *args, **kwargs):
         result = _urm_edit_probe_original_get_changes(self, cycle, *args, **kwargs)
-        tracing = (self is renpy.store.__dict__ and
-                   getattr(renpy.store, "urm_edit_probe_modify_seen", False))
+        tracing = getattr(renpy.store, "urm_edit_probe_modify_seen", False)
         if tracing:
             changes = result[0] if isinstance(result, tuple) else result
             has_target = isinstance(changes, dict) and "urm_edit_probe_value" in changes
             old_value = changes.get("urm_edit_probe_value") if has_target else None
+            target_in_store = "urm_edit_probe_value" in self
             print("URM_EDIT_STORE_CHANGES", cycle, "has_target", has_target,
-                  "old", old_value, "current",
-                  renpy.store.urm_edit_probe_value,
+                  "old", old_value, "target_in_store", target_in_store,
+                  "is_main_store", self is renpy.store.__dict__,
+                  "store_id", id(self), "main_store_id", id(renpy.store.__dict__),
+                  "current", renpy.store.urm_edit_probe_value,
                   "context_force", renpy.game.context().force_checkpoint,
                   "log_force", renpy.game.log.force_checkpoint,
                   "node", renpy.game.context().current)
