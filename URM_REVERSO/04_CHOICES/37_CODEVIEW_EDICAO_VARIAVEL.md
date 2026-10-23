@@ -2,7 +2,7 @@
 
 **Data:** 2026-10-23  
 **Escopo:** traçar estaticamente, nas fontes originais preservadas do URM, o caminho entre o código/condição de uma alternativa, o hyperlink de variável e a tela de edição.  
-**Status:** circuito de fonte confirmado; ainda não executado como sequência de interface em runtime.
+**Status:** circuito de fonte confirmado e fluxo de tela/edição/rollback observado em runtime integrado; o clique visual automatizado no hyperlink permanece pendente. Ver [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md).
 
 ## Circuito de navegação
 
@@ -52,7 +52,8 @@ O objeto `Var` considera editável uma variável resolvida contra o store global
 - **CONFIRMADO NA FONTE URM ORIGINAL:** o hyperlink cria `Var(varName)` e abre `URM_modify_value`.
 - **CONFIRMADO NA FONTE URM ORIGINAL:** o editor chama `SetVarValue` e, por fim, `Var.setValue`, que escreve no store.
 - **OBSERVADO EM RUNTIME INTEGRADO:** a tela Choices original abre e seleciona uma alternativa em fixed rollback, documento [36](36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md).
-- **PENDENTE:** clicar em variável do CodeView, alterar o valor via editor e observar o resultado real de rollback/save-load numa única fixture.
+- **OBSERVADO EM RUNTIME INTEGRADO:** o CodeView e a tela original de edição foram abertos; a variável foi alterada 1→7 e lida pelo bloco da rota; após uma sequência de rollback o valor retornou a 1. O handler foi chamado diretamente pelo test runner, sem clique visual do hyperlink. Detalhes e limites no [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md).
+- **PENDENTE:** automatizar o clique visual do hyperlink e testar save/load.
 
 ## Limites que afetam a interpretação
 
@@ -73,17 +74,13 @@ O objeto `Var` considera editável uma variável resolvida contra o store global
 | `screens/vars.rpy.x52` | `URM_modify_value`, input, Enter, Change (181–254) | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
 | `classes/vars.rpy` | `Var.setValue`, `SetVarValue`, monitor (aprox. 232–269, 421–439, 492–577) | `57482937e14f215dac0ecb22a62da8ad160cba58` |
 
-## Próximo probe de runtime
+## Próximos probes de runtime
 
-Usar um menu de teste com uma variável escalar declarada pelo jogo e referenciada no bloco de uma alternativa. Com o pacote original carregado:
+A sequência integrada de edição e rollback já foi executada; ver [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md). Restam:
 
-1. Abrir Choices com Alt+C durante a fronteira.
-2. Selecionar a alternativa e abrir o CodeView com Alt+S.
-3. Confirmar que o token da variável fica clicável e que o handler abre `URM_modify_value`.
-4. Gravar um valor diferente pelo input/Change da tela real.
-5. Registrar o valor antes/depois, `rollback_is_fixed`, `rollback_limit`, checkpoint e saída da tela.
-6. Avançar até uma condição posterior que leia esse valor; usar rollback até antes da edição e depois cruzar a fronteira.
-7. Comparar o valor observado com o log de store e com notificações do StoreMonitor.
-8. Separar do save/load e dos stores persistentes próprios do URM, que ficam para outro caso de teste.
+1. Automatizar ou observar manualmente o clique no token hyperlink renderizado, pois o runner atual chamou o handler diretamente.
+2. Instrumentar cada retorno de `RollbackLog.rollback()` para localizar em qual PAGEUP o estado da edição é restaurado.
+3. Testar save/load em casos separados e comparar com o estado da sessão.
+4. Comparar a callback e as notificações do StoreMonitor com variável comum, monitorada e congelada.
 
 A fixture deve manter observabilidade por logs e asserts; não deve alterar o pacote original do URM nem os diretórios Wells/SDK.
