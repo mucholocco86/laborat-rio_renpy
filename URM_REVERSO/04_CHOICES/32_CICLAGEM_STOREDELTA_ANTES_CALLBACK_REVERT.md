@@ -203,7 +203,7 @@ A revisão de `RollbackLog.rollback()` mostra como o pedido `checkpoint(hard=Fal
 - Depois de localizar o hard checkpoint solicitado, o caminho `greedy=True` pode remover registros posteriores não hard, incluindo os que só têm checkpoint soft, até o limite/condição seguinte.
 - A exceção no mesmo método é `on_load=True`: nesse modo, `rb.checkpoint` soft também reduz a variável local `checkpoints`. O carregamento tem, portanto, regra própria.
 
-Essa conclusão é **CONFIRMADA NO SDK 7.4.11 pela fonte** (`renpy/python.py`, `RollbackLog.checkpoint`, `can_rollback`, `rollback`; blob `c5eb2819a3e4ee096dbf01130d70a77f9b623484`). A API pública `renpy.checkpoint()` também transforma `hard` em `renpy.store._rollback and hard` (`renpy/exports.py`, blob `e4e81a...` a confirmar no índice; não use este SHA como referência até verificar).
+Essa conclusão é **CONFIRMADA NO SDK 7.4.11 pela fonte** (`renpy/python.py`, `RollbackLog.checkpoint`, `can_rollback`, `rollback`; blob `c5eb2819a3e4ee096dbf01130d70a77f9b623484`). A API pública `renpy.checkpoint()` também transforma `hard` em `renpy.store._rollback and hard` (`renpy/exports.py`, blob `781b35b31522dafc6a24e7c3212d206c7bd6dfa5`).
 
 ### Tentativa runtime não conclusiva
 
