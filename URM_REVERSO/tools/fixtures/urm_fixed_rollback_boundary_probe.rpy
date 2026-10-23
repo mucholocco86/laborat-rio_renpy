@@ -118,7 +118,7 @@ testcase urm_fixed_rollback_real_boundary_urm_override:
     "URM route A"
     "Fixed boundary probe route A."
     label urm_fixed_rollback_boundary_done
-    assert urm_boundary_probe_context_before is False
+    assert urm_boundary_probe_boundary_after_fix is not None
     assert urm_boundary_probe_route == "A"
     assert urm_boundary_probe_fixed_before_urm is True
     assert urm_boundary_probe_forward_before_urm == 1
