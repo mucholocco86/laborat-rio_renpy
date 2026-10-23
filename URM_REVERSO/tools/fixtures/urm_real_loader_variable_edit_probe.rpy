@@ -5,6 +5,7 @@ default urm_edit_probe_trace_enabled = True
 default urm_edit_probe_value = 1
 default urm_edit_probe_route_value = None
 default urm_edit_probe_modify_seen = False
+default urm_edit_probe_monitor_called = False
 default urm_edit_probe_code_seen = False
 
 init python:
@@ -181,6 +182,20 @@ label urm_real_loader_variable_edit_start:
     $ x52URM.Settings.showWatchPanel = False
     $ x52URM.States.updateNotificationShown = True
     $ x52URM.afterLoad()
+    $ x52URM.VarsStore.monitor("urm_edit_probe_value")
+    $ print("URM_EDIT_MONITOR_CONFIG", x52URM.VarsStore.isMonitored("urm_edit_probe_value"))
+    $ _urm_edit_probe_original_notification_add = x52URM.Notifications.add
+
+    python:
+        _urm_edit_probe_original_notification_add = x52URM.Notifications.add
+
+        def _urm_edit_probe_trace_notification_add(self, **kwargs):
+            if kwargs.get("text") == "urm_edit_probe_value":
+                renpy.store.urm_edit_probe_monitor_called = True
+                print("URM_EDIT_NOTIFICATION", kwargs)
+            return _urm_edit_probe_original_notification_add(self, **kwargs)
+
+        x52URM.Notifications.add = _urm_edit_probe_trace_notification_add
 
     $ _urm_edit_probe_original_set_value = x52URM.Var.setValue
     $ _urm_edit_probe_original_handle_change = x52URM.StoreMonitor.handleVarChange
@@ -251,6 +266,8 @@ testcase urm_real_loader_variable_edit_runtime:
     assert urm_edit_probe_route_value == 7
     assert urm_edit_probe_code_seen is True
     assert urm_edit_probe_modify_seen is True
+    assert x52URM.VarsStore.isMonitored("urm_edit_probe_value") is True
+    assert urm_edit_probe_monitor_called is False
     $ print("URM_EDIT_RUNTIME_RESULT", urm_edit_probe_value,
             urm_edit_probe_route_value, renpy.in_fixed_rollback(),
             renpy.can_rollback())
