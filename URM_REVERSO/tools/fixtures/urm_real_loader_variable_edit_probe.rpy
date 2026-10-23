@@ -127,7 +127,7 @@ testcase urm_real_loader_variable_edit_runtime:
     type BACKSPACE
     type "7"
     type RETURN
-    type ESCAPE
+    $ renpy.hide_screen('URM_CodeView')
     type alt_e
     "Edit probe route reached."
     "URM variable edit continuation checkpoint."
