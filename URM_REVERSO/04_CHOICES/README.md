@@ -416,3 +416,6 @@ A fonte `RollbackLog.rollback()` confirma que a contagem de checkpoints num roll
 ### Continuação de 2026-10-23 — fixed rollback e ação de Choice do URM
 
 O [documento 33 — Fixed rollback e escolha acionada pelo URM](33_ROLLBACK_FIXO_E_ESCOLHA_URM.md) cruza `rollback_is_fixed` da ação URM com a sensibilidade de `ChoiceReturn`, a fronteira de `RollbackLog` e o retorno estrutural consumido por `Menu.execute()` no SDK 7.4.11. A fonte sustenta a intenção de liberar seleção via URM durante fixed rollback, mas a integração da tela modal e a seleção alternativa em runtime continuam pendentes. Não há evidência de que a ação apague `fixed_rollback_boundary` ou altere diretamente registros do histórico.
+
+
+A validação reduzida do run [39895890714](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39895890714) mostrou que, com `rollback_is_fixed=True` definido diretamente no fixture, a tela modal análoga ao URM ainda devolve o índice e `Menu.execute()` executa a rota A sob `fix_rollback_without_choice=False` e `True`. Isso é runtime da ponte screen→menu→AST; o ciclo real que atravessa uma fronteira `renpy.fix_rollback()` permanece pendente. Fixture e limites no [documento 33](33_ROLLBACK_FIXO_E_ESCOLHA_URM.md).
