@@ -13,6 +13,10 @@ O run integrado [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/
 
 A leitura oposta dos runs 39909338891 e 39910066028 era um falso negativo no próprio probe. O gate `isinstance(changes, dict)` usava o nome global `dict`, que no contexto Ren’Py do fixture resolvia para `renpy.python.RevertableDict`; a coleção retornada era um `dict` nativo. A confirmação foi obtida em 39910519723 ao imprimir `type(changes)`, o binding de `dict` e testar diretamente `"urm_edit_probe_value" in changes`. A análise anterior foi corrigida, não se trata de mudança de comportamento entre execuções.
 
+## Efeito sobre o StoreMonitor neste percurso
+
+No run 39910519723, depois de `complete(begin=True)` ciclar a base do StoreDict com o valor atual 7, a consulta posterior `get_changes(False)` não continha `urm_edit_probe_value`; ela continha a alteração de `urm_edit_probe_route_value`. A fixture tampouco registrou chamada a `StoreMonitor.handleVarChange` para a variável editada. Como a fonte do callback do URM consulta `get_changes(False)` e só chama o handler para as chaves retornadas, a ordem observada explica por que a edição foi reversível sem gerar chamada do monitor nesse caso: o delta foi incorporado ao rollback antes de estar disponível ao callback. Isso é uma explicação sustentada pela combinação de fonte e trace, limitada ao caminho testado; não prova comportamento de toda edição ou configuração de monitoramento.
+
 ## Sequência que as fontes sustentam
 
 O SDK permite o seguinte caminho genérico: interação anterior pode levar `Context.run()` a `RollbackLog.begin()`; quando começa novo período, `begin()` pode chamar `complete(True)`, que consulta `StoreDict.get_changes(True)`. Em outro momento, `ast.Python.execute()` chama os callbacks, e a callback do URM consulta `get_changes(False)`.
