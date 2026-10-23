@@ -102,6 +102,8 @@ init python:
         tracing = (self is renpy.store.__dict__ and
                    getattr(renpy.store, "urm_edit_probe_trace_enabled", False))
         if tracing:
+            import sys
+            caller = sys._getframe(1).f_code.co_name
             changes = result[0] if isinstance(result, tuple) else result
             try:
                 has_target = "urm_edit_probe_value" in changes
@@ -115,8 +117,9 @@ init python:
                   "store_id", id(self), "main_store_id", id(renpy.store.__dict__),
                   "result_type", type(result), "delta_type", type(changes),
                   "dict_binding", repr(dict), "dict_binding_type", type(dict),
-                  "direct_has_target", has_target, "delta_id", id(changes),
-                  "delta_repr", repr(changes),
+                  "direct_has_target", has_target, "caller", caller,
+                  "modify_screen_open", bool(renpy.get_screen("URM_modify_value")),
+                  "delta_id", id(changes), "delta_repr", repr(changes),
                   "current", renpy.store.urm_edit_probe_value,
                   "context_force", renpy.game.context().force_checkpoint,
                   "log_force", renpy.game.log.force_checkpoint,
