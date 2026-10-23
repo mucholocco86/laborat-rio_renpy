@@ -10,33 +10,6 @@ default urm_edit_probe_force_trace_enabled = False
 default urm_edit_probe_code_seen = False
 
 init python:
-    # Diagnostic only: trace writes to Context.force_checkpoint in this disposable fixture.
-    _urm_edit_probe_context_class = renpy.execution.Context
-    _urm_edit_probe_original_context_setattr = _urm_edit_probe_context_class.__setattr__
-
-    def _urm_edit_probe_trace_context_setattr(self, name, value):
-        if name == "force_checkpoint" and getattr(renpy.store, "urm_edit_probe_force_trace_enabled", False):
-            import sys
-            frame = sys._getframe(1)
-            caller_chain = []
-            for _urm_edit_force_depth in range(6):
-                if frame is None:
-                    break
-                caller_chain.append((frame.f_code.co_name, frame.f_code.co_filename, frame.f_lineno))
-                frame = frame.f_back
-            try:
-                old_value = getattr(self, "force_checkpoint")
-            except Exception:
-                old_value = "<unset>"
-            print("URM_EDIT_CONTEXT_FORCE_WRITE", old_value, value,
-                  "context_current", getattr(self, "current", None),
-                  "active_current", renpy.game.context().current,
-                  "log_force", renpy.game.log.force_checkpoint,
-                  "stack", caller_chain)
-        return _urm_edit_probe_original_context_setattr(self, name, value)
-
-    _urm_edit_probe_context_class.__setattr__ = _urm_edit_probe_trace_context_setattr
-
     _urm_edit_probe_original_begin = renpy.python.RollbackLog.begin
     def _urm_edit_probe_trace_begin(self, force=False):
         tracing = getattr(renpy.store, "urm_edit_probe_force_trace_enabled", False)
