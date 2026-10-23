@@ -148,7 +148,8 @@ label urm_fixed_rollback_second_cycle_start:
         "Fixed boundary probe route B."
 
 label urm_fixed_rollback_second_cycle_done:
-    return
+    "Second-cycle continuation checkpoint."
+    jump urm_fixed_rollback_second_cycle_done
 
 
 testcase urm_fixed_rollback_second_cycle_diagnostic:
@@ -159,6 +160,8 @@ testcase urm_fixed_rollback_second_cycle_diagnostic:
     type PAGEUP
     "URM route A"
     "Fixed boundary probe route A."
+    type K_RETURN
+    "Second-cycle continuation checkpoint."
     $ urm_second_cycle_probe_dump("BEFORE_SECOND_PAGEUPS")
     type PAGEUP
     type PAGEUP
