@@ -55,12 +55,13 @@ label urm_fixed_rollback_boundary_start:
     $ renpy.store._rollback = True
     $ renpy.config.fix_rollback_without_choice = False
 
+    $ print("BOUNDARY_BEFORE_MENU", renpy.in_fixed_rollback(), renpy.roll_forward_info(),
+            renpy.game.context().current, renpy.game.log.fixed_rollback_boundary)
     if renpy.in_fixed_rollback():
         $ urm_boundary_probe_native_a_sensitive = renpy.ui.ChoiceReturn("Route A", 0).get_sensitive()
         $ urm_boundary_probe_native_b_sensitive = renpy.ui.ChoiceReturn("Route B", 1).get_sensitive()
-        $ print("BOUNDARY_REPLAY_BEFORE_MENU", renpy.in_fixed_rollback(), renpy.roll_forward_info(),
-                urm_boundary_probe_native_a_sensitive, urm_boundary_probe_native_b_sensitive,
-                renpy.game.log.fixed_rollback_boundary)
+        $ print("BOUNDARY_REPLAY_SENSITIVITY", urm_boundary_probe_native_a_sensitive,
+                urm_boundary_probe_native_b_sensitive)
         show screen urm_boundary_probe_overlay
 
     menu:
@@ -88,6 +89,8 @@ testcase urm_fixed_rollback_real_boundary_urm_override:
     run Jump("urm_fixed_rollback_boundary_start")
     "Native route B"
     "Fixed boundary probe route B."
+    type PAGEUP
+    type PAGEUP
     type PAGEUP
     type PAGEUP
     "URM route A"
