@@ -13,9 +13,8 @@ init python:
             renpy.store.urm_hidden_probe_screen_count += 1
             hidden = [c for c in (x52URM.Choices.currentChoices or []) if c.text == "Hidden route C"]
             renpy.store.urm_hidden_probe_false_item = bool(hidden and not hidden[0].isVisible)
-            if renpy.store.urm_hidden_probe_screen_count >= 2:
-                renpy.store.urm_hidden_probe_reopened_after_rollback = (
-                    renpy.store.urm_hidden_probe_route is None and renpy.game.log.rollback_is_fixed)
+            if renpy.store.urm_hidden_probe_route is None and renpy.game.log.rollback_is_fixed and renpy.roll_forward_info() == 2:
+                renpy.store.urm_hidden_probe_reopened_after_rollback = True
             print("HIDDEN_PROBE_SCREEN", name, "count", renpy.store.urm_hidden_probe_screen_count,
                   "route", renpy.store.urm_hidden_probe_route,
                   "fixed", renpy.game.log.rollback_is_fixed,
