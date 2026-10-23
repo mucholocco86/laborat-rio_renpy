@@ -85,3 +85,33 @@ Usar uma fixture temporária fora de `wells/`, `wells_beta/`, das fontes origina
 6. Manter a evidência de runtime separada da conclusão estática e remover/arquivar a fixture de acordo com o fluxo de experimentação do laboratório.
 
 Nenhum código protegido foi alterado nesta etapa.
+
+## Atualização — fronteira real atravessada em runtime (2026-10-23)
+
+A fixture foi estendida para executar uma escolha nativa, chamar `renpy.fix_rollback()` depois dela, avançar até uma fala e acionar rollback pelo evento de teclado `PAGEUP`. O workflow [39897163458](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39897163458) concluiu **SUCCESS** no SDK 7.4.11.
+
+O log do ciclo reproduzido mostra:
+
+1. O jogador escolhe B; a fixture alcança o ponto após o menu.
+2. O primeiro `PAGEUP` retorna a um estado anterior, mas ainda não alcança a fronteira fixa (`rollback_is_fixed=False`, sem roll-forward).
+3. O segundo `PAGEUP` atravessa a fronteira: o rollback termina com `rollback_is_fixed=True`, e `roll_forward_info()==1`, que corresponde à escolha B.
+4. No menu reaberto, a medição das ações nativas dá A insensível e B sensível. A tela URM reduzida oferece A; ao escolhê-la, registra fixed=True/forward=1, limpa a flag, retorna o índice 0 e o Ren'Py executa o bloco A. O testcase confirma a rota observada.
+
+Trecho do log:
+
+```text
+BOUNDARY_ROLLBACK_END True ... 1
+BOUNDARY_URM_ACTION True 1 False True ... 0 False
+BOUNDARY_AFTER_MENU A False None ...
+```
+
+### Conclusão atualizada
+
+- **OBSERVADO EM RUNTIME — fixture reduzida com fronteira real:** após `renpy.fix_rollback()` e rollback efetivo até a decisão, a alternativa previamente escolhida B permanece como roll-forward e a ação nativa a distingue das demais.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** a ação análoga a `URMChoice.Action` limpa a flag fixed, devolve outra posição estrutural (A, índice 0) e o motor executa o bloco A.
+- **CONFIRMADO NO SDK 7.4.11 — fonte + runtime:** `rollback_is_fixed` não impede por si só que uma ação programática retorne outro índice; as ações nativas consultam fixed rollback para sensibilidade, enquanto `ChoiceReturn.__call__` retorna o valor.
+- **Limite:** o fixture reproduz a ação e a tela, mas não carrega o URM integral pelo loader. O teste cobre `fix_rollback_without_choice=False); o cenário `True` só foi exercitado no probe sintético anterior.
+- **PENDENTE:** testar novo rollback depois da troca A, para confirmar como a nova decisão se comporta após o script alcançar novamente `renpy.fix_rollback()`; testar também `fix_rollback_without_choice=True` com uma fronteira real, e save/load.
+- **Tentativa inconclusiva:** a extensão que tentou executar A→rollback→B ficou parada esperando o botão B (runs [39896929205](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39896929205) e [39897042594](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39897042594)). Não houve segundo trace de rollback; portanto, ela não demonstra que o segundo rollback ou a segunda troca falhe no jogo. A fixture foi retornada ao caso de um ciclo validado, cujo run verde é 39897163458.
+
+A fixture final e o workflow dedicado permanecem em [`urm_fixed_rollback_boundary_probe.rpy`](https://github.com/mucholocco86/laborat-rio_renpy/blob/main/URM_REVERSO/tools/fixtures/urm_fixed_rollback_boundary_probe.rpy) e [`urm-fixed-rollback-boundary-probe.yml`](https://github.com/mucholocco86/laborat-rio_renpy/blob/main/.github/workflows/urm-fixed-rollback-boundary-probe.yml). Nenhum SDK, fonte original do URM ou arquivo do Wells foi alterado.
