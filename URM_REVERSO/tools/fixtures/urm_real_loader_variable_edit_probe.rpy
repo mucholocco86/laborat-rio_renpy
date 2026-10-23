@@ -75,7 +75,8 @@ init python:
     _urm_edit_probe_original_get_changes = renpy.python.StoreDict.get_changes
     def _urm_edit_probe_trace_get_changes(self, cycle, *args, **kwargs):
         result = _urm_edit_probe_original_get_changes(self, cycle, *args, **kwargs)
-        tracing = getattr(renpy.store, "urm_edit_probe_modify_seen", False)
+        tracing = (self is renpy.store.__dict__ and
+                   getattr(renpy.store, "urm_edit_probe_modify_seen", False))
         if tracing:
             changes = result[0] if isinstance(result, tuple) else result
             has_target = isinstance(changes, dict) and "urm_edit_probe_value" in changes
@@ -92,6 +93,46 @@ init python:
         return result
 
     renpy.python.StoreDict.get_changes = _urm_edit_probe_trace_get_changes
+
+    _urm_edit_probe_original_store_begin = renpy.python.StoreDict.begin
+    def _urm_edit_probe_trace_store_begin(self):
+        tracing = (self is renpy.store.__dict__ and
+                   getattr(renpy.store, "urm_edit_probe_modify_seen", False))
+        if tracing:
+            before = self.old.as_dict().get("urm_edit_probe_value", "<missing>")
+            print("URM_EDIT_STORE_BEGIN_BEFORE", before,
+                  "current", renpy.store.urm_edit_probe_value,
+                  "node", renpy.game.context().current)
+        rv = _urm_edit_probe_original_store_begin(self)
+        if tracing:
+            after = self.old.as_dict().get("urm_edit_probe_value", "<missing>")
+            print("URM_EDIT_STORE_BEGIN_AFTER", after,
+                  "current", renpy.store.urm_edit_probe_value,
+                  "node", renpy.game.context().current)
+        return rv
+
+    renpy.python.StoreDict.begin = _urm_edit_probe_trace_store_begin
+
+    _urm_edit_probe_original_rollback_record = renpy.python.Rollback.rollback
+    def _urm_edit_probe_trace_rollback_record(self):
+        tracing = getattr(renpy.store, "urm_edit_probe_modify_seen", False)
+        target_values = []
+        if tracing:
+            for store_name, changes in self.stores.items():
+                if "urm_edit_probe_value" in changes:
+                    target_values.append((store_name, changes["urm_edit_probe_value"]))
+            print("URM_EDIT_RECORD_ROLLBACK_BEGIN", target_values,
+                  "current", renpy.store.urm_edit_probe_value,
+                  "record_context", self.context.current)
+        try:
+            return _urm_edit_probe_original_rollback_record(self)
+        finally:
+            if tracing:
+                print("URM_EDIT_RECORD_ROLLBACK_END", target_values,
+                      "current", renpy.store.urm_edit_probe_value,
+                      "record_context", renpy.game.context().current)
+
+    renpy.python.Rollback.rollback = _urm_edit_probe_trace_rollback_record
 
 label urm_real_loader_variable_edit_start:
     $ urm_edit_probe_value = 1
