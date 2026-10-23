@@ -123,7 +123,7 @@ testcase urm_real_loader_variable_edit_runtime:
     type alt_c
     type alt_1
     type alt_s
-    click "urm_edit_probe_value"
+    "urm_edit_probe_value"
     type BACKSPACE
     type "7"
     type RETURN
