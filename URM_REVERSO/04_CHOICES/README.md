@@ -439,3 +439,8 @@ O [documento 35](35_ENTRADA_DA_TELA_CHOICES_E_FIXED_ROLLBACK.md) localiza os pon
 ### Validação integrada em 2026-10-23 — screen original durante fixed rollback
 
 O run [39903530535](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39903530535) passou com o pacote original copiado intacto para um jogo descartável Ren'Py 7.4.11. A notificação usou Alt+C, chamou a tela original `URM_choices` enquanto `rollback_is_fixed=True`, e a ação `ChoiceReturn` levou à rota A. O harness habilitou rollback no contexto de teste; os limites e próximos casos estão em [36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md](36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md). Isso confirma a rota de Choices nessa fixture, mas não encerra a investigação de edição de variáveis, save/load ou configurações alternativas.
+
+
+### Circuito de edição de variável a partir de uma Choice
+
+O [documento 37](37_CODEVIEW_EDICAO_VARIAVEL.md) segue a rota estática `Choice → CodeView → hyperlink URMVarDialog → URM_modify_value → SetVarValue → Var.setValue → renpy.store`. Ele separa o que a fonte confirma do que ainda depende de runtime, principalmente o checkpoint e a participação de uma escrita feita por ação de screen no monitor/rollback.
