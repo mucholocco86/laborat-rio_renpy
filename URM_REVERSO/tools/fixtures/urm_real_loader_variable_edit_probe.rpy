@@ -51,6 +51,46 @@ init python:
     # Install the diagnostic wrapper; previously it was defined but never assigned.
     renpy.python.RollbackLog.rollback = _urm_edit_probe_trace_rollback
 
+    _urm_edit_probe_original_complete = renpy.python.RollbackLog.complete
+    def _urm_edit_probe_trace_complete(self, begin=False):
+        tracing = getattr(renpy.store, "urm_edit_probe_modify_seen", False)
+        if tracing:
+            print("URM_EDIT_COMPLETE_BEGIN", begin,
+                  "log_force", self.force_checkpoint,
+                  "context_force", renpy.game.context().force_checkpoint,
+                  "did_interaction", self.did_interaction,
+                  "current", renpy.game.context().current)
+        try:
+            return _urm_edit_probe_original_complete(self, begin)
+        finally:
+            if tracing:
+                print("URM_EDIT_COMPLETE_END", begin,
+                      "log_force", self.force_checkpoint,
+                      "context_force", renpy.game.context().force_checkpoint,
+                      "did_interaction", self.did_interaction,
+                      "current", renpy.game.context().current)
+
+    renpy.python.RollbackLog.complete = _urm_edit_probe_trace_complete
+
+    _urm_edit_probe_original_get_changes = renpy.python.StoreDict.get_changes
+    def _urm_edit_probe_trace_get_changes(self, cycle, *args, **kwargs):
+        result = _urm_edit_probe_original_get_changes(self, cycle, *args, **kwargs)
+        tracing = (self is renpy.store.__dict__ and
+                   getattr(renpy.store, "urm_edit_probe_modify_seen", False))
+        if tracing:
+            changes = result[0] if isinstance(result, tuple) else result
+            has_target = isinstance(changes, dict) and "urm_edit_probe_value" in changes
+            old_value = changes.get("urm_edit_probe_value") if has_target else None
+            print("URM_EDIT_STORE_CHANGES", cycle, "has_target", has_target,
+                  "old", old_value, "current",
+                  renpy.store.urm_edit_probe_value,
+                  "context_force", renpy.game.context().force_checkpoint,
+                  "log_force", renpy.game.log.force_checkpoint,
+                  "node", renpy.game.context().current)
+        return result
+
+    renpy.python.StoreDict.get_changes = _urm_edit_probe_trace_get_changes
+
 label urm_real_loader_variable_edit_start:
     $ urm_edit_probe_value = 1
     $ urm_edit_probe_route_value = None
