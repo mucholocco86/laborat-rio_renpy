@@ -22,7 +22,7 @@ Assim, o valor devolvido pela interação tem de identificar a entrada estrutura
 
 **CONFIRMADO NO SDK 7.4.11.** Em renpy/exports.py, a função menu() avalia cada condição usando renpy.python.py_eval(condition). Com menu_actions desligado, inclui somente as entradas cuja condição é verdadeira. Com menu_actions ligado, a fonte também pode descartar condições falsas se menu_include_disabled estiver desligado; quando itens desabilitados são incluídos, a condição é passada como sensitive do ChoiceReturn nativo.
 
-A função display_menu() cria as ações da tela para os itens filtrados e, após ui.interact(), chama checkpoint(rv) e retorna o valor. Menu.execute() usa esse valor para entrar no bloco correspondente.
+A função display_menu() cria as ações da tela para os itens filtrados e, após ui.interact(), chama checkpoint(rv) e retorna o valor. checkpoint() recebe hard=True por padrão, mas só encaminha hard=True quando renpy.store._rollback também está verdadeiro; a existência/força efetiva do checkpoint depende ainda do estado do log. Menu.execute() usa o valor para entrar no bloco correspondente.
 
 **PENDENTE:** a tela do URM mostra alternativas marcadas como invisíveis e sua ação chama ChoiceReturn com o índice original. A leitura da tela demonstra que o botão de seleção do URM não bloqueia pelo próprio predicado isVisible; ainda não foi isolado em runtime se o caminho direto do URM efetivamente contorna o filtro/condição do menu nativo em todas as configurações. Não generalizar a partir do teste com Choice visível.
 
@@ -46,7 +46,7 @@ Isso confirma o circuito estrutural já descrito nos docs 14–15, sem afirmar q
 
 **CONFIRMADO NO SDK 7.4.11.** StoreDict.get_changes(True) devolve os valores anteriores ao ciclo e atualiza sua base de comparação. Rollback.rollback() seleciona registros, chama rb.rollback() e reaplica os dados reversíveis dos stores/contextos.
 
-A distinção importante é que Context.force_checkpoint provoca uma passagem forçada pela abertura/ciclo de rollback; o flag RollbackLog.force_checkpoint leva complete() a criar um checkpoint **soft**. Isso não é o mesmo que um hard checkpoint, e nenhum desses flags, isoladamente, explica a reversão de 1→7.
+A distinção importante é que Context.force_checkpoint provoca uma passagem forçada pela abertura/ciclo de rollback; o flag RollbackLog.force_checkpoint leva complete() a solicitar um checkpoint com hard=False. Isso não é o mesmo que o checkpoint do menu, que chama checkpoint(rv) com hard=True por padrão (a efetividade depende de renpy.store._rollback), e nenhum desses flags, isoladamente, explica a reversão de 1→7.
 
 ## 5. Runtime da edição integrada
 
