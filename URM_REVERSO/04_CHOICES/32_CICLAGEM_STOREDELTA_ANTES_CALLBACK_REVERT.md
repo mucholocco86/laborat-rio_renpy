@@ -193,3 +193,22 @@ Esses números cobrem o trecho instrumentado do testcase, que inclui nós de pre
 - **PENDENTE:** isolar a contagem por fronteira de callback sem incluir nós de setup/rollback e executar o circuito com o URM integral.
 
 Fixture instrumentada no commit [d4a132ae51d53a583e1167a6d6a0f79c962f0eb5](https://github.com/mucholocco86/laborat-rio_renpy/commit/d4a132ae51d53a583e1167a6d6a0f79c962f0eb5); run [39893930678](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39893930678), **SUCCESS**.
+## Contagem de checkpoints soft no rollback normal
+
+A revisão de `RollbackLog.rollback()` mostra como o pedido `checkpoint(hard=False)` influencia o retrocesso:
+
+- `RollbackLog.checkpoint()` marca `current.checkpoint=True`, mas, com `hard=False`, não incrementa `rollback_limit` nem define `current.hard_checkpoint`.
+- `can_rollback()` depende de `rollback_limit > 0`; portanto, o checkpoint soft não cria por si só capacidade adicional de rollback interativo.
+- No rollback normal (`on_load=False`), o laço decrementa `checkpoints` somente quando encontra `rb.hard_checkpoint`. Um registro com apenas `rb.checkpoint=True` não satisfaz a contagem solicitada.
+- Depois de localizar o hard checkpoint solicitado, o caminho `greedy=True` pode remover registros posteriores não hard, incluindo os que só têm checkpoint soft, até o limite/condição seguinte.
+- A exceção no mesmo método é `on_load=True`: nesse modo, `rb.checkpoint` soft também reduz a variável local `checkpoints`. O carregamento tem, portanto, regra própria.
+
+Essa conclusão é **CONFIRMADA NO SDK 7.4.11 pela fonte** (`renpy/python.py`, `RollbackLog.checkpoint`, `can_rollback`, `rollback`; blob `c5eb2819a3e4ee096dbf01130d70a77f9b623484`). A API pública `renpy.checkpoint()` também transforma `hard` em `renpy.store._rollback and hard` (`renpy/exports.py`, blob `e4e81a...` a confirmar no índice; não use este SHA como referência até verificar).
+
+### Tentativa runtime não conclusiva
+
+A tentativa [39894546076](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39894546076) falhou nas asserções e **não** é evidência de runtime para a regra. O harness adicionou interações/checkpoints próprios, e o rollback retornou a um estado anterior ao valor de setup. As saídas mostraram `rollback_limit` ficar em 1 após o pedido soft numa variante, mas a sequência final não isolou a fronteira de estado pretendida. O testcase foi removido da fixture e do workflow para não deixar uma etapa vermelha. O run anterior [39894376572](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39894376572) também falhou por loop de teste antes de uma validação útil.
+
+- **CONFIRMADO NO SDK 7.4.11 — fonte:** soft não incrementa `rollback_limit` e não conta como checkpoint normal em `rollback(on_load=False)`.
+- **PENDENTE:** desenhar um teste runtime com boundary/interaction e log de rollback controlados, sem usar os menus do harness como pontos hard implícitos.
+- **Não concluído:** nenhum comportamento do URM integral foi validado por esses dois runs com falha.
