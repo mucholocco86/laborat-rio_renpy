@@ -444,3 +444,8 @@ O run [39903530535](https://github.com/mucholocco86/laborat-rio_renpy/actions/ru
 ### Circuito de edição de variável a partir de uma Choice
 
 O [documento 37](37_CODEVIEW_EDICAO_VARIAVEL.md) segue a rota estática `Choice → CodeView → hyperlink URMVarDialog → URM_modify_value → SetVarValue → Var.setValue → renpy.store`. Ele separa o que a fonte confirma do que ainda depende de runtime, principalmente o checkpoint e a participação de uma escrita feita por ação de screen no monitor/rollback.
+
+
+### Validação integrada em 2026-10-23 — edição de variável e rollback
+
+O [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md) registra o teste do editor original do URM em jogo descartável Ren'Py 7.4.11. A tela real alterou 1→7 durante fixed rollback; a rota leu 7 e, após quatro PAGEUP, as asserções confirmaram retorno a 1 e à rota `None` ([run 39905267994](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39905267994), SUCCESS). O wrapper corrigido não registrou chamada de `handleVarChange` para esse valor. O test runner invocou o handler do hyperlink diretamente; clique visual, evento exato da restauração e save/load continuam pendentes.
