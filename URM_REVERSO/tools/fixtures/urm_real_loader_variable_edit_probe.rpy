@@ -123,7 +123,7 @@ testcase urm_real_loader_variable_edit_runtime:
     type alt_c
     type alt_1
     type alt_s
-    "urm_edit_probe_value"
+    $ x52URM.CodeView.handleVarClicked("urm_edit_probe_value")
     type BACKSPACE
     type "7"
     type RETURN
