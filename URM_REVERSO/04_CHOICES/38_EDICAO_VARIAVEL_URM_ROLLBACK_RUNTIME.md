@@ -47,7 +47,7 @@ As execuções diagnósticas anteriores tiveram erros no próprio wrapper (`take
 
 - O test runner não conseguiu focar e clicar automaticamente no token hyperlink renderizado do CodeView. Para validar o circuito sem atribuir ao runner uma capacidade que ele não demonstrou, o fixture invocou diretamente o handler original `CodeView.handleVarClicked`. Portanto, a abertura da tela e a edição são integradas/reais, mas o clique visual no hyperlink permanece pendente.
 - O teste usa um jogo de laboratório e habilita explicitamente `context.rollback=True` e `store._rollback=True`. Não generalizar a sequência para todos os jogos ou configurações.
-- O run 39907164916 localizou a restauração no terceiro PAGEUP. O run posterior 39909338891 instrumentou os registros internos: um registro contendo o valor 1 foi aplicado nessa chamada. No run [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723), `get_changes(True)` retornou o delta com `urm_edit_probe_value: 1` durante `complete(begin=True)` no nó 69; o registro corrente passou a conter esse valor antigo e foi reaplicado no PAGEUP 3. Isso resolve a origem do valor antigo para a fixture.
+- O run 39907164916 localizou a restauração no terceiro PAGEUP. O trace corrigido [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723) mostrou `StoreDict.old` contendo 1 antes do fechamento do ciclo; `get_changes(True)` retornou `urm_edit_probe_value: 1` durante `complete(begin=True)` no nó 69; o registro corrente foi preenchido com esse valor antigo e reaplicado no PAGEUP 3. Isso resolve a origem do valor restaurado para essa fixture.
 - A observação de `context.force_checkpoint=True` durante `Var.setValue` não demonstra que a edição solicitou checkpoint nem explica o registro antigo reaplicado. A semântica de checkpoint soft e os outros percursos de StoreDict estão nos documentos 18, 19, 32 e 39.
 - Save/load, criação de variável, freeze, monitoramento configurado via stores URM, edição durante outros pontos do menu, e edição de objetos/listas/dicionários não foram testados aqui.
 - O fixture chama `renpy.hide_screen('URM_CodeView')` explicitamente para sair do CodeView no test runner; não é evidência sobre como a interação manual fecha essa tela em todas as situações.
@@ -64,7 +64,7 @@ As execuções diagnósticas anteriores tiveram erros no próprio wrapper (`take
 ## Próximos probes
 
 1. Fazer o test runner ativar o hyperlink renderizado com um mecanismo de foco compatível, sem substituir o handler direto, ou registrar essa limitação e usar teste manual reprodutível.
-2. Localizar quando o registro de rollback que contém 1 foi preenchido e por que o delta da edição 1→7 não apareceu nas chamadas instrumentadas de `get_changes`; rastrear também as escritas/transferências de `force_checkpoint`.
+2. Rastrear a origem e a transferência de `force_checkpoint` em cada fase; a captura de 1→7 por `get_changes(True)` já foi localizada. Testar se um caminho de edição com monitor habilitado produz notificação quando o callback sucede a ciclagem do delta.
 3. Testar save/load em casos separados: salvar imediatamente após editar, salvar depois de avançar e carregar o slot.
 4. Testar separadamente uma variável monitorada e uma congelada pela configuração real do URM, verificando `python_callbacks`, `get_changes`, notificação e precedência do freeze.
 5. Comparar edição antes/durante/depois do menu sem combinar esses casos em um único resultado.
