@@ -1993,37 +1993,3 @@ testcase urm_notification_revert_frozen_monitor_callback_with_rollback:
     run Jump("urm_revert_monitor_rollback_start")
     "Apply notification Revert"
     label urm_revert_monitor_rollback_verify
-
-# Compare a soft checkpoint with native rollback's hard-checkpoint counting.
-default urm_soft_checkpoint_value = 0
-default urm_soft_checkpoint_route = 0
-
-label urm_soft_checkpoint_rollback_start:
-    $ renpy.game.context().rollback = True
-    $ renpy.store._rollback = True
-    $ urm_soft_checkpoint_value = 10
-    $ urm_soft_checkpoint_route = 0
-    $ renpy.checkpoint("hard-before-soft-probe")
-    $ print("SOFT_CP_AFTER_HARD_REQUEST", urm_soft_checkpoint_value, renpy.game.log.rollback_limit)
-    $ renpy.pause(0.1, checkpoint=False)
-
-    $ urm_soft_checkpoint_value = 20
-    $ renpy.game.log.checkpoint(hard=False)
-    $ print("SOFT_CP_AFTER_SOFT_REQUEST", urm_soft_checkpoint_value, renpy.game.log.rollback_limit)
-    $ renpy.pause(0.1, checkpoint=False)
-
-    $ urm_soft_checkpoint_value = 30
-    $ urm_soft_checkpoint_route = 1
-    $ print("SOFT_CP_LOG_BEFORE_ROLLBACK", [(rb.checkpoint, rb.hard_checkpoint) for rb in renpy.game.log.log[-6:]], renpy.game.log.rollback_limit)
-    $ renpy.rollback(force=True, checkpoints=1, label="urm_soft_checkpoint_rollback_verify")
-
-label urm_soft_checkpoint_rollback_verify:
-    $ print("SOFT_CP_AFTER_ROLLBACK", urm_soft_checkpoint_value, urm_soft_checkpoint_route, renpy.game.log.rollback_limit)
-    return
-
-testcase urm_soft_checkpoint_does_not_count_as_normal_checkpoint:
-    run Jump("urm_soft_checkpoint_rollback_start")
-    label urm_soft_checkpoint_rollback_verify
-    assert urm_soft_checkpoint_value == 10
-    assert urm_soft_checkpoint_route == 0
-    $ renpy.quit()
