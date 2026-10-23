@@ -448,7 +448,7 @@ O [documento 37](37_CODEVIEW_EDICAO_VARIAVEL.md) segue a rota estática `Choice 
 
 ### Validação integrada em 2026-10-23 — edição de variável e rollback
 
-O [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md) registra o teste do editor original do URM em jogo descartável Ren'Py 7.4.11. A tela real alterou 1→7 durante fixed rollback; a rota leu 7 e, após quatro PAGEUP, as asserções confirmaram retorno a 1 e à rota `None` ([run 39905267994](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39905267994), SUCCESS). O wrapper corrigido não registrou chamada de `handleVarChange` para esse valor. O test runner invocou o handler do hyperlink diretamente; clique visual, evento exato da restauração e save/load continuam pendentes.
+O [documento 38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md) registra a edição 1→7 pelo editor original em fixed rollback e a leitura 7 pela rota. O trace por tecla [39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916) localizou o retorno a 1/`None` no PAGEUP 3. A instrumentação do run [39909338891](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39909338891) não encontrou a chave em `get_changes`; durante esse PAGEUP foi aplicado um registro contendo valor antigo 1. Assim, o estado retornou, mas a edição 1→7 não foi observada como delta próprio. O clique visual do hyperlink e save/load seguem pendentes.
 
 
 ### Continuação de 2026-10-23 — PAGEUP exato da restauração
