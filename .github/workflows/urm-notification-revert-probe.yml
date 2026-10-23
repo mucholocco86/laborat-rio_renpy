@@ -148,3 +148,19 @@ jobs:
           result=$?
           echo "END frozen Revert monitor callback rollback probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
+
+
+      - name: Run soft checkpoint rollback-count probe
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START soft checkpoint rollback-count probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-notification-revert-probe" test urm_soft_checkpoint_does_not_count_as_normal_checkpoint
+          result=$?
+          echo "END soft checkpoint rollback-count probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
