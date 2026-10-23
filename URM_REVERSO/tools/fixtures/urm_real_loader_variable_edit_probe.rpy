@@ -1,4 +1,5 @@
 # Full original URM variable editor probe, staged unchanged in a disposable Ren'Py 7.4.11 game.
+default urm_edit_probe_trace_enabled = True
 # It opens Choices -> CodeView -> URM_modify_value, edits an int, and reads it in the selected branch.
 
 default urm_edit_probe_value = 1
@@ -135,7 +136,6 @@ init python:
     renpy.python.Rollback.rollback = _urm_edit_probe_trace_rollback_record
 
 label urm_real_loader_variable_edit_start:
-    $ urm_edit_probe_trace_enabled = True
     $ urm_edit_probe_value = 1
     $ urm_edit_probe_route_value = None
     $ urm_edit_probe_modify_seen = False
