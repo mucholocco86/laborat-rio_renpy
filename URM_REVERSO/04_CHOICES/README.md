@@ -468,3 +468,8 @@ O [documento 40](40_MENU_CONDICOES_FORCE_CHECKPOINT_RUNTIME.md) confirma no SDK 
 ### Continuação de 2026-10-23 — Choice com condição falsa executada
 
 O [documento 41](41_CHOICE_CONDICAO_FALSA_EXECUTADA_PELO_URM.md) registra o teste integrado [39913014343](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39913014343): a tela original do URM listou Hidden route C com isVisible=False e índice AST 2; Alt+3/Enter chamou ChoiceReturn com value 2 e o bloco C executou. Neste percurso de Ren'Py 7.4.11, a seleção programática pela UI do URM conseguiu executar a alternativa cuja condição era literalmente False. Isso comprova o caso do fixture, não todas as expressões/configurações de menu. O documento 40 contém o cruzamento nativo de condições, retorno de Choice e checkpoints. Rollback depois da rota forçada, condição dinâmica e save/load continuam pendentes.
+
+
+### Continuação de 2026-10-23 — rollback após Choice forçada
+
+O [documento 42](42_ROLLBACK_APOS_CHOICE_CONDICAO_FALSA.md) registra o runtime integrado [39924626643](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39924626643). Depois de C, cuja condição era False, o terceiro PAGEUP restaurou a rota para None e retornou ao Menu; o quarto manteve o Menu em fixed rollback, com rollback_limit zero e roll-forward no índice 2 (C). A tela original do URM reabriu nesse estado e selecionou B, cuja rota executou. As contagens são próprias da fixture 7.4.11; não generalizar para qualquer jogo ou sequência. Save/load e condição variável seguem pendentes.
