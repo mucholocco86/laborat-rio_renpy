@@ -82,6 +82,20 @@ BOUNDARY_ROLLBACK_END True ... boundary (..., 41) forward 0
 SECOND_CYCLE_STATE AFTER_FOURTH_PAGEUP limit 0 can False ... fixed True forward 0
 ```
 
+### Segunda seleção na segunda fronteira — runtime observado
+
+O run [39902388045](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902388045) foi marcado como **FAILURE** por uma asserção auxiliar sobre a lista em `renpy.session`, não pela seleção. Antes dessa asserção, o log registrou:
+
+```text
+SECOND_CYCLE_STATE AFTER_FOURTH_PAGEUP limit 0 can False ... fixed True forward 0
+BOUNDARY_URM_ACTION True 0 True False ... 1 False
+BOUNDARY_AFTER_MENU B False None ...
+```
+
+Isso mostra, na fixture: fixed rollback ativo; forward index 0 (A); rollback interativo indisponível por `rollback_limit=0`; sensibilidade nativa A=True/B=False; a ação equivalente ao URM limpa o flag fixed e retorna índice 1; o menu executa a rota B. O testcase chegou à fala da rota B e falhou somente ao comparar uma lista de eventos armazenada em `renpy.session` com uma sequência cumulativa esperada. A lista não é usada como prova de seleção; a evidência direta é o trace da ação e `BOUNDARY_AFTER_MENU B`.
+
+O run de acompanhamento [39902500519](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902500519) remove essa dependência e verifica a variável de rota e os campos rollback-aware capturados na ação. A UI persistente da fixture é apenas um modo de reabrir o controle após rollback; não modela a política de esconder/abrir telas do URM real.
+
 ### Conclusões limitadas
 
 - **CONFIRMADO NO SDK 7.4.11:** limite de rollback e fixed boundary são mecanismos separados. O estado `rollback_is_fixed` não determina `can_rollback()`; este último depende de rollback habilitado e de `rollback_limit > 0`.
@@ -89,11 +103,11 @@ SECOND_CYCLE_STATE AFTER_FOURTH_PAGEUP limit 0 can False ... fixed True forward 
 - **OBSERVADO EM RUNTIME — fixture reduzida:** após a reescolha A, o fluxo executa de novo `renpy.fix_rollback()` e cria uma nova fronteira.
 - **OBSERVADO EM RUNTIME — fixture reduzida:** quatro PAGEUP depois da reescolha A chegaram à fronteira recriada. Os primeiros eventos atravessaram checkpoints internos; o quarto deixou `rollback_is_fixed=True` e forward index `0`, correspondente a A.
 - **OBSERVADO EM RUNTIME — fixture reduzida:** ao atingir essa fronteira, o limite chegou a zero, de modo que `renpy.can_rollback()` passou a falso enquanto fixed rollback permanecia ativo.
-- **PENDENTE:** selecionar B via ação equivalente a `ChoiceReturn` nessa segunda fronteira e verificar o bloco executado. O próximo probe mantém a tela diagnóstica visível condicionalmente durante o ciclo para tornar o botão B disponível após a segunda travessia; essa tela persistente é uma conveniência do harness, não reprodução da política de ocultação do URM.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** na segunda fronteira, mesmo com `renpy.can_rollback()==False`, a ação equivalente a `ChoiceReturn` selecionou B; o trace mostrou `rv=1` e o estado do menu registrou rota B. A escolha nativa A estava sensível e B insensível antes da ação.
 - **NÃO É EVIDÊNCIA SOBRE O URM INTEGRAL:** o fixture reproduz a ação e a tela mínima; não carrega o URM pelo loader nem testa jogos de terceiros.
 
 ## Próximo passo
 
-Continuar a sondagem já alcançada até verificar a segunda seleção. O próximo run [39902388045](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902388045) testa se a tela diagnóstica aparece na segunda fronteira, permite escolher B e executa o respectivo bloco. Se passar, registrar o segundo `ChoiceReturn` e comparar seu roll-forward.
+Continuar a sondagem já alcançada até verificar a segunda seleção. O run [39902388045](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902388045) já demonstra a segunda seleção, mas falhou na asserção da lista de `renpy.session`. Validar a nova asserção com [39902500519](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902500519). Se passar, o próximo estudo é remover a persistência artificial da tela e comparar a reabertura com o circuito real do URM, seguido de save/load.
 
 Preservar a fixture verde de um único ciclo separada e não alterar `wells/`, `wells_beta/`, fontes originais do URM ou SDKs.
