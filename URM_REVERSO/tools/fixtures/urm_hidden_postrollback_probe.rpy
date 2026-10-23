@@ -95,14 +95,7 @@ label urm_hidden_condition_probe_start:
 
 label urm_hidden_condition_probe_continue:
     "Hidden condition probe continuation."
-    $ renpy.rollback(checkpoints=1, label="urm_hidden_probe_after_rollback")
     jump urm_hidden_condition_probe_continue
-
-label urm_hidden_probe_after_rollback:
-    $ print("HIDDEN_POST_ROLLBACK_RESULT_1", urm_hidden_probe_route,
-            renpy.game.context().current, renpy.game.log.rollback_is_fixed,
-            renpy.can_rollback(), renpy.roll_forward_info())
-    $ renpy.rollback(checkpoints=1)
 
 testcase urm_hidden_condition_probe_runtime:
     run Jump("urm_hidden_condition_probe_start")
@@ -119,7 +112,11 @@ testcase urm_hidden_condition_probe_runtime:
     assert urm_hidden_probe_false_item is True
     type RETURN
     "Hidden condition probe continuation."
-    type RETURN
+    type PAGEUP
+    type PAGEUP
+    $ print("HIDDEN_POST_ROLLBACK_TESTCASE_BEFORE_RECHOICE", urm_hidden_probe_route,
+            renpy.game.context().current, renpy.game.log.rollback_is_fixed,
+            renpy.can_rollback(), renpy.roll_forward_info())
     type alt_c
     type alt_2
     type RETURN
