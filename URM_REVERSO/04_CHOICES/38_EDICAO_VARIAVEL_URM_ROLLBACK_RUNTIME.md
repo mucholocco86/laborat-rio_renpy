@@ -1,7 +1,7 @@
 # 38 — Edição de variável pelo URM e retorno por rollback (runtime)
 
 **Data:** 2026-10-23  
-**Escopo:** validação integrada do editor de variável do URM original, carregado em um jogo descartável no Ren'Py 7.4.11, com seleção de Choice sob fixed rollback e uma passada posterior de rollback.  
+**Escopo:** validação integrada do editor de variável do URM original, carregado em um jogo descartável no Ren'Py 7.4.11, com seleção de Choice sob fixed rollback, monitor URM ativado e uma passada posterior de rollback.  
 **Classificação:** runtime observado no cenário controlado descrito abaixo.
 
 ## Resultado
@@ -25,6 +25,7 @@ O teste integrado observou a edição real da variável do jogo pela tela origin
 ## Evidências
 
 - Workflow integrado: [run 39905267994](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39905267994) — **SUCCESS**.
+- Repetição com variável monitorada pela API original `VarsStore.monitor`: [run 39910824879](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910824879) — **SUCCESS**; monitor ativo confirmado, sem chamada a `handleVarChange` ou criação de notificação para a variável, e mesmas asserções de edição/rollback aprovadas.
 - Fixture com trace por tecla: commit `44b34d9eaf1c63bbf2b9a7830730d9201bd8c4eb`; trace corrigido do delta e do registro: run [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723), SUCCESS. O run [39909338891](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39909338891) foi inicialmente interpretado com falso negativo na instrumentação.
 - Fixture: [urm_real_loader_variable_edit_probe.rpy](../tools/fixtures/urm_real_loader_variable_edit_probe.rpy).
 - Workflow isolado: [urm-real-loader-variable-edit-rollback-probe.yml](../../.github/workflows/urm-real-loader-variable-edit-rollback-probe.yml).
@@ -66,6 +67,6 @@ As execuções diagnósticas anteriores tiveram erros no próprio wrapper (`take
 1. Fazer o test runner ativar o hyperlink renderizado com um mecanismo de foco compatível, sem substituir o handler direto, ou registrar essa limitação e usar teste manual reprodutível.
 2. Rastrear a origem e a transferência de `force_checkpoint` em cada fase; a captura de 1→7 por `get_changes(True)` já foi localizada. Testar se um caminho de edição com monitor habilitado produz notificação quando o callback sucede a ciclagem do delta.
 3. Testar save/load em casos separados: salvar imediatamente após editar, salvar depois de avançar e carregar o slot.
-4. Testar separadamente uma variável monitorada e uma congelada pela configuração real do URM, verificando `python_callbacks`, `get_changes`, notificação e precedência do freeze.
+4. A variável monitorada já foi testada pela API original `VarsStore.monitor` no run 39910824879 e não notificou neste percurso; falta validar metadado carregado de `.urm`. Testar separadamente uma variável congelada, verificando `python_callbacks`, `get_changes` e precedência do freeze.
 5. Comparar edição antes/durante/depois do menu sem combinar esses casos em um único resultado.
 
