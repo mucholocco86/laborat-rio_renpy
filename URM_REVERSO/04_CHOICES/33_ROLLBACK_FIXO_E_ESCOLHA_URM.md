@@ -53,6 +53,26 @@ A configuração `fix_rollback_without_choice=False` é apenas o padrão do SDK;
 - **NÃO DEMONSTRADO:** a atribuição não prova que o URM remova a fronteira, altere o histórico, preserve a alternativa nova após outro rollback ou funcione da mesma forma quando `fix_rollback_without_choice=True`.
 - **PENDENTE:** teste de runtime que crie uma decisão com `renpy.fix_rollback()`, faça rollback até antes dela, compare a seleção nativa e a seleção via URM, observe o bloco executado e repita com ambos os valores da configuração. Depois, testar novo rollback e save/load.
 
+## Runtime reduzido — screen → Menu AST com a flag ativa
+
+A fixture independente `URM_REVERSO/tools/fixtures/urm_fixed_rollback_choice_probe.rpy` foi executada pelo workflow [39895890714](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39895890714), concluído **SUCCESS** no Ren'Py 7.4.11.
+
+O testcase define deliberadamente `renpy.game.log.rollback_is_fixed = True`, consulta a sensibilidade de dois `ChoiceReturn` nativos sem valor de roll-forward disponível e, em seguida, escolhe a rota A pelo botão modal que reproduz a ação do URM. A tela devolve o índice 0 à interação do menu. O log registrou:
+
+```text
+FIXED_CHOICE_PRE False True False False
+FIXED_CHOICE_POST False A False
+FIXED_CHOICE_PRE True True False False
+FIXED_CHOICE_POST True A False
+```
+
+Os dois pares correspondem a `config.fix_rollback_without_choice=False` e `True`. Em ambos, as ações nativas consultadas estavam insensíveis; a ação modal selecionou a rota A, o bloco correspondente do AST foi executado e o indicador ficou falso após a ação.
+
+- **OBSERVADO EM RUNTIME — fixture reduzida:** com a flag fixed ativa artificialmente, a ação de screen análoga ao URM devolve o índice e o motor executa a alternativa correspondente; o caminho passou com ambos os valores da configuração.
+- **CONFIRMADO NO SDK 7.4.11 — runtime sintético:** a consulta `ChoiceReturn.get_sensitive()` retornou falso para as duas opções quando `rollback_is_fixed=True` e não havia dado de roll-forward.
+- **Limite explícito:** a fixture **atribui a flag diretamente**. Ela não executa `renpy.fix_rollback()`, não atravessa uma fronteira real via rollback, não instala a tela/código integral do URM e não mede o papel do roll-forward nativo. Portanto, não confirma ainda a sequência natural rollback → fixed boundary → escolha alternativa.
+- **Arquivos do experimento:** [fixture](https://github.com/mucholocco86/laborat-rio_renpy/blob/main/URM_REVERSO/tools/fixtures/urm_fixed_rollback_choice_probe.rpy) e [workflow isolado](https://github.com/mucholocco86/laborat-rio_renpy/blob/main/.github/workflows/urm-fixed-rollback-choice-probe.yml).
+
 ## Próximo experimento isolado
 
 Usar uma fixture temporária fora de `wells/`, `wells_beta/`, das fontes originais do URM e do SDK:
