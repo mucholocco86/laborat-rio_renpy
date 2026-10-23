@@ -9,15 +9,15 @@
 
 A fonte do URM confirma que `URM_modify_value` escreve no store por `SetVarValue → Var.setValue`, sem chamar diretamente `StoreMonitor.handleVarChange`. O monitor consulta mudanças em callback de nó `ast.Python`.
 
-O probe reduzido do documento 32 demonstrou que um delta pode ser ciclado por `complete(True)` antes da callback em um percurso específico. Porém, o trace integrado do editor original (run [39909338891](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39909338891)) não encontrou `urm_edit_probe_value` em nenhuma chamada instrumentada de `get_changes`, embora o valor atual fosse 7. Portanto, não aplicamos ao editor real a explicação medida no probe reduzido.
+O run integrado [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723) mostra que, após a edição 1→7, `RollbackLog.complete(begin=True)` chama `StoreDict.get_changes(True)`, recebe um delta contendo `urm_edit_probe_value: 1` e o grava no registro corrente. O PAGEUP 3 aplica esse registro e restaura 1/None. Portanto, neste cenário, a escrita 1→7 foi capturada como delta reversível nativo.
 
-O PAGEUP 3 ainda retornou o estado observado a 1: o trace encontrou um registro de rollback anterior contendo 1, que ao ser aplicado mudou o valor de 7 para 1. Não encontrou registro contendo 7. Assim, foi observada a restauração do estado, mas não demonstrado que a edição 1→7 tenha sido registrada como delta próprio. A origem temporal do registro que continha 1 segue aberta.
+A leitura oposta dos runs 39909338891 e 39910066028 era um falso negativo no próprio probe. O gate `isinstance(changes, dict)` usava o nome global `dict`, que no contexto Ren’Py do fixture resolvia para `renpy.python.RevertableDict`; a coleção retornada era um `dict` nativo. A confirmação foi obtida em 39910519723 ao imprimir `type(changes)`, o binding de `dict` e testar diretamente `"urm_edit_probe_value" in changes`. A análise anterior foi corrigida, não se trata de mudança de comportamento entre execuções.
 
 ## Sequência que as fontes sustentam
 
 O SDK permite o seguinte caminho genérico: interação anterior pode levar `Context.run()` a `RollbackLog.begin()`; quando começa novo período, `begin()` pode chamar `complete(True)`, que consulta `StoreDict.get_changes(True)`. Em outro momento, `ast.Python.execute()` chama os callbacks, e a callback do URM consulta `get_changes(False)`.
 
-Esse diagrama é uma possibilidade arquitetural baseada nas fontes, não o trace observado da edição integrada. O run 39909338891 mediu `get_changes` após a edição e não encontrou a chave-alvo. O probe reduzido do documento 32 é evidência independente de outro caminho.
+O fluxo foi observado diretamente no run 39910519723: `complete(begin=True)` chamou `get_changes(True)`; o delta continha o valor antigo 1 e foi atribuído ao campo de store do registro corrente. A callback do URM e `get_changes(False)` permanecem caminhos distintos de notificação/observação. O probe reduzido do documento 32 continua sendo um percurso separado, não a única evidência de ciclagem de delta.
 
 ## Evidência de fonte
 
@@ -44,11 +44,11 @@ A conclusão sobre ciclo de delta também está registrada em [documento 32](32_
 No run [39909338891](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39909338891) (**SUCCESS**), a fixture instrumentou `StoreDict.get_changes`, `StoreDict.begin`, `RollbackLog.complete` e `Rollback.rollback`, delegando aos métodos originais. O pacote URM original foi copiado sem alterações para o jogo descartável.
 
 - `Var.setValue` alterou 1→7; o bloco da rota leu 7.
-- As chamadas instrumentadas de `get_changes(True)` e `get_changes(False)` após a tela de edição apareceram sem a chave `urm_edit_probe_value`, embora a chave estivesse no StoreDict principal e seu valor atual fosse 7.
-- Na restauração do PAGEUP 3, os registros examinados não continham a chave-alvo até um registro associado ao nó do Menu anterior conter `('store', 1)`. Aplicá-lo mudou o valor observado de 7 para 1; a rota voltou a `None`.
-- PAGEUP 1 e 2 mantiveram valor/rota em 7; PAGEUP 4 não mudou o estado.
+- No run [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723), imediatamente após `Var.setValue` mudar 1→7, `complete(begin=True)` foi chamado no nó 69. Antes da chamada, o registro não tinha a chave-alvo e `StoreDict.old` continha 1.
+- `get_changes(True)` retornou delta do tipo `dict` nativo com `urm_edit_probe_value: 1`; membership direto foi verdadeiro. `complete()` terminou com a mesma identidade de registro e o dicionário de store contendo o valor antigo 1. O próximo delta observado com `cycle=False` continha a rota, não repetiu a chave editada.
+- PAGEUP 1 e 2 mantiveram valor/rota em 7; PAGEUP 3 aplicou o registro contendo 1 e restaurou valor 1/rota `None`; PAGEUP 4 não mudou o estado.
 
-O resultado confirma a restauração do estado observável, mas não mostra um delta específico da edição 1→7. Uma entrada histórica anterior contendo 1 foi reaplicada. A origem e o momento em que esse registro passou a conter 1 em relação à edição continuam pendentes. O trace do rollback por evento anterior está em [run 39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916).
+A restauração é, portanto, explicada pelo delta da escrita 1→7 presente no histórico. O run anterior [39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916) localizou o evento de aplicação no terceiro PAGEUP.
 
 ## Correção de leitura de `force_checkpoint`
 
@@ -75,10 +75,11 @@ O teste continua condicionado ao harness: `context.rollback=True`, `store._rollb
 
 - **CONFIRMADO NA FONTE URM ORIGINAL:** editor screen → `SetVarValue` → `Var.setValue`; callback do monitor é registrada em `python_callbacks`; callback define `force_checkpoint` e consulta mudanças; setter e callback são caminhos distintos.
 - **CONFIRMADO NO SDK 7.4.11:** `ast.Python.execute()` chama callbacks depois do bytecode; `RollbackLog.begin/complete` pode ciclar StoreDict; `Rollback.rollback()` reaplica valores antigos armazenados em cada registro.
-- **OBSERVADO EM RUNTIME INTEGRADO:** edição 1→7 foi lida pela rota; nenhuma chamada instrumentada de `get_changes` trouxe a chave-alvo; no PAGEUP 3, registro anterior contendo 1 foi aplicado, restaurando 1/`None`.
-- **OBSERVADO EM RUNTIME REDUZIDO:** documento 32 mediu outro percurso onde o delta 20→10 foi retornado por `get_changes(True)` antes da callback.
-- **CORRIGIDO:** a interpretação anterior de que o editor integrado foi capturado por `complete(True)`; o run 39909338891 não encontrou o delta-alvo.
-- **PENDENTE:** localizar quando o registro contendo 1 foi criado/atualizado; determinar se a atribuição 1→7 é registrada em outro caminho; instrumentar cada escrita/transferência de `force_checkpoint`; testar variável marcada, save/load e clique visual no hyperlink.
+- **OBSERVADO EM RUNTIME INTEGRADO:** a edição 1→7 foi lida pela rota; no run 39910519723, `get_changes(True)` retornou o valor antigo 1, `complete()` o guardou no registro corrente e PAGEUP 3 o reaplicou.
+- **CONFIRMADO NO SDK 7.4.11:** `StoreDict.get_changes(True)` retorna um mapeamento de valores anteriores ao ciclo e atualiza a base `old`; `RollbackLog.complete(begin=True)` grava o delta no registro corrente.
+- **OBSERVADO EM RUNTIME REDUZIDO:** documento 32 mediu outro percurso de ciclo do delta (20→10) antes da callback.
+- **CORRIGIDO:** o falso negativo dos runs 39909338891/39910066028 vinha do gate `isinstance(changes, dict)`, pois o nome `dict` do contexto Ren’Py resolvia para `RevertableDict`, mas o delta era `dict` nativo. O membership direto foi validado em 39910519723.
+- **PENDENTE:** localizar a origem exata da solicitação/transferência de `force_checkpoint` em cada fase; testar variável monitorada/congelada, save/load, clique visual no hyperlink e outros pontos de edição.
 
 ## Fontes
 
@@ -86,7 +87,8 @@ O teste continua condicionado ao harness: `context.rollback=True`, `store._rollb
 |---|---|---|
 | SDK `renpy/ast.py` | `Python.execute`, ~910–940 | `d81ffc13f28f0b7442ba6905f1745ee838f7b185` |
 | SDK `renpy/execution.py` | `Context.run`, início de nó e transferência de `force_checkpoint`, ~500–565 | `547f73b26dad0fe08fda6333e5f4b60c97cf8772` |
-| SDK `renpy/python.py` | `RollbackLog.begin/complete/checkpoint`, ~1620–1860; `rollback`, ~1930–1995 | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+| SDK `renpy/python.py` | `StoreDict.get_changes` ~160–190; `RollbackLog.begin/complete/checkpoint`, ~1632–1860; `rollback`, ~1930–1995 | `c5eb2819a3e4ee096dbf01130d70a77f9b623484` |
+| SDK `renpy/pydict.pyx` | `DictItems` e `find_changes`, ~84–160; confirmação de que o delta é materializado como dicionário | `24fcb4d701afe6f3042aef6cd7e1f8f934ffc761` |
 | URM original `classes/vars.rpy` | `Var.setValue`, `StoreMonitorClass`, ~232–269, 492–577 | `57482937e14f215dac0ecb22a62da8ad160cba58` |
 | URM original `screens/vars.rpy.x52` | `URM_modify_value` e ação Input/Change, ~181–254 | `7959b2c0e6249df0edbb9ebe683481d46e4537e1` |
 
