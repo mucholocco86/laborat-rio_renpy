@@ -412,3 +412,7 @@ O run [39893930678](https://github.com/mucholocco86/laborat-rio_renpy/actions/ru
 ### Continuação de 2026-10-23 — significado do checkpoint soft no rollback
 
 A fonte `RollbackLog.rollback()` confirma que a contagem de checkpoints num rollback normal considera `hard_checkpoint`; os registros soft não aumentam `rollback_limit` nem decrementam a contagem pedida. O algoritmo greedy pode atravessar registros soft posteriores ao hard checkpoint alcançado. Em `on_load=True`, o SDK também conta `rb.checkpoint` soft, portanto load segue regra distinta. A tentativa runtime [39894546076](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39894546076) falhou e foi descartada como prova; a fixture e o step foram removidos. Detalhes e fonte no [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
+
+### Continuação de 2026-10-23 — fixed rollback e ação de Choice do URM
+
+O [documento 33 — Fixed rollback e escolha acionada pelo URM](33_ROLLBACK_FIXO_E_ESCOLHA_URM.md) cruza `rollback_is_fixed` da ação URM com a sensibilidade de `ChoiceReturn`, a fronteira de `RollbackLog` e o retorno estrutural consumido por `Menu.execute()` no SDK 7.4.11. A fonte sustenta a intenção de liberar seleção via URM durante fixed rollback, mas a integração da tela modal e a seleção alternativa em runtime continuam pendentes. Não há evidência de que a ação apague `fixed_rollback_boundary` ou altere diretamente registros do histórico.
