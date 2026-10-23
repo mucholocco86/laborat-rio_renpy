@@ -2,7 +2,7 @@
 
 **Data:** 2026-10-23  
 **Escopo:** explicar a ausência de chamada a `StoreMonitor.handleVarChange` no teste integrado de edição e distinguir notificação do URM da captura reversível nativa do Ren'Py 7.4.11.  
-**Evidência:** inspeção das fontes do URM original e do SDK; runtime integrado do URM original com variável marcada para monitoramento; runtime reduzido anterior sobre ciclagem de delta.  
+**Evidência:** inspeção das fontes do URM original e do SDK; runtime integrado do URM original com variável marcada para monitoramento e rastreamento da pilha do callback; runtime reduzido anterior sobre ciclagem de delta.  
 **Proteções:** não houve mudança em SDK, fontes originais URM, `wells/` ou `wells_beta/`.
 
 ## Resultado
@@ -17,7 +17,9 @@ A leitura oposta dos runs 39909338891 e 39910066028 era um falso negativo no pr�
 
 No run 39910519723, depois de `complete(begin=True)` ciclar a base do StoreDict com o valor atual 7, a consulta posterior `get_changes(False)` não continha `urm_edit_probe_value`; ela continha a alteração de `urm_edit_probe_route_value`. A fixture tampouco registrou chamada a `StoreMonitor.handleVarChange` para a variável editada. Como a fonte do callback do URM consulta `get_changes(False)` e só chama o handler para as chaves retornadas, a ordem observada explica por que a edição foi reversível sem gerar chamada do monitor nesse caso: o delta foi incorporado ao rollback antes de estar disponível ao callback. Isso é uma explicação sustentada pela combinação de fonte e trace, limitada ao caminho testado; não prova comportamento de toda edição ou configuração de monitoramento.
 
-O run integrado [39910824879](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910824879) repetiu o circuito com `VarsStore.monitor("urm_edit_probe_value")` ativado; o probe confirmou `isMonitored=True`. A tela original ainda editou 1→7, a rota leu 7 e o rollback retornou a 1/None. A asserção de que não houve `StoreMonitor.handleVarChange` nem `Notifications.add` para essa variável passou. O log mostrou novamente que `complete(True)` consumiu o delta antes da consulta `get_changes(False)` posterior, que viu a alteração da rota. Isso confirma ausência de notificação neste percurso integrado mesmo com a flag de monitor ativa. O teste marcou a flag diretamente pela API `VarsStore.monitor`; não validou seu carregamento via arquivo `.urm`.
+No run integrado [39910824879](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910824879), `VarsStore.monitor("urm_edit_probe_value")` deixou `isMonitored=True`; a tela original editou 1→7, a rota leu 7 e o rollback retornou a 1/None. Não houve chamada a `StoreMonitor.handleVarChange` nem `Notifications.add` para essa variável. A flag foi ativada pela API, sem testar seu carregamento de `.urm`.
+
+A pilha foi identificada no run [39912065172](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39912065172): `ConstantStoreHandler.handler` → `StoreMonitor._m1_vars__pythonCallback` (vars.rpy, linha 547) → `renpy.ast.Python.execute` (linha 933). Nessa chamada real do callback, `get_changes(False)` continha `urm_edit_probe_route_value`, mas não `urm_edit_probe_value`; `URM_modify_value` já estava fechada. O trace imediatamente anterior mostrou `RollbackLog.complete(begin=True)` chamando `get_changes(True)`, capturando o valor antigo 1 e ciclando a base. Assim, a ausência de notificação fica explicada neste cenário: o delta da variável foi incorporado ao registro reversível antes da consulta do callback.
 
 ## Sequência que as fontes sustentam
 
@@ -50,7 +52,7 @@ A conclusão sobre ciclo de delta também está registrada em [documento 32](32_
 No run [39909338891](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39909338891) (**SUCCESS**), a fixture instrumentou `StoreDict.get_changes`, `StoreDict.begin`, `RollbackLog.complete` e `Rollback.rollback`, delegando aos métodos originais. O pacote URM original foi copiado sem alterações para o jogo descartável.
 
 - `Var.setValue` alterou 1→7; o bloco da rota leu 7.
-- No run [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723), imediatamente após `Var.setValue` mudar 1→7, `complete(begin=True)` foi chamado no nó 69. Antes da chamada, o registro não tinha a chave-alvo e `StoreDict.old` continha 1.
+- No run [39910519723](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39910519723), imediatamente após `Var.setValue` mudar 1→7, `complete(begin=True)` foi chamado no nó 69. A repetição monitorada [39912065172](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39912065172) rastreou a pilha do callback até `ast.Python.execute` e confirmou que `get_changes(False)` posterior não continha a variável editada, com a tela já fechada. Antes da chamada, o registro não tinha a chave-alvo e `StoreDict.old` continha 1.
 - `get_changes(True)` retornou delta do tipo `dict` nativo com `urm_edit_probe_value: 1`; membership direto foi verdadeiro. `complete()` terminou com a mesma identidade de registro e o dicionário de store contendo o valor antigo 1. O próximo delta observado com `cycle=False` continha a rota, não repetiu a chave editada.
 - PAGEUP 1 e 2 mantiveram valor/rota em 7; PAGEUP 3 aplicou o registro contendo 1 e restaurou valor 1/rota `None`; PAGEUP 4 não mudou o estado.
 
@@ -81,7 +83,7 @@ O teste continua condicionado ao harness: `context.rollback=True`, `store._rollb
 
 - **CONFIRMADO NA FONTE URM ORIGINAL:** editor screen → `SetVarValue` → `Var.setValue`; callback do monitor é registrada em `python_callbacks`; callback define `force_checkpoint` e consulta mudanças; setter e callback são caminhos distintos.
 - **CONFIRMADO NO SDK 7.4.11:** `ast.Python.execute()` chama callbacks depois do bytecode; `RollbackLog.begin/complete` pode ciclar StoreDict; `Rollback.rollback()` reaplica valores antigos armazenados em cada registro.
-- **OBSERVADO EM RUNTIME INTEGRADO:** a edição 1→7 foi lida pela rota; no run 39910519723, `get_changes(True)` retornou o valor antigo 1, `complete()` o guardou no registro corrente e PAGEUP 3 o reaplicou. No run 39910824879, a mesma execução com `isMonitored=True` não chamou `handleVarChange` nem `Notifications.add` para a variável, embora a edição e a restauração por rollback tenham ocorrido.
+- **OBSERVADO EM RUNTIME INTEGRADO:** a edição 1→7 foi lida pela rota; no run 39910519723, `get_changes(True)` retornou o valor antigo 1, `complete()` o guardou no registro corrente e PAGEUP 3 o reaplicou. Nos runs 39910824879/39912065172, com `isMonitored=True`, a pilha confirmou a execução do callback: sua consulta `get_changes(False)` não tinha a variável; a tela já estava fechada e não houve chamada a `handleVarChange`/notificação.
 - **CONFIRMADO NO SDK 7.4.11:** `StoreDict.get_changes(True)` retorna um mapeamento de valores anteriores ao ciclo e atualiza a base `old`; `RollbackLog.complete(begin=True)` grava o delta no registro corrente.
 - **OBSERVADO EM RUNTIME REDUZIDO:** documento 32 mediu outro percurso de ciclo do delta (20→10) antes da callback.
 - **CORRIGIDO:** o falso negativo dos runs 39909338891/39910066028 vinha do gate `isinstance(changes, dict)`, pois o nome `dict` do contexto Ren’Py resolvia para `RevertableDict`, mas o delta era `dict` nativo. O membership direto foi validado em 39910519723.
