@@ -83,7 +83,7 @@ label urm_real_loader_variable_edit_start:
                   "force_checkpoint", renpy.game.context().force_checkpoint)
             return rv
 
-        def _urm_edit_probe_trace_handle_change(self, varName, oldValue, newValue):
+        def _urm_edit_probe_trace_handle_change(varName, oldValue, newValue):
             if varName == "urm_edit_probe_value":
                 print("URM_EDIT_MONITOR_HANDLE", varName, oldValue, newValue,
                       "fixed", renpy.game.log.rollback_is_fixed,
