@@ -18,6 +18,15 @@ init python:
         elif name == "URM_modify_value":
             renpy.store.urm_edit_probe_modify_seen = True
             var = args[0] if args else kwargs.get("var")
+            prior_values = []
+            for rb in renpy.game.log.log:
+                changes = rb.stores.get("store", {})
+                if "urm_edit_probe_value" in changes:
+                    prior_values.append((rb.context.current, changes["urm_edit_probe_value"]))
+            current_changes = renpy.game.log.current.stores.get("store", {})
+            if "urm_edit_probe_value" in current_changes:
+                prior_values.append(("current", current_changes["urm_edit_probe_value"]))
+            print("URM_EDIT_PRE_EDIT_RECORD_VALUES", prior_values)
             print("URM_EDIT_MODIFY_SCREEN_SHOWN", getattr(var, "name", None),
                   "value", getattr(var, "value", None),
                   "fixed", renpy.game.log.rollback_is_fixed,
