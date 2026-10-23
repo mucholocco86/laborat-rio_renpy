@@ -168,5 +168,7 @@ testcase urm_fixed_rollback_second_cycle_diagnostic:
     $ urm_second_cycle_probe_dump("AFTER_SECOND_PAGEUPS")
     type PAGEUP
     $ urm_second_cycle_probe_dump("AFTER_THIRD_PAGEUP")
+    type PAGEUP
+    $ urm_second_cycle_probe_dump("AFTER_FOURTH_PAGEUP")
     $ renpy.quit()
     $ renpy.quit()
