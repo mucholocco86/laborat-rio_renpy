@@ -65,11 +65,17 @@ init python:
     def _urm_edit_probe_trace_complete(self, begin=False):
         tracing = getattr(renpy.store, "urm_edit_probe_trace_enabled", False)
         if tracing:
+            before_store = self.current.stores.get("store", {}) if self.current is not None else {}
+            before_old = renpy.store.__dict__.old.as_dict().get("urm_edit_probe_value", "<missing>")
             print("URM_EDIT_COMPLETE_BEGIN", begin,
                   "log_force", self.force_checkpoint,
                   "context_force", renpy.game.context().force_checkpoint,
                   "did_interaction", self.did_interaction,
-                  "current", renpy.game.context().current)
+                  "current", renpy.game.context().current,
+                  "record_id", id(self.current),
+                  "stores_id", id(before_store),
+                  "target_pre", before_store.get("urm_edit_probe_value", "<missing>"),
+                  "store_old", before_old)
         try:
             return _urm_edit_probe_original_complete(self, begin)
         finally:
@@ -82,6 +88,9 @@ init python:
                       "did_interaction", self.did_interaction,
                       "target_in_record", has_target,
                       "record_old", current_changes.get("urm_edit_probe_value"),
+                      "record_id", id(self.current),
+                      "stores_id", id(current_changes),
+                      "record_repr", repr(current_changes),
                       "current", renpy.game.context().current)
 
     renpy.python.RollbackLog.complete = _urm_edit_probe_trace_complete
@@ -100,6 +109,8 @@ init python:
                   "old", old_value, "target_in_store", target_in_store,
                   "is_main_store", self is renpy.store.__dict__,
                   "store_id", id(self), "main_store_id", id(renpy.store.__dict__),
+                  "result_type", type(result), "delta_id", id(changes),
+                  "delta_repr", repr(changes),
                   "current", renpy.store.urm_edit_probe_value,
                   "context_force", renpy.game.context().force_checkpoint,
                   "log_force", renpy.game.log.force_checkpoint,
