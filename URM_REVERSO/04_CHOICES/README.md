@@ -419,3 +419,8 @@ O [documento 33 — Fixed rollback e escolha acionada pelo URM](33_ROLLBACK_FIXO
 
 
 A validação reduzida do run [39895890714](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39895890714) mostrou que, com `rollback_is_fixed=True` definido diretamente no fixture, a tela modal análoga ao URM ainda devolve o índice e `Menu.execute()` executa a rota A sob `fix_rollback_without_choice=False` e `True`. Isso é runtime da ponte screen→menu→AST; o ciclo real que atravessa uma fronteira `renpy.fix_rollback()` permanece pendente. Fixture e limites no [documento 33](33_ROLLBACK_FIXO_E_ESCOLHA_URM.md).
+
+
+### Continuação de 2026-10-23 — fixed rollback real e reescolha via URM
+
+O run [39897163458](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39897163458) percorreu uma fronteira criada por `renpy.fix_rollback()` após uma escolha nativa B. No segundo `PAGEUP`, o trace confirmou `rollback_is_fixed=True` e `roll_forward_info()==1`; B nativa ficou sensível e A bloqueada. A ação URM reduzida limpou a flag, retornou índice 0 e o motor executou A. Isto valida um ciclo real da fronteira no fixture Ren'Py 7.4.11; URM integral, segundo rollback após a troca, configuração `fix_rollback_without_choice=True` com fronteira real e save/load seguem pendentes. Veja [documento 33](33_ROLLBACK_FIXO_E_ESCOLHA_URM.md) e [fixture](../tools/fixtures/urm_fixed_rollback_boundary_probe.rpy).
