@@ -146,4 +146,6 @@ testcase urm_real_loader_variable_edit_runtime:
             urm_edit_probe_route_value, renpy.in_fixed_rollback(),
             renpy.can_rollback(), renpy.game.log.rollback_limit,
             renpy.game.context().current, renpy.game.log.fixed_rollback_boundary)
+    assert urm_edit_probe_value == 1
+    assert urm_edit_probe_route_value is None
     $ renpy.quit()
