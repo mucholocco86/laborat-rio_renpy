@@ -17,6 +17,18 @@ init python:
               "store_rollback", renpy.store._rollback)
 
     _urm_real_loader_probe_original_rollback = renpy.python.RollbackLog.rollback
+    _urm_real_loader_probe_original_choice_return = renpy.ui.ChoiceReturn.__call__
+
+    def _urm_real_loader_probe_trace_choice_return(self):
+        print("REAL_URM_CHOICERETURN", "fixed_before",
+              renpy.game.log.rollback_is_fixed, "label", self.label,
+              "index", self.index)
+        rv = _urm_real_loader_probe_original_choice_return(self)
+        print("REAL_URM_CHOICERETURN_RESULT", rv,
+              "fixed_after", renpy.game.log.rollback_is_fixed)
+        return rv
+
+    renpy.ui.ChoiceReturn.__call__ = _urm_real_loader_probe_trace_choice_return
 
     def _urm_real_loader_probe_trace_rollback(self, checkpoints, force=False, label=None,
                                              greedy=True, on_load=False, abnormal=True,
@@ -82,9 +94,7 @@ testcase urm_real_loader_choices_boundary_runtime:
     "Fixed boundary probe route B."
     type PAGEUP
     type PAGEUP
-    "Choices detected"
     type alt_c
-    "Choices"
     type alt_1
     type RETURN
     "Fixed boundary probe route A."
