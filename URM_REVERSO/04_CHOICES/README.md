@@ -434,3 +434,8 @@ O [documento 34](34_SEGUNDO_ROLLBACK_APOS_REESCOLHA_URM.md) corrige a leitura da
 ### Continuação de 2026-10-23 — entrada real da tela Choices
 
 O [documento 35](35_ENTRADA_DA_TELA_CHOICES_E_FIXED_ROLLBACK.md) localiza os pontos reais de entrada de `URM_choices`: notificação flutuante com tecla `Alt+C` e botão do watchpanel. O atalho `Alt+M` abre a interface principal, que não lista Choices como aba. A fonte convertida não bloqueia explicitamente a entrada por `rollback_is_fixed`, mas a disponibilidade sob fixed rollback real permanece **pendente de teste integrado** com loader, overlay e telas originais.
+
+
+### Validação integrada em 2026-10-23 — screen original durante fixed rollback
+
+O run [39903530535](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39903530535) passou com o pacote original copiado intacto para um jogo descartável Ren'Py 7.4.11. A notificação usou Alt+C, chamou a tela original `URM_choices` enquanto `rollback_is_fixed=True`, e a ação `ChoiceReturn` levou à rota A. O harness habilitou rollback no contexto de teste; os limites e próximos casos estão em [36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md](36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md). Isso confirma a rota de Choices nessa fixture, mas não encerra a investigação de edição de variáveis, save/load ou configurações alternativas.
