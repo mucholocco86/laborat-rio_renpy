@@ -58,7 +58,7 @@ jobs:
           set -u
           echo "START hidden URM Choice probe: $(date -u +%FT%TZ)"
           set +e
-          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-hidden-postrollback-probe" test urm_hidden_postrollback_probe_runtime
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-hidden-postrollback-probe" test urm_hidden_condition_probe_runtime
           result=$?
           echo "END hidden URM Choice probe: $(date -u +%FT%TZ), exit=$result"
           exit "$result"
