@@ -114,6 +114,8 @@ testcase urm_hidden_condition_probe_runtime:
     "Hidden condition probe continuation."
     type PAGEUP
     type PAGEUP
+    type PAGEUP
+    type PAGEUP
     $ print("HIDDEN_POST_ROLLBACK_TESTCASE_BEFORE_RECHOICE", urm_hidden_probe_route,
             renpy.game.context().current, renpy.game.log.rollback_is_fixed,
             renpy.can_rollback(), renpy.roll_forward_info())
