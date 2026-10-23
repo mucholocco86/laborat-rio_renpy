@@ -197,3 +197,6 @@ O run [39665745692](https://github.com/mucholocco86/laborat-rio_renpy/actions/ru
 ### Atualização de 2026-10-21 — pedido de checkpoint da callback
 
 A fonte convertida mostra que `_m1_vars__pythonCallback` define `context.force_checkpoint=True` antes de consultar o delta, inclusive em callback sem mudança utilizável. No SDK 7.4.11, o próximo nó transfere esse pedido para `RollbackLog.force_checkpoint` quando rollback está ativo; `RollbackLog.complete()` o consome como `checkpoint(hard=False)`. O trace reduzido observou a transferência, mas ainda não contou os checkpoints soft efetivamente materializados nem executou o URM pelo loader integral. Detalhes no [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
+### Trace de 2026-10-23 — checkpoints soft
+
+O run [39893930678](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39893930678) confirmou no harness que chamadas `checkpoint(hard=False)` marcam o registro corrente quando ainda não era checkpoint e não elevam `hard_checkpoint`; chamadas repetidas em registro já marcado não criam outra marca. Foram observadas 9 e 10 transições efetivas ao longo dos dois testcases, incluindo setup e rollback. Isso não mede checkpoints por ação nem valida o URM carregado integralmente. Ver [documento 32](32_CICLAGEM_STOREDELTA_ANTES_CALLBACK_REVERT.md).
