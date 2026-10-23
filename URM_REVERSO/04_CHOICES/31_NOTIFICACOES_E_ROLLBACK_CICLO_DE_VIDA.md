@@ -571,3 +571,12 @@ A inspeção do callback real revelou que `afterLoad()` também chama `URMFiles.
 | URM convertido `classes/URMFiles.rpy` | `autoLoad`, `load`, `URMFile.save/load`, `URMFileStore.toJSON` | `888aba28d9d2e7870d8c4e6526417390179cd326` |
 | URM convertido `classes/vars.rpy` | `VarsStoreClass.store/watchedStore` vinculados aos stores do URMFile | `57482937e14f215dac0ecb22a62da8ad160cba58` |
 | URM convertido `classes/main.rpy` | instanciação de `Notifications`; chamada a `URMFiles.autoLoad()` em `afterLoad` | `14f93406d2946eaed664ed72c1d47063984ce24f` |
+
+
+## Correção posterior — localização das fontes originais e teste integrado (2026-10-23)
+
+As buscas históricas citadas acima usaram um nível de caminho presumido (`1_URM_ORIGINAL/0x52-URM/...`) que não existe no repositório. A inspeção posterior confirmou que o pacote original está preservado diretamente em `URM_REVERSO/01_MATERIAL_URM/1_URM_ORIGINAL/`, com `classes/`, `framework/`, `screens/`, `images/` e demais arquivos. Portanto, aqueles 404 demonstravam apenas o erro do caminho presumido, não a ausência de fontes originais.
+
+O run integrado [39903530535](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39903530535) copiou o conteúdo original intacto para uma pasta temporária `game/0x52-URM/`, usou o loader real e abriu a tela original `URM_choices` durante fixed rollback. Essa execução atualiza a afirmação anterior de que ainda não havia teste com loader/pacote original para a entrada de Choices. Ela **não** testa o ciclo de vida da lista `NotificationsClass.notifications` em rollback/save/load; essa questão continua pendente e o restante deste documento mantém seu escopo.
+
+Evidência detalhada: [documento 36 — Choices original do URM abertas durante fixed rollback real](36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md).
