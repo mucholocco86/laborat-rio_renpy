@@ -43,7 +43,7 @@ init python:
     def _urm_boundary_trace_rollback(self, checkpoints, force=False, label=None,
                                      greedy=True, on_load=False, abnormal=True,
                                      current_label=None):
-        traced = renpy.store.urm_boundary_probe_trace_enabled
+        traced = renpy.session.get("urm_boundary_probe_trace_enabled", False)
         if traced:
             print("BOUNDARY_ROLLBACK_BEGIN", checkpoints, force, self.rollback_is_fixed,
                   renpy.game.context().current, self.fixed_rollback_boundary,
@@ -86,6 +86,7 @@ screen urm_boundary_probe_overlay():
 label urm_fixed_rollback_boundary_start:
     $ urm_boundary_probe_route = None
     $ urm_boundary_probe_trace_enabled = True
+    $ renpy.session["urm_boundary_probe_trace_enabled"] = True
     $ renpy.session["urm_boundary_probe_route_executed"] = []
     $ renpy.session["urm_boundary_probe_action_records"] = []
     $ urm_boundary_probe_fixed_before_urm = None
