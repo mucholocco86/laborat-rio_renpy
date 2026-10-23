@@ -164,21 +164,4 @@ testcase urm_fixed_rollback_second_cycle_diagnostic:
     type PAGEUP
     $ urm_second_cycle_probe_dump("AFTER_SECOND_PAGEUPS")
     $ renpy.quit()
-    label urm_fixed_rollback_second_cycle_done
-    assert renpy.session["urm_second_cycle_probe_route_executed"] == ["B", "A", "B"]
-    assert len(renpy.session["urm_second_cycle_probe_action_records"]) == 2
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][1] == 0
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][2] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][3] == 1
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][4] is False
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][5] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][6] == 0
-    assert renpy.session["urm_second_cycle_probe_action_records"][0][7] is False
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][1] == 1
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][2] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][3] == 0
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][4] is True
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][5] is False
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][6] == 1
-    assert renpy.session["urm_second_cycle_probe_action_records"][1][7] is False
     $ renpy.quit()
