@@ -22,7 +22,7 @@ init python:
     def _urm_real_loader_probe_trace_choice_return(self):
         print("REAL_URM_CHOICERETURN", "fixed_before",
               renpy.game.log.rollback_is_fixed, "label", self.label,
-              "index", self.index)
+              "value", self.value)
         rv = _urm_real_loader_probe_original_choice_return(self)
         print("REAL_URM_CHOICERETURN_RESULT", rv,
               "fixed_after", renpy.game.log.rollback_is_fixed)
