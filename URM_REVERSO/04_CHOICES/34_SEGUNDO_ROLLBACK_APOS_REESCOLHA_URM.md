@@ -2,7 +2,7 @@
 
 **Data:** 2026-10-23  
 **Escopo:** causa do testcase inconclusivo anterior e novo ciclo de rollback no Ren'Py 7.4.11.  
-**Status:** código SDK confirmado; primeiro ciclo de fronteira real confirmado; nova fronteira após a reescolha observada; travessia da nova fronteira ainda pendente.
+**Status:** código SDK confirmado; dois ciclos de fronteira atravessados em runtime reduzido; uma segunda ação de escolha após o segundo fixed rollback está em teste.
 
 ## Pergunta
 
@@ -62,7 +62,8 @@ Run [39902170129](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs
 2. O fluxo alcança novamente `renpy.fix_rollback()`. Como a ação da escolha limpou `rollback_is_fixed`, essa chamada define uma nova `fixed_rollback_boundary` no contexto do menu. A fronteira anterior não fica simplesmente “apagada para sempre”.
 3. Antes dos PAGEUP seguintes, esta fixture tinha `rollback_limit=4`, `renpy.can_rollback()=True`, `context.rollback=True`, `store._rollback=True` e `rollback_is_fixed=False`.
 4. Os dois PAGEUP seguintes fizeram duas novas chamadas reais a `RollbackLog.rollback()`. Ambas ficaram em registros internos da interação/tradução (`end_translate`), sem ainda alcançar a nova fronteira. O limite caiu de 4 para 2 e permaneceu positivo.
-5. Um terceiro PAGEUP também invocou rollback. A chamada terminou ainda com `rollback_is_fixed=False`; depois, durante a execução restaurada, outra chamada a `fix_rollback()` recalculou a fronteira. No snapshot final desse run, `can_rollback()` continuava verdadeiro.
+5. Um terceiro PAGEUP invocou rollback. O rollback terminou antes da fronteira, depois o fluxo restaurado executou novamente `fix_rollback()` e recalculou a fronteira no contexto seguinte. `can_rollback()` continuou verdadeiro.
+6. Um quarto PAGEUP cruzou a fronteira recriada: o log terminou com `rollback_is_fixed=True`, `roll_forward_info()==0` (índice A) e `rollback_limit=0`, então `can_rollback()==False` nesse ponto.
 
 Trechos representativos:
 
@@ -76,6 +77,9 @@ SECOND_CYCLE_STATE AFTER_SECOND_PAGEUPS limit 2 can True ... fixed False
 BOUNDARY_ROLLBACK_BEGIN 1 ... forward True
 BOUNDARY_ROLLBACK_END False ... current (..., 41) ... boundary (..., 40)
 SECOND_CYCLE_STATE AFTER_THIRD_PAGEUP limit 1 can True ... fixed False
+BOUNDARY_ROLLBACK_BEGIN 1 ... forward True
+BOUNDARY_ROLLBACK_END True ... boundary (..., 41) forward 0
+SECOND_CYCLE_STATE AFTER_FOURTH_PAGEUP limit 0 can False ... fixed True forward 0
 ```
 
 ### Conclusões limitadas
@@ -83,16 +87,13 @@ SECOND_CYCLE_STATE AFTER_THIRD_PAGEUP limit 1 can True ... fixed False
 - **CONFIRMADO NO SDK 7.4.11:** limite de rollback e fixed boundary são mecanismos separados. O estado `rollback_is_fixed` não determina `can_rollback()`; este último depende de rollback habilitado e de `rollback_limit > 0`.
 - **CONFIRMADO NO SDK 7.4.11:** alterações do store são registradas como deltas de valores anteriores e restauradas pela entrada `Rollback`.
 - **OBSERVADO EM RUNTIME — fixture reduzida:** após a reescolha A, o fluxo executa de novo `renpy.fix_rollback()` e cria uma nova fronteira.
-- **OBSERVADO EM RUNTIME — fixture reduzida:** após A, mais de uma chamada de rollback é aceita e consome checkpoints; o segundo PAGEUP da nova sequência ainda não atinge a fronteira.
-- **NÃO DEMONSTRADO:** a travessia da nova fronteira depois de A, a segunda ativação de fixed rollback, outra substituição de A por B, e a recuperação do fluxo depois dessa segunda troca.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** quatro PAGEUP depois da reescolha A chegaram à fronteira recriada. Os primeiros eventos atravessaram checkpoints internos; o quarto deixou `rollback_is_fixed=True` e forward index `0`, correspondente a A.
+- **OBSERVADO EM RUNTIME — fixture reduzida:** ao atingir essa fronteira, o limite chegou a zero, de modo que `renpy.can_rollback()` passou a falso enquanto fixed rollback permanecia ativo.
+- **PENDENTE:** selecionar B via ação equivalente a `ChoiceReturn` nessa segunda fronteira e verificar o bloco executado. O próximo probe mantém a tela diagnóstica visível condicionalmente durante o ciclo para tornar o botão B disponível após a segunda travessia; essa tela persistente é uma conveniência do harness, não reprodução da política de ocultação do URM.
 - **NÃO É EVIDÊNCIA SOBRE O URM INTEGRAL:** o fixture reproduz a ação e a tela mínima; não carrega o URM pelo loader nem testa jogos de terceiros.
 
 ## Próximo passo
 
-Continuar a sondagem controlada, com uma entrada PAGEUP por vez e snapshot do estado após cada uma, até ocorrer uma das situações:
+Continuar a sondagem já alcançada até verificar a segunda seleção. O próximo run [39902388045](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39902388045) testa se a tela diagnóstica aparece na segunda fronteira, permite escolher B e executa o respectivo bloco. Se passar, registrar o segundo `ChoiceReturn` e comparar seu roll-forward.
 
-1. `rollback_is_fixed=True` ao cruzar a fronteira recriada; ou
-2. `can_rollback=False`; ou
-3. a execução prosseguir para outro caminho e redefinir novamente a fronteira.
-
-Ao alcançar o segundo fixed rollback, reexibir a tela de teste após rollback e verificar se o roll-forward corresponde à alternativa A. Então testar a ação equivalente a `ChoiceReturn` para selecionar B. Manter a fixture verde de um único ciclo separada e não alterar `wells/`, `wells_beta/`, fontes originais do URM ou SDKs.
+Preservar a fixture verde de um único ciclo separada e não alterar `wells/`, `wells_beta/`, fontes originais do URM ou SDKs.
