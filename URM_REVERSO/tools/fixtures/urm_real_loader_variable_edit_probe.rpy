@@ -69,26 +69,30 @@ label urm_real_loader_variable_edit_start:
     $ _urm_edit_probe_original_set_value = x52URM.Var.setValue
     $ _urm_edit_probe_original_handle_change = x52URM.StoreMonitor.handleVarChange
 
-    $ def _urm_edit_probe_trace_set_value(self, newValue=None, *args, **kwargs):
-        oldValue = self.value
-        rv = _urm_edit_probe_original_set_value(self, newValue, *args, **kwargs)
-        print("URM_EDIT_VAR_SET", self.name, "old", oldValue,
-              "new", self.value, "result", rv,
-              "fixed", renpy.game.log.rollback_is_fixed,
-              "limit", renpy.game.log.rollback_limit,
-              "force_checkpoint", renpy.game.context().force_checkpoint)
-        return rv
+    python:
+        _urm_edit_probe_original_set_value = x52URM.Var.setValue
+        _urm_edit_probe_original_handle_change = x52URM.StoreMonitor.handleVarChange
 
-    $ def _urm_edit_probe_trace_handle_change(self, varName, oldValue, newValue):
-        if varName == "urm_edit_probe_value":
-            print("URM_EDIT_MONITOR_HANDLE", varName, oldValue, newValue,
+        def _urm_edit_probe_trace_set_value(self, newValue=None, *args, **kwargs):
+            oldValue = self.value
+            rv = _urm_edit_probe_original_set_value(self, newValue, *args, **kwargs)
+            print("URM_EDIT_VAR_SET", self.name, "old", oldValue,
+                  "new", self.value, "result", rv,
                   "fixed", renpy.game.log.rollback_is_fixed,
                   "limit", renpy.game.log.rollback_limit,
-                  "current", renpy.game.context().current)
-        return _urm_edit_probe_original_handle_change(self, varName, oldValue, newValue)
+                  "force_checkpoint", renpy.game.context().force_checkpoint)
+            return rv
 
-    $ x52URM.Var.setValue = _urm_edit_probe_trace_set_value
-    $ x52URM.StoreMonitor.handleVarChange = _urm_edit_probe_trace_handle_change
+        def _urm_edit_probe_trace_handle_change(self, varName, oldValue, newValue):
+            if varName == "urm_edit_probe_value":
+                print("URM_EDIT_MONITOR_HANDLE", varName, oldValue, newValue,
+                      "fixed", renpy.game.log.rollback_is_fixed,
+                      "limit", renpy.game.log.rollback_limit,
+                      "current", renpy.game.context().current)
+            return _urm_edit_probe_original_handle_change(self, varName, oldValue, newValue)
+
+        x52URM.Var.setValue = _urm_edit_probe_trace_set_value
+        x52URM.StoreMonitor.handleVarChange = _urm_edit_probe_trace_handle_change
 
     menu:
         "Native route A":
