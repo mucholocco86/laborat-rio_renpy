@@ -7,37 +7,17 @@
 
 ## Resultado
 
-A edição pela tela `URM_modify_value` escreve no store por `SetVarValue → Var.setValue`. Essa rota não chama diretamente `StoreMonitor.handleVarChange` e não é, por si, a execução de um nó `renpy.ast.Python`.
+A fonte do URM confirma que `URM_modify_value` escreve no store por `SetVarValue → Var.setValue`, sem chamar diretamente `StoreMonitor.handleVarChange`. O monitor consulta mudanças em callback de nó `ast.Python`.
 
-O monitor do URM está ligado a `renpy.config.python_callbacks`. No SDK 7.4.11, `ast.Python.execute()` chama esses callbacks no `finally`, depois do bytecode Python do nó. Em outro momento do fluxo, quando a interação retorna ao executor e o próximo nó começa, `Context.run()` pode chamar `RollbackLog.begin()`; se a interação anterior marcou `did_interaction`, `begin()` fecha o registro anterior por `complete(True)`. Esse fechamento coleta deltas com `StoreDict.get_changes(True)`, avançando a base de comparação.
+O probe reduzido do documento 32 demonstrou que um delta pode ser ciclado por `complete(True)` antes da callback em um percurso específico. Porém, o trace integrado do editor original (run [39909338891](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39909338891)) não encontrou `urm_edit_probe_value` em nenhuma chamada instrumentada de `get_changes`, embora o valor atual fosse 7. Portanto, não aplicamos ao editor real a explicação medida no probe reduzido.
 
-Com rollback ativo, esse ciclo pode registrar no histórico uma edição feita pela screen **antes** de um nó Python subsequente executar a callback do URM. A callback então consulta `get_changes(False)` sem encontrar o mesmo delta. A ausência de notificação do StoreMonitor não significa que o estado saiu do histórico nativo.
+O PAGEUP 3 ainda retornou o estado observado a 1: o trace encontrou um registro de rollback anterior contendo 1, que ao ser aplicado mudou o valor de 7 para 1. Não encontrou registro contendo 7. Assim, foi observada a restauração do estado, mas não demonstrado que a edição 1→7 tenha sido registrada como delta próprio. A origem temporal do registro que continha 1 segue aberta.
 
 ## Sequência que as fontes sustentam
 
-```text
-URM screen Input / ação
-    ↓
-SetVarValue → Var.setValue
-    ↓
-atribuição a renpy.store
-    ↓
-interação retorna / did_interaction
-    ↓
-Context.run inicia o próximo nó
-    ↓
-RollbackLog.begin() → complete(True)
-    ↓
-StoreDict.get_changes(True) fecha/captura o delta
-    ↓
-nó ast.Python executa seu bytecode
-    ↓
-python_callbacks → StoreMonitor._m1_vars__pythonCallback
-    ↓
-get_changes(False) consulta o período já ciclado
-```
+O SDK permite o seguinte caminho genérico: interação anterior pode levar `Context.run()` a `RollbackLog.begin()`; quando começa novo período, `begin()` pode chamar `complete(True)`, que consulta `StoreDict.get_changes(True)`. Em outro momento, `ast.Python.execute()` chama os callbacks, e a callback do URM consulta `get_changes(False)`.
 
-A sequência acima é a explicação da interação entre os componentes, não a afirmação de que toda screen, toda ação ou todo jogo atravessa exatamente o mesmo conjunto de nós. O caso integrado e o caso reduzido são classificados separadamente abaixo.
+Esse diagrama é uma possibilidade arquitetural baseada nas fontes, não o trace observado da edição integrada. O run 39909338891 mediu `get_changes` após a edição e não encontrou a chave-alvo. O probe reduzido do documento 32 é evidência independente de outro caminho.
 
 ## Evidência de fonte
 
@@ -61,9 +41,14 @@ A conclusão sobre ciclo de delta também está registrada em [documento 32](32_
 
 ## Evidência de runtime integrada
 
-No run [39905267994](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39905267994), já com o wrapper do monitor corrigido, o fixture carregou o pacote original do URM no jogo descartável. O editor real alterou 1→7 e o valor foi lido pela rota. Não houve erro de callback nem log do wrapper em `handleVarChange` para a variável alvo. Após a sequência PAGEUP, o valor e a rota foram restaurados.
+No run [39909338891](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39909338891) (**SUCCESS**), a fixture instrumentou `StoreDict.get_changes`, `StoreDict.begin`, `RollbackLog.complete` e `Rollback.rollback`, delegando aos métodos originais. O pacote URM original foi copiado sem alterações para o jogo descartável.
 
-Esse runtime integrado **não instrumentou** `StoreDict.get_changes`, portanto a coleta do delta em `complete(True)` é uma explicação sustentada pelas fontes e corroborada pelo runtime reduzido do documento 32, mas não um evento medido diretamente naquele run integrado.
+- `Var.setValue` alterou 1→7; o bloco da rota leu 7.
+- As chamadas instrumentadas de `get_changes(True)` e `get_changes(False)` após a tela de edição apareceram sem a chave `urm_edit_probe_value`, embora a chave estivesse no StoreDict principal e seu valor atual fosse 7.
+- Na restauração do PAGEUP 3, os registros examinados não continham a chave-alvo até um registro associado ao nó do Menu anterior conter `('store', 1)`. Aplicá-lo mudou o valor observado de 7 para 1; a rota voltou a `None`.
+- PAGEUP 1 e 2 mantiveram valor/rota em 7; PAGEUP 4 não mudou o estado.
+
+O resultado confirma a restauração do estado observável, mas não mostra um delta específico da edição 1→7. Uma entrada histórica anterior contendo 1 foi reaplicada. A origem e o momento em que esse registro passou a conter 1 em relação à edição continuam pendentes. O trace do rollback por evento anterior está em [run 39907164916](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/39907164916).
 
 ## Correção de leitura de `force_checkpoint`
 
@@ -88,12 +73,12 @@ O teste continua condicionado ao harness: `context.rollback=True`, `store._rollb
 
 ## Classificação
 
-- **CONFIRMADO NA FONTE URM ORIGINAL:** editor screen → `SetVarValue` → `Var.setValue`; callback de monitor é registrado em `python_callbacks`; callback define `force_checkpoint` e consulta mudanças; setter e callback são caminhos distintos.
-- **CONFIRMADO NO SDK 7.4.11:** callbacks são chamados pelo nó `ast.Python`; início de registro por interação pode fechar/ciclar StoreDict antes do próximo nó; o checkpoint soft não é hard.
-- **OBSERVADO EM RUNTIME INTEGRADO:** edição 1→7 lida pela rota; o wrapper corrigido não registrou `handleVarChange`; PAGEUP 3 restaurou 1 e `None`.
-- **OBSERVADO EM RUNTIME REDUZIDO:** documento 32 mediu o delta 20→10 em `get_changes(True)` antes da callback e mostrou o callback subsequente sem delta.
-- **INTERPRETAÇÃO SUSTENTADA, não medição integrada:** a edição integrada foi capturada por `complete(True)` antes da callback; é consistente com a ordem estática e com o fixture reduzido.
-- **PENDENTE:** medir `get_changes` e cada escrita/transferência de `force_checkpoint` dentro do fixture com loader original; testar variável marcada como monitorada/congelada; save/load; clique visual no hyperlink.
+- **CONFIRMADO NA FONTE URM ORIGINAL:** editor screen → `SetVarValue` → `Var.setValue`; callback do monitor é registrada em `python_callbacks`; callback define `force_checkpoint` e consulta mudanças; setter e callback são caminhos distintos.
+- **CONFIRMADO NO SDK 7.4.11:** `ast.Python.execute()` chama callbacks depois do bytecode; `RollbackLog.begin/complete` pode ciclar StoreDict; `Rollback.rollback()` reaplica valores antigos armazenados em cada registro.
+- **OBSERVADO EM RUNTIME INTEGRADO:** edição 1→7 foi lida pela rota; nenhuma chamada instrumentada de `get_changes` trouxe a chave-alvo; no PAGEUP 3, registro anterior contendo 1 foi aplicado, restaurando 1/`None`.
+- **OBSERVADO EM RUNTIME REDUZIDO:** documento 32 mediu outro percurso onde o delta 20→10 foi retornado por `get_changes(True)` antes da callback.
+- **CORRIGIDO:** a interpretação anterior de que o editor integrado foi capturado por `complete(True)`; o run 39909338891 não encontrou o delta-alvo.
+- **PENDENTE:** localizar quando o registro contendo 1 foi criado/atualizado; determinar se a atribuição 1→7 é registrada em outro caminho; instrumentar cada escrita/transferência de `force_checkpoint`; testar variável marcada, save/load e clique visual no hyperlink.
 
 ## Fontes
 
