@@ -1,0 +1,75 @@
+name: URM fixed rollback Choice probe
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'URM_REVERSO/tools/fixtures/urm_fixed_rollback_choice_probe.rpy'
+      - '.github/workflows/urm-fixed-rollback-choice-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: urm-fixed-rollback-choice-probe
+  cancel-in-progress: true
+
+jobs:
+  fixed-choice:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out laboratory
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb xauth libgl1 libglu1-mesa libx11-6 libxext6 libxrender1 libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1 libasound2
+
+      - name: Prepare disposable game copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_root="${RUNNER_TEMP}/urm-fixed-rollback-choice-probe"
+          rm -rf "$probe_root"
+          cp -a renpy-7.4.11-sdk/the_question "$probe_root"
+          cp URM_REVERSO/tools/fixtures/urm_fixed_rollback_choice_probe.rpy "$probe_root/game/zz_urm_fixed_rollback_choice_probe.rpy"
+          chmod +x renpy-7.4.11-sdk/renpy.sh
+          chmod +x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+          test -f "$probe_root/game/zz_urm_fixed_rollback_choice_probe.rpy"
+          test -x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+
+      - name: Run URM Choice override with default fixed rollback config
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START fixed rollback Choice probe, block_all=false: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-fixed-rollback-choice-probe" test urm_fixed_choice_urm_override_default
+          result=$?
+          echo "END fixed rollback Choice probe, block_all=false: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
+
+      - name: Run URM Choice override with block-all config
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START fixed rollback Choice probe, block_all=true: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-fixed-rollback-choice-probe" test urm_fixed_choice_urm_override_block_all
+          result=$?
+          echo "END fixed rollback Choice probe, block_all=true: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
