@@ -9,8 +9,12 @@ RPY_DIR = ROOT / "Wells_Revisor"
 if str(RPY_DIR) not in sys.path:
     sys.path.insert(0, str(RPY_DIR))
 
-from wells_revisor_core import review_text, review_file, diagnosticar_texto
+from wells_revisor_core import (
+    review_text, review_file, diagnosticar_texto,
+    _correct_source_anchored_structures,
+)
 from wells_guia_ptbr import validar_revisao
+from wells_isolador_renpy import segmentar
 
 
 class RevisorRpyLinguisticaTests(unittest.TestCase):
@@ -108,6 +112,55 @@ class RevisorRpyLinguisticaTests(unittest.TestCase):
             self.assertIn("ordem_nome_quebrada", codigos)
             self.assertEqual(len(result["linguistic_issues"]), 2)
             self.assertIn('"Você é filho dela."', p.read_text(encoding="utf-8"))
+
+    def test_concordancia_moralidade_leve_com_tags(self):
+        native = "{b}{color=#87e1fa}Light Morality{/color}{/b} increased by {size=+3}{b}{color=#2bff8b}3{/color}{/b}{/size}."
+        translated = "{b}{color=#87e1fa}Moralidade Leve{/color}{/b} aumentado por {size=+3}{b}{color=#2bff8b}3{/color}{/b}{/size}."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(
+            actual,
+            "{b}{color=#87e1fa}Moralidade Leve{/color}{/b} aumentada por {size=+3}{b}{color=#2bff8b}3{/color}{/b}{/size}.",
+        )
+        self.assertEqual(changes, 1)
+        self.assertEqual(
+            [s.valor for s in segmentar(native) if s.tipo == "protegido"],
+            [s.valor for s in segmentar(actual) if s.tipo == "protegido"],
+        )
+
+    def test_placeholder_possessivo_reordenado_com_base_no_old(self):
+        native = "Looks like it's settled then, I agree with [mc]'s plan."
+        translated = "Parece que está resolvido então, concordo com [mc] o plano de."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(actual, "Parece que está resolvido então, concordo com o plano de [mc].")
+        self.assertEqual(changes, 1)
+
+    def test_placeholder_possessivo_aceita_adjetivo_e_outro_nome(self):
+        native = "I agree with [Pearl]'s detailed plan."
+        translated = "concordo com [Pearl] o plano detalhado de."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(actual, "concordo com o plano detalhado de [Pearl].")
+        self.assertEqual(changes, 1)
+
+    def test_placeholder_nao_muda_sem_possessivo_no_original(self):
+        native = "I agree with [mc] about the plan."
+        translated = "concordo com [mc] o plano de."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(actual, translated)
+        self.assertEqual(changes, 0)
+
+    def test_moralidade_ja_feminina_permanece_igual(self):
+        native = "Light Morality increased."
+        translated = "Moralidade Leve{/color}{/b} aumentada."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(actual, translated)
+        self.assertEqual(changes, 0)
+
+    def test_idioma_dependente_da_cena_nao_e_reescrito(self):
+        native = "The girls submit to your command, you succeeded in ordering them."
+        translated = "As garotas se submetem às suas ordens, você conseguiu dar-lhes um jeito."
+        actual, changes = _correct_source_anchored_structures(native, translated)
+        self.assertEqual(actual, translated)
+        self.assertEqual(changes, 0)
 
 if __name__ == "__main__":
     unittest.main()

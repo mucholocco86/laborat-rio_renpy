@@ -330,6 +330,44 @@ def review_text(text, dictionary=None, base_linguistica=None):
 
     return reviewed, grammar_changes + spelling_changes, len(tokens)
 
+
+def _correct_source_anchored_structures(native: str, translated: str):
+    """Corrige calques de baixa ambiguidade usando o registro nativo pareado."""
+    changes = 0
+    protected_native, _ = _protect_renpy(native)
+    protected, tokens = _protect_renpy(translated)
+
+    new = re.sub(
+        r"(?i)((?:__WELLS_TOKEN_\d{6}__)+Moralidade\s+Leve(?:__WELLS_TOKEN_\d{6}__)+\s+)aumentado\b",
+        r"\1aumentada",
+        protected,
+    )
+    if new != protected:
+        protected = new
+        changes += 1
+
+    native_names = re.findall(
+        r"(__WELLS_TOKEN_\d{6}__)\s*['’]s\s+(?:[A-Za-z-]+\s+){0,3}plan\b",
+        protected_native,
+        re.I,
+    )
+    if native_names:
+        name = re.escape(native_names[0])
+        rx = re.compile(
+            rf"(?i)\b(concordo\s+com)\s+({name})\s+(o\s+(?:(?:[\wÀ-ÖØ-öø-ÿ-]+\s+){{0,3}})plano(?:\s+[\wÀ-ÖØ-öø-ÿ-]+){{0,3}})\s+de(\.)?(?=$|\s)"
+        )
+
+        def reorder(match):
+            punctuation = match.group(4) or ""
+            return f"{match.group(1)} {match.group(3)} de {match.group(2)}{punctuation}"
+
+        new, count = rx.subn(reorder, protected, count=1)
+        if count:
+            protected = new
+            changes += count
+
+    return _restore_renpy(protected, tokens), changes
+
 def _read_txt(path: Path):
     return path.read_text(encoding="utf-8-sig").splitlines()
 
@@ -837,6 +875,7 @@ def review_json_pair(native_path: Path, translated_path: Path, base_dir: Path,
             protected_text, dictionary=None, base_linguistica=base_linguistica
         )
         reviewed = _restore_manual_terms(reviewed, manual_tokens)
+        reviewed, _anchored_changes = _correct_source_anchored_structures(native, reviewed)
 
         if manual_tokens:
             protected_records += 1
