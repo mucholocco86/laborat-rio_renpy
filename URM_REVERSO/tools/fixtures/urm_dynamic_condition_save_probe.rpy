@@ -66,7 +66,6 @@ testcase urm_dynamic_condition_save_load_runtime:
     run Jump("urm_dynamic_save_probe_start")
     "Native save route B"
     "Save probe route B."
-    "Save probe continuation."
     type PAGEUP
     type PAGEUP
     type alt_c
