@@ -58,7 +58,8 @@ label urm_dynamic_fresh_load_start:
         $ raise Exception("Fresh-process probe save slot is missing")
     $ renpy.session["urm_dynamic_fresh_load_marker"] = True
     $ print("DYNAMIC_FRESH_BEFORE_LOAD", urm_dynamic_fresh_gate, urm_dynamic_fresh_route)
-    $ renpy.load("urm-dynamic-choice-fresh-process")
+    $ x52URM.Gamesaves.load("urm-dynamic-choice-fresh-process")
+    $ renpy.pause(10.0)
 
 label urm_dynamic_fresh_verify:
     $ print("DYNAMIC_FRESH_AFTER_LOAD", urm_dynamic_fresh_gate, urm_dynamic_fresh_route, renpy.game.context().current)
@@ -87,4 +88,5 @@ testcase urm_dynamic_condition_fresh_write:
 testcase urm_dynamic_condition_fresh_load:
     $ renpy.session.pop("urm_dynamic_fresh_load_marker", None)
     run Jump("urm_dynamic_fresh_load_start")
+    type RETURN
     "Fresh process restored edited Choice state."
