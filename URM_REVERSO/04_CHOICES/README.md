@@ -486,3 +486,7 @@ O [documento 44](44_ROLLBACK_VARIAVEL_CONDICAO_CHOICE.md) registra o runtime fin
 ### Continuação de 2026-10-25 — editor gráfico, Choice dinâmica e rollback
 
 O [documento 45](45_EDITOR_GRAFICO_CHOICE_DINAMICA_ROLLBACK.md) registra o runtime integrado [40200078200](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40200078200). A tela URM_modify_value original recebeu o valor 1, submeteu-o por SetVarValue e fechou; a rota C executou. No terceiro PAGEUP deste roteiro, rollback restaurou variável 0, rota None e condição falsa para C. O harness chamou diretamente CodeView.handleVarClicked para abrir a edição, então o clique físico no hyperlink permanece fora desta prova; as telas originais, entrada, submit, seleção e rollback foram testados.
+
+### Continuação de 2026-10-25 — save/load nativo da Choice editada
+
+O [documento 46](46_SAVE_LOAD_NATIVO_APOS_EDICAO_CHOICE.md) registra o run integrado final [40212821209](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40212821209). Depois da edição pelo editor original do URM e da execução de C, o save nativo registrou variável 1 e rota C; a fixture mudou os valores para 0 e `mutated-after-save`; `renpy.load` restaurou 1/C e passou. Isso valida a serialização nativa na mesma sessão, não o conteúdo de `.urm` nem um processo novo. Os runs anteriores com erro de roteiro/guarda são documentados e não são evidência negativa.
