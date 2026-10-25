@@ -62,3 +62,11 @@ O primeiro run [40213540839](https://github.com/mucholocco86/laborat-rio_renpy/a
 ## Próxima verificação
 
 Exercitar a tela URM_gamesaves: abrir a lista, selecionar o slot salvo, confirmar a ação modal e observar a retomada do estado. Em separado, verificar se algum `.urm` foi criado/alterado e listar exatamente quais stores próprios contém, sem tratar o arquivo como save completo.
+
+## Tentativa de confirmação pela interface Gamesaves
+
+A fonte examinada depois do teste mostra `GameSavesClass.load(slot)` chamando `Confirm(..., Function(renpy.load, slot), ...)`; `Confirm.__call__` mostra `x52URM_Confirm`; o template original associa K_RETURN à ação yes e oculta o modal. O caminho esperado é, portanto, seleção/ação Gamesaves → confirmação original → `renpy.load(slot)`.
+
+Foram feitas duas tentativas de acionar essa interação em runtime dentro do test runner. Nos runs [40213802714](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213802714) e [40213906303](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213906303), o job falhou com `Could not locate the displayable` ao tentar enviar Enter ou localizar a fala sob o modal. Isso é falha de automação do harness; não demonstra falha do callback Gamesaves nem do save. Como o objetivo principal de load em processo novo já passou, a fixture canônica foi restaurada ao caminho direto renpy.load e repetida com sucesso no run [40214014928](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40214014928).
+
+**Status runtime da UI:** pendente. A fonte confirma o callback que Gamesaves passa ao modal, mas ainda não há teste ponta a ponta que selecione o slot visualmente e confirme o diálogo em execução.
