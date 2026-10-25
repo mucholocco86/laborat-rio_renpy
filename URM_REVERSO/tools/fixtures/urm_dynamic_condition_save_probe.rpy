@@ -50,6 +50,8 @@ label urm_dynamic_save_probe_save:
     if renpy.can_load("urm-dynamic-choice-edit-roundtrip"):
         $ renpy.unlink_save("urm-dynamic-choice-edit-roundtrip")
     $ renpy.save("urm-dynamic-choice-edit-roundtrip", "Dynamic Choice edited state")
+    if renpy.test.testexecution.urm_dynamic_save_reentered:
+        jump urm_dynamic_save_probe_verify
     $ renpy.test.testexecution.urm_dynamic_save_reentered = True
     $ urm_dynamic_save_gate = 0
     $ urm_dynamic_save_route = "mutated-after-save"
