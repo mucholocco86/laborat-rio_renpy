@@ -69,6 +69,7 @@ label urm_dynamic_fresh_verify:
 
 testcase urm_dynamic_condition_fresh_write:
     run Jump("urm_dynamic_fresh_write_start")
+    "Native fresh route B"
     "Native fresh route B reached."
     type PAGEUP
     type PAGEUP
