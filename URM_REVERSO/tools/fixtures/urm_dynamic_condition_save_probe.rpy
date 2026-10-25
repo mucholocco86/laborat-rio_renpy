@@ -29,17 +29,23 @@ label urm_dynamic_save_probe_start:
             $ urm_dynamic_save_route = "C"
 
     $ renpy.fix_rollback()
-    if urm_dynamic_save_route == "A":
-        "Save probe route A."
+    if urm_dynamic_save_route == "C":
+        "Save probe route C."
+        jump urm_dynamic_save_probe_save
     elif urm_dynamic_save_route == "B":
         "Save probe route B."
     else:
-        "Save probe route C."
-    jump urm_dynamic_save_probe_save
+        "Save probe route A."
+
+label urm_dynamic_save_probe_continue:
+    "Save probe continuation."
+    jump urm_dynamic_save_probe_continue
 
 label urm_dynamic_save_probe_save:
     if renpy.test.testexecution.urm_dynamic_save_reentered:
         jump urm_dynamic_save_probe_verify
+    if urm_dynamic_save_gate != 1 or urm_dynamic_save_route != "C":
+        $ raise Exception("Save probe reached save point without edited condition and route C")
     $ print("DYNAMIC_SAVE_BEFORE_SAVE", urm_dynamic_save_gate, urm_dynamic_save_route, renpy.game.context().current)
     if renpy.can_load("urm-dynamic-choice-edit-roundtrip"):
         $ renpy.unlink_save("urm-dynamic-choice-edit-roundtrip")
@@ -60,6 +66,7 @@ testcase urm_dynamic_condition_save_load_runtime:
     run Jump("urm_dynamic_save_probe_start")
     "Native save route B"
     "Save probe route B."
+    "Save probe continuation."
     type PAGEUP
     type PAGEUP
     type alt_c
