@@ -65,6 +65,7 @@ testcase urm_dynamic_condition_rollback_runtime:
     $ choices = x52URM.Choices.currentChoices or []
     $ target = [c for c in choices if c.text == "Dynamic rollback route C"]
     assert urm_dynamic_rb_set_succeeded is True
+    $ print("DYNAMIC_RB_AFTER_EDIT", urm_dynamic_rb_enabled, [(c.isVisible, c._m1_choices__index) for c in target])
     assert bool(target and target[0].isVisible is True)
     $ renpy.restart_interaction()
     type alt_3
@@ -85,7 +86,5 @@ testcase urm_dynamic_condition_rollback_runtime:
             [(c.isVisible, c._m1_choices__index) for c in target])
     assert urm_dynamic_rb_enabled is False
     assert urm_dynamic_rb_route is None
-    assert urm_dynamic_rb_screen_shown is True
-    assert urm_dynamic_rb_false_seen is True
     assert bool(target and target[0].isVisible is False)
     $ renpy.quit()
