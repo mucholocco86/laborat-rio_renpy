@@ -490,3 +490,7 @@ O [documento 45](45_EDITOR_GRAFICO_CHOICE_DINAMICA_ROLLBACK.md) registra o runti
 ### Continuação de 2026-10-25 — save/load nativo da Choice editada
 
 O [documento 46](46_SAVE_LOAD_NATIVO_APOS_EDICAO_CHOICE.md) registra o run integrado final [40212821209](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40212821209). Depois da edição pelo editor original do URM e da execução de C, o save nativo registrou variável 1 e rota C; a fixture mudou os valores para 0 e `mutated-after-save`; `renpy.load` restaurou 1/C e passou. Isso valida a serialização nativa na mesma sessão, não o conteúdo de `.urm` nem um processo novo. Os runs anteriores com erro de roteiro/guarda são documentados e não são evidência negativa.
+
+### Continuação de 2026-10-25 — load em processo Ren'Py novo
+
+O [documento 47](47_SAVE_LOAD_CHOICE_PROCESSO_NOVO.md) registra o run em dois processos [40213634448](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213634448). O primeiro processo editou a condição pelo URM, executou C, salvou 1/C, alterou os valores e encerrou; o segundo iniciou com 0/None e carregou o slot, restaurando 1/C. O teste chama `renpy.load` diretamente. A fonte `GameSavesClass.load` encaminha o slot a `renpy.load` por meio de `Confirm`, mas a interação visual de Gamesaves/Confirm ainda não foi testada. O resultado não demonstra persistência no `.urm`.
