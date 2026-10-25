@@ -494,3 +494,7 @@ O [documento 46](46_SAVE_LOAD_NATIVO_APOS_EDICAO_CHOICE.md) registra o run integ
 ### Continuação de 2026-10-25 — load em processo Ren'Py novo
 
 O [documento 47](47_SAVE_LOAD_CHOICE_PROCESSO_NOVO.md) registra o run em dois processos [40213634448](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213634448). O primeiro processo editou a condição pelo URM, executou C, salvou 1/C, alterou os valores e encerrou; o segundo iniciou com 0/None e carregou o slot, restaurando 1/C. O teste chama `renpy.load` diretamente. A fonte `GameSavesClass.load` encaminha o slot a `renpy.load` por meio de `Confirm`, mas a interação visual de Gamesaves/Confirm ainda não foi testada. O resultado não demonstra persistência no `.urm`.
+
+### Continuação — tentativa de Gamesaves modal após teste em processo novo
+
+O load em processo novo continuou passando após restauração da fixture para `renpy.load` direto: [40214014928](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40214014928). A inspeção da fonte confirmou que Gamesaves.load chama Confirm com `Function(renpy.load, slot)` e o template do modal liga K_RETURN ao callback. As tentativas de acionar o modal no runner [40213802714](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213802714) e [40213906303](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213906303) falharam por `Could not locate the displayable`; nenhuma delas mede o resultado do load pelo modal. A seleção visual do slot e confirmação em runtime permanecem pendentes; detalhes no documento 47.
