@@ -1,0 +1,60 @@
+name: URM dynamic Choice graphical editor and rollback probe
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'URM_REVERSO/tools/fixtures/urm_dynamic_condition_editor_probe.rpy'
+      - '.github/workflows/urm-dynamic-condition-editor-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: urm-dynamic-condition-editor-probe
+  cancel-in-progress: true
+
+jobs:
+  dynamic-condition-editor:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out laboratory
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb xauth libgl1 libglu1-mesa libx11-6 libxext6 libxrender1 libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1 libasound2
+      - name: Prepare disposable game with unchanged original URM package
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_root="${RUNNER_TEMP}/urm-dynamic-condition-editor-probe"
+          rm -rf "$probe_root"
+          cp -a renpy-7.4.11-sdk/the_question "$probe_root"
+          mkdir -p "$probe_root/game/0x52-URM"
+          cp -a URM_REVERSO/01_MATERIAL_URM/1_URM_ORIGINAL/. "$probe_root/game/0x52-URM/"
+          cp URM_REVERSO/tools/fixtures/urm_dynamic_condition_editor_probe.rpy "$probe_root/game/zz_urm_dynamic_condition_editor_probe.rpy"
+          chmod +x renpy-7.4.11-sdk/renpy.sh
+          chmod +x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+          test -f "$probe_root/game/0x52-URM/framework/bootstrap.rpy"
+          test -f "$probe_root/game/0x52-URM/classes/main.rpy"
+          test -f "$probe_root/game/0x52-URM/screens/choices.rpy.x52"
+          test -f "$probe_root/game/zz_urm_dynamic_condition_editor_probe.rpy"
+      - name: Exercise original variable editor and rollback
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START dynamic condition editor probe: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-dynamic-condition-editor-probe" test urm_dynamic_condition_editor_rollback_runtime
+          result=$?
+          echo "END dynamic condition editor probe: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
