@@ -498,3 +498,7 @@ O [documento 47](47_SAVE_LOAD_CHOICE_PROCESSO_NOVO.md) registra o run em dois pr
 ### Continuação — tentativa de Gamesaves modal após teste em processo novo
 
 O load em processo novo continuou passando após restauração da fixture para `renpy.load` direto: [40214014928](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40214014928). A inspeção da fonte confirmou que Gamesaves.load chama Confirm com `Function(renpy.load, slot)` e o template do modal liga K_RETURN ao callback. As tentativas de acionar o modal no runner [40213802714](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213802714) e [40213906303](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40213906303) falharam por `Could not locate the displayable`; nenhuma delas mede o resultado do load pelo modal. A seleção visual do slot e confirmação em runtime permanecem pendentes; detalhes no documento 47.
+
+### Continuação de 2026-10-27 — fronteira .urm e save nativo
+
+O [documento 48](48_FRONTEIRA_PERSISTENCIA_SAVE_NATIVO_E_URM.md) registra inspeção estática de URMFiles.rpy: URMFile.save serializa stores URM como JSON em ZIP; a fonte não percorre o store Ren'Py para criar snapshot global, e Var.setValue não chama o salvamento .urm. Os documentos 46–47 comprovam separadamente que o save nativo preservou a variável e a rota nas fixtures. Gravação/carregamento .urm com o URM original e comparação de seu conteúdo seguem pendentes de runtime.
