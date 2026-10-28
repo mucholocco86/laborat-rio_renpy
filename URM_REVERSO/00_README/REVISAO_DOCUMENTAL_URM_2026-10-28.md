@@ -15,7 +15,7 @@ A análise atual confirma que o núcleo prioritário já tem evidência bem alé
 - **Save nativo:** o valor editado e a rota sobreviveram ao save/load e ao carregamento por um segundo processo Ren'Py (docs 46 e 47).
 - **Arquivo `.urm`:** testes em dois processos mostraram que `vars`, `watched`, `textboxCustomizations`, `labels` e `replacements` guardam dados/configurações próprios do URM; os probes não restauraram um snapshot geral das variáveis de gameplay (docs 49, 50 e `06_VARIABLES/02–03`).
 - **Configurações:** `persistent.URMSettings` e o ZIP global `settings` são canais separados e foram recuperados em processo novo no run 40666289110, descrito em `06_VARIABLES/03_MAPA_CANAIS_PERSISTENCIA_URM.md`.
-- **Snapshots:** o diff do URM detectou escalares e substituição de containers por conteúdo diferente; não detectou mutação in-place nem novas listas/dicionários de conteúdo igual. O teste adicional mostrou que o `Var` antigo na comparação é somente leitura e o atual edita o store, preservando o snapshot (doc 51). Snapshots não é rollback.
+- **Snapshots:** o diff do URM detectou escalares e substituição de containers por conteúdo diferente; não detectou mutação in-place nem novas listas/dicionários de conteúdo igual. O teste adicional mostrou que o `Var` antigo na comparação é somente leitura e o atual edita o store, preservando o snapshot; variáveis ausentes aparecem como `None` e não são recriadas pela edição do diff (doc 51). Snapshots não é rollback.
 
 ## Correções de status aplicadas nesta revisão
 
