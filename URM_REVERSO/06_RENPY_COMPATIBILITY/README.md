@@ -1,20 +1,24 @@
 # Compatibilidade com Ren'Py 7.4.11
 
-Esta área registra a futura validação direta contra o SDK completo existente em `renpy-7.4.11-sdk/`. O SDK é somente referência e permanece intocado.
+Esta área registra os mecanismos do SDK usados pelo URM. O SDK em `renpy-7.4.11-sdk/` é referência somente-leitura e permanece intocado.
 
-## Prioridade
+## Estado atualizado em 2026-10-28
 
-1. `renpy.ast.Menu` e `Menu.items`.
-2. `renpy.ui.ChoiceReturn` e interação.
-3. `rollback_is_fixed`, checkpoints e rollback log.
-4. `renpy.config.python_callbacks`.
-5. `renpy.store.__dict__.get_changes`.
-6. `context.force_checkpoint`.
-7. patches de compatibilidade do URM (`StoreDict.get_changes`, `RollbackLog.complete`, SetField e callbacks de Say).
+A investigação estática e parte dos testes runtime estão concluídos para o circuito prioritário de Choices, estado, rollback e persistência:
 
-Cada diferença deverá ser confrontada com o código real do SDK e registrada com evidência.
+- Menu/ChoiceReturn, checkpoint, deltas de StoreDict, rollback e Context: fonte do SDK examinada; runtime reduzido documentado em `04_CHOICES/22`.
+- URM original selecionando Choice sob fixed rollback, inclusive condição falsa: runtime integrado nos docs `04_CHOICES/36`, `41` e `42`.
+- Edição de variável pela interface original, leitura do valor pelo fluxo do jogo e reversão por rollback: docs `04_CHOICES/38–45`.
+- Save/load nativo da edição e da rota, inclusive em processo novo: docs `04_CHOICES/46–47`.
+- `.urm`, Settings e snapshots: docs `04_CHOICES/49–51` e `06_VARIABLES/02–03`.
 
+Esses resultados são específicos do Ren'Py 7.4.11 e dos roteiros documentados. Não cobrem todos os tipos de objeto, estados de UI, combinações de configuração ou outros SDKs.
 
-## Validação estática concluída em 2026-10-16
+## Continuidade
 
-O documento [02 — Save/load do SDK e persistência própria do URM](02_SDK_SAVELOAD_URM_PERSISTENCIA.md) registra a inspeção de RollbackLog.freeze/unfreeze, save/load nativo, callbacks de nós Python e URMFiles.autoLoad. A execução runtime, fixed rollback e os ciclos completos de persistent/settings continuam pendentes.
+1. Validar filtro de texto numa Choice realmente renderizada e a ordem entre filtros.
+2. Completar save/load nativo combinado com load `.urm`, registrando ordem e precedência.
+3. Testar persistência nativa da instância Snapshots e interações visuais ainda pendentes.
+4. Depois de fechar os comportamentos no 7.4.11, comparar com SDKs 6.99.4 e 8.5.3.
+
+Para a revisão consolidada dos documentos, consulte [Revisão documental URM — 2026-10-28](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md).
