@@ -1,0 +1,10 @@
+init 5 python:
+    class TGCharacterRoleSister (TGCharacterRole):
+        def __init__ (self):
+            super ().__init__ ()
+            self.long = _("hermana")
+            self.longPlural = _("hermanas")
+            self.short = _("hermana")
+            self.shortPlural = _("hermanas")
+            self.nick = _("hermanita")
+            self.nickPlural = _("hermanitas")

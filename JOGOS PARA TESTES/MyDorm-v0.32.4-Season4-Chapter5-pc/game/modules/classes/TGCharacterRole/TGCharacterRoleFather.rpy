@@ -1,0 +1,10 @@
+init 5 python:
+    class TGCharacterRoleFather (TGCharacterRole):
+        def __init__ (self):
+            super ().__init__ ()
+            self.long = _("padre")
+            self.longPlural = _("padres")
+            self.short = _("papá")
+            self.shortPlural = _("papás")
+            self.nick = _("papi")
+            self.nickPlural = _("papis")
