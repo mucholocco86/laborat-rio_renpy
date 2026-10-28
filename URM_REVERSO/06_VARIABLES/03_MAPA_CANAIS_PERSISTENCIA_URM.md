@@ -74,3 +74,7 @@ No runtime, `textboxesEnabled=True` foi salvo em persistent e `quickmenuEnabled=
 - URM convertido `classes/textrepl.rpy`, blob SHA `70ce9cc40378af1de5092255558659c8512a04f6`.
 - URM convertido `classes/textbox.rpy`, blob SHA `33cbf0440c09715be1bbc2789296f5e252ba88c6`.
 - URM convertido `classes/snapshots.rpy`, blob SHA `20b45be23df8f12d7f4dfca7a1f401642d6fedba`.
+
+## Atualização — texto da Choice e identidade (2026-10-28)
+
+O doc [04_CHOICES/52](../04_CHOICES/52_TEXTREPL_MENU_AST_FILTER_PATH.md) complementa o mapa: a regra `replacements` carregada participa do filtro de rótulo chamado por `Menu.execute()`; o SDK mantém o índice AST original como valor estrutural. O runtime atual chamou o callback diretamente após load; falta validar o texto final renderizado numa Choice real.
