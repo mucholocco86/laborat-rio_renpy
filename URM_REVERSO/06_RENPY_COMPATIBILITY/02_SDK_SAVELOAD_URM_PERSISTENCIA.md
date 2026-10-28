@@ -103,3 +103,14 @@ Continuar a árvore de pesquisa e edição seguindo as telas que acionam as clas
 5. Depois montar uma matriz runtime isolada para edição antes/durante/depois de menus, rollback, save e load.
 
 O documento 15 valida o circuito estático Menu/ChoiceReturn/checkpoint/store/rollback. Este documento fecha a inspeção estática do caminho nativo de save/load e distingue sua persistência da carga dos dados próprios do URM; os efeitos em execução continuam pendentes de teste.
+
+## Revisão posterior — testes runtime até 2026-10-28
+
+O status acima é histórico e descreve a inspeção de 2026-10-16; testes posteriores atualizaram partes que estavam pendentes:
+
+- Edição de variável pelo URM e rollback foram observados no doc [38](../04_CHOICES/38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md); o callback do StoreMonitor não recebeu aquela chave no cenário rastreado, enquanto o delta nativo permitiu restaurar o valor (doc [39](../04_CHOICES/39_STOREMONITOR_DELTA_E_EDICAO_POR_SCREEN.md)).
+- Save/load nativo foi observado na mesma sessão e em processo Ren'Py novo (docs [46](../04_CHOICES/46_SAVE_LOAD_NATIVO_APOS_EDICAO_CHOICE.md) e [47](../04_CHOICES/47_SAVE_LOAD_CHOICE_PROCESSO_NOVO.md)).
+- Stores `.urm` foram salvos/carregados em dois processos (docs [49](../04_CHOICES/49_PERSISTENCIA_URM_RUNTIME_STORES_E_ESTADO.md), [50](../04_CHOICES/50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md) e [06_VARIABLES/03](../06_VARIABLES/03_MAPA_CANAIS_PERSISTENCIA_URM.md)).
+- Settings por jogo e globais foram recuperados em processo novo, conforme run 40666289110 e o mapa de persistência.
+
+**Ainda pendente:** interação visual completa de Gamesaves/Confirm; persistência de Snapshots no save nativo; matriz ampla de combinações entre save nativo e load `.urm`; comparação com outros SDKs. Os testes acima não provam equivalência fora do Ren'Py 7.4.11.
