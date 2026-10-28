@@ -14,9 +14,7 @@ label urm_snapshot_save_write_start:
     $ x52URM.afterLoad()
     $ x52URM.Settings.lastLoadedFile = None
 
-    menu:
-        "Snapshot persistence checkpoint":
-            pass
+    "Checkpoint before snapshot save."
     $ renpy.fix_rollback()
 
     $ assert not x52URM.Snapshots.exists("native-save-probe")
@@ -48,7 +46,8 @@ label urm_snapshot_save_verify:
 
 testcase urm_snapshot_native_save_write:
     run Jump("urm_snapshot_save_write_start")
-    type alt_1
+    "Checkpoint before snapshot save."
+    type RETURN
     "Snapshot was created and native save was written."
 
 testcase urm_snapshot_native_save_load:
