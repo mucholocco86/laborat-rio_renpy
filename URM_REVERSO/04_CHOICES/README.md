@@ -534,3 +534,8 @@ O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra o run [406584
 ### Continuação — TextRepl e identidade estrutural da Choice (2026-10-28)
 
 O [documento 52](52_TEXTREPL_MENU_AST_FILTER_PATH.md) rastreia no SDK 7.4.11 `Menu.execute()` → `say_menu_text_filter` → tupla com índice AST original → processamento de menu → continuação do bloco. Isso confirma que o texto transformado não substitui o índice usado pela seleção. O teste runtime do doc 50 validou o callback chamado diretamente; renderização final na screen segue pendente.
+
+
+### Continuação — persistência de Snapshots em save nativo (2026-10-28)
+
+O [documento 53](53_PERSISTENCIA_SNAPSHOTS_SAVE_NATIVO.md) registra um teste do URM original em dois processos Ren'Py 7.4.11. O processo novo carregou o slot nativo e restaurou um valor de gameplay controle, mas o singleton `x52URM.Snapshots` permaneceu vazio. As tentativas anteriores com harness inválido foram excluídas. A explicação estática cruza o marcador `_constant` do store `x52URM` com o `ConstantStoreHandler` do URM e o processo de roots/log do SDK. A conclusão fica delimitada a este caminho e versão; exportação ou persistência por outra ação da interface não foi testada.
