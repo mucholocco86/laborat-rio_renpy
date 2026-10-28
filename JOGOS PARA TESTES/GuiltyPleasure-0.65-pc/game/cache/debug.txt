@@ -1,0 +1,230 @@
+Timeline: analisando 130201 nós identificados no AST
+Timeline: índice de rotas: 35 variáveis atribuídas
+Timeline: varredura de padrões: encontrados 133 nós Default, capturados 40
+Timeline: índice de rotas: 57 variáveis no total, 4 com condições if (máximo=2)
+Timeline: índice de cobertura: 14 descrições de ramificações
+Timeline thumbs init: no pkl file — starting empty
+Timeline: migração de imagens: total=0 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (0 nós)
+Timeline snapshot: idx=0 ctx=(u'game/script.rpy', 1793049147, 3059) roots_keys=134
+Timeline menu enter: node=0 ast=(u'game/script.rpy', 2559) site=(u'game/script.rpy', 2559) opts=2 current_type=Menu
+Timeline snapshot: cached idx=0 cache_menu_total=1
+Timeline thumb: captura da choice indisponível; node=0 ast=(u'game/script.rpy', 2559)
+Timeline asset thumb render failed for scene788: Refusing to open images/Scene788.png while predicting.
+Timeline snapshot: idx=0 ctx=(u'game/script.rpy', 1793049147, 3059) roots_keys=133
+Timeline menu enter: node=0 ast=(u'game/script.rpy', 2559) site=(u'game/script.rpy', 2559) opts=2 current_type=Menu
+Timeline snapshot: cached idx=0 cache_menu_total=1
+Timeline thumb: captura da choice indisponível; node=0 ast=(u'game/script.rpy', 2559)
+Timeline snapshot: idx=0 ctx=(u'game/script.rpy', 1793049147, 3059) roots_keys=134
+Timeline menu enter: node=0 ast=(u'game/script.rpy', 2559) site=(u'game/script.rpy', 2559) opts=2 current_type=Menu
+Timeline snapshot: cached idx=0 cache_menu_total=1
+Timeline thumb: captura da choice indisponível; node=0 ast=(u'game/script.rpy', 2559)
+Timeline choice: node=0 idx=0 label=u'Definitely.[KoGa3ChoiceView1]' source=index
+Timeline snapshot: idx=1 ctx=(u'game/script.rpy', 1793049147, 3135) roots_keys=134
+Timeline menu enter: node=1 ast=(u'game/script.rpy', 2660) site=(u'game/script.rpy', 2660) opts=3 current_type=Menu
+Timeline snapshot: cached idx=1 cache_menu_total=2
+Timeline thumb: captura da choice indisponível; node=1 ast=(u'game/script.rpy', 2660)
+Timeline snapshot: idx=1 ctx=(u'game/script.rpy', 1793049147, 3135) roots_keys=134
+Timeline menu enter: node=1 ast=(u'game/script.rpy', 2660) site=(u'game/script.rpy', 2660) opts=3 current_type=Menu
+Timeline snapshot: cached idx=1 cache_menu_total=2
+Timeline thumb: captura da choice indisponível; node=1 ast=(u'game/script.rpy', 2660)
+Timeline snapshot: idx=1 ctx=(u'game/script.rpy', 1793049147, 3135) roots_keys=134
+Timeline menu enter: node=1 ast=(u'game/script.rpy', 2660) site=(u'game/script.rpy', 2660) opts=3 current_type=Menu
+Timeline snapshot: cached idx=1 cache_menu_total=2
+Timeline thumb: captura da choice indisponível; node=1 ast=(u'game/script.rpy', 2660)
+Timeline choice: node=1 idx=1 label=u'Knock Again.[KoGa3ChoiceView1]' source=index
+Timeline: analisando 130201 nós identificados no AST
+Timeline: índice de rotas: 35 variáveis atribuídas
+Timeline: varredura de padrões: encontrados 133 nós Default, capturados 40
+Timeline: índice de rotas: 57 variáveis no total, 4 com condições if (máximo=2)
+Timeline: índice de cobertura: 14 descrições de ramificações
+Timeline thumbs init: no pkl file — starting empty
+Timeline: migração de imagens: total=2 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (2 nós)
+Timeline asset thumb render failed for scene788: Refusing to open images/Scene788.png while predicting.
+Timeline asset thumb render failed for scene815: Refusing to open images/Scene815.png while predicting.
+Timeline do_load: dispatching snapshot unfreeze
+Timeline unfreeze: cache copiado; menus=2
+Timeline unfreeze: ctx=(u'game/script.rpy', 1793049147, 3059) roots_keys=134
+Timeline on_load: overlay screens hidden after snapshot jump
+Timeline on_load: path=synthetic target={u'option_ast_index': 0, u'option_index': 0, u'node_index': 0} replay_path_len=2
+Timeline on_load: shadow_path set count=1
+Timeline: validação após o carregamento concluída (0 nós)
+Timeline menu enter: node=0 ast=(u'game/script.rpy', 2559) site=(u'game/script.rpy', 2559) opts=2 current_type=Menu
+Timeline replay: chegou ao nó=0 opção=0
+Timeline choice: node=0 idx=0 label=u'Definitely.[KoGa3ChoiceView1]' source=index
+Timeline do_load: dispatching load slot=wf_recovery
+Timeline: migração de imagens: total=2 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (2 nós)
+Timeline snapshot: idx=2 ctx=(u'game/script.rpy', 1793049147, 3461) roots_keys=134
+Timeline menu enter: node=2 ast=(u'game/script.rpy', 3022) site=(u'game/script.rpy', 3022) opts=2 current_type=Menu
+Timeline snapshot: cached idx=2 cache_menu_total=3
+Timeline thumb: captura da choice indisponível; node=2 ast=(u'game/script.rpy', 3022)
+Timeline choice: node=2 idx=1 label=u'Tell her.[KoGa3ChoiceView1]' source=index
+Timeline snapshot: idx=3 ctx=(u'game/script.rpy', 1793049147, 3487) roots_keys=134
+Timeline menu enter: node=3 ast=(u'game/script.rpy', 3050) site=(u'game/script.rpy', 3050) opts=2 current_type=Menu
+Timeline snapshot: cached idx=3 cache_menu_total=4
+Timeline thumb: captura da choice indisponível; node=3 ast=(u'game/script.rpy', 3050)
+Timeline do_load: dispatching snapshot unfreeze
+Timeline unfreeze: cache copiado; menus=4
+Timeline unfreeze: ctx=(u'game/script.rpy', 1793049147, 3461) roots_keys=134
+Timeline on_load: overlay screens hidden after snapshot jump
+Timeline on_load: path=synthetic target={u'option_ast_index': 1, u'option_index': 1, u'node_index': 2} replay_path_len=3
+Timeline on_load: shadow_path set count=None
+Timeline: validação após o carregamento concluída (2 nós)
+Timeline menu enter: node=2 ast=(u'game/script.rpy', 3022) site=(u'game/script.rpy', 3022) opts=2 current_type=Menu
+Timeline replay: chegou ao nó=2 opção=1
+Timeline choice: node=2 idx=1 label=u'Tell her.[KoGa3ChoiceView1]' source=index
+Timeline do_load: dispatching load slot=wf_recovery
+Timeline: migração de imagens: total=3 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (3 nós)
+Timeline snapshot: idx=3 ctx=(u'game/script.rpy', 1793049147, 3487) roots_keys=134
+Timeline menu enter: node=3 ast=(u'game/script.rpy', 3050) site=(u'game/script.rpy', 3050) opts=2 current_type=Menu
+Timeline snapshot: cached idx=3 cache_menu_total=4
+Timeline thumb: captura da choice indisponível; node=3 ast=(u'game/script.rpy', 3050)
+Timeline thumbs save error: No module named compat.pickle
+Timeline thumbs save error: No module named compat.pickle
+Timeline snapshot: idx=3 ctx=(u'game/script.rpy', 1793049147, 3487) roots_keys=134
+Timeline menu enter: node=3 ast=(u'game/script.rpy', 3050) site=(u'game/script.rpy', 3050) opts=2 current_type=Menu
+Timeline snapshot: cached idx=3 cache_menu_total=4
+Timeline thumb: captura da choice indisponível; node=3 ast=(u'game/script.rpy', 3050)
+Timeline thumbs save error: No module named compat.pickle
+Timeline thumbs save error: No module named compat.pickle
+Timeline: analisando 130201 nós identificados no AST
+Timeline: índice de rotas: 35 variáveis atribuídas
+Timeline: varredura de padrões: encontrados 133 nós Default, capturados 40
+Timeline: índice de rotas: 57 variáveis no total, 4 com condições if (máximo=2)
+Timeline: índice de cobertura: 14 descrições de ramificações
+Timeline thumbs init: no pkl file — starting empty
+Timeline: migração de imagens: total=3 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (3 nós)
+Timeline: migração de imagens: total=3 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (3 nós)
+Timeline snapshot: idx=3 ctx=(u'game/script.rpy', 1793049147, 3487) roots_keys=132
+Timeline menu enter: node=3 ast=(u'game/script.rpy', 3050) site=(u'game/script.rpy', 3050) opts=2 current_type=Menu
+Timeline snapshot: cached idx=3 cache_menu_total=4
+Timeline thumb: captura da choice indisponível; node=3 ast=(u'game/script.rpy', 3050)
+Timeline snapshot: idx=3 ctx=(u'game/script.rpy', 1793049147, 3487) roots_keys=132
+Timeline menu enter: node=3 ast=(u'game/script.rpy', 3050) site=(u'game/script.rpy', 3050) opts=2 current_type=Menu
+Timeline snapshot: cached idx=3 cache_menu_total=4
+Timeline thumb: captura da choice indisponível; node=3 ast=(u'game/script.rpy', 3050)
+Timeline choice: node=3 idx=0 label=u'You don\u2019t really look like [EileenName].[KoGa3ChoiceView1]' source=index
+Timeline snapshot: idx=4 ctx=(u'game/script.rpy', 1793049147, 3592) roots_keys=132
+Timeline menu enter: node=4 ast=(u'game/script.rpy', 3179) site=(u'game/script.rpy', 3179) opts=2 current_type=Menu
+Timeline snapshot: cached idx=4 cache_menu_total=5
+Timeline thumb: captura da choice indisponível; node=4 ast=(u'game/script.rpy', 3179)
+Timeline asset thumb render failed for scene990: Refusing to open images/Scene990.png while predicting.
+Timeline do_load: dispatching snapshot unfreeze
+Timeline unfreeze: cache copiado; menus=5
+Timeline unfreeze: ctx=(u'game/script.rpy', 1793049147, 3059) roots_keys=134
+Timeline on_load: overlay screens hidden after snapshot jump
+Timeline on_load: path=synthetic target={u'option_ast_index': 0, u'option_index': 0, u'node_index': 0} replay_path_len=4
+Timeline on_load: shadow_path set count=3
+Timeline: validação após o carregamento concluída (0 nós)
+Timeline menu enter: node=0 ast=(u'game/script.rpy', 2559) site=(u'game/script.rpy', 2559) opts=2 current_type=Menu
+Timeline replay: chegou ao nó=0 opção=0
+Timeline choice: node=0 idx=0 label=u'Definitely.[KoGa3ChoiceView1]' source=index
+Timeline do_load: dispatching load slot=wf_recovery
+Timeline: migração de imagens: total=4 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (4 nós)
+Timeline snapshot: idx=4 ctx=(u'game/script.rpy', 1793049147, 3592) roots_keys=132
+Timeline menu enter: node=4 ast=(u'game/script.rpy', 3179) site=(u'game/script.rpy', 3179) opts=2 current_type=Menu
+Timeline snapshot: cached idx=4 cache_menu_total=5
+Timeline thumb: captura da choice indisponível; node=4 ast=(u'game/script.rpy', 3179)
+Timeline do_load: dispatching snapshot unfreeze
+Timeline unfreeze: cache copiado; menus=5
+Timeline unfreeze: ctx=(u'game/script.rpy', 1793049147, 3059) roots_keys=134
+Timeline on_load: overlay screens hidden after snapshot jump
+Timeline on_load: path=synthetic target={u'option_ast_index': 0, u'option_index': 0, u'node_index': 0} replay_path_len=4
+Timeline on_load: shadow_path set count=3
+Timeline: validação após o carregamento concluída (0 nós)
+Timeline menu enter: node=0 ast=(u'game/script.rpy', 2559) site=(u'game/script.rpy', 2559) opts=2 current_type=Menu
+Timeline replay: chegou ao nó=0 opção=0
+Timeline choice: node=0 idx=0 label=u'Definitely.[KoGa3ChoiceView1]' source=index
+Timeline: analisando 130201 nós identificados no AST
+Timeline: índice de rotas: 35 variáveis atribuídas
+Timeline: varredura de padrões: encontrados 133 nós Default, capturados 40
+Timeline: índice de rotas: 57 variáveis no total, 4 com condições if (máximo=2)
+Timeline: índice de cobertura: 14 descrições de ramificações
+Timeline thumbs init: no pkl file — starting empty
+Timeline: migração de imagens: total=1 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (1 nós)
+Timeline: migração de imagens: total=4 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (4 nós)
+Timeline snapshot: idx=4 ctx=(u'game/script.rpy', 1793049147, 3592) roots_keys=134
+Timeline menu enter: node=4 ast=(u'game/script.rpy', 3179) site=(u'game/script.rpy', 3179) opts=2 current_type=Menu
+Timeline snapshot: cached idx=4 cache_menu_total=5
+Timeline thumb: captura da choice indisponível; node=4 ast=(u'game/script.rpy', 3179)
+Timeline do_load: dispatching snapshot unfreeze
+Timeline unfreeze: cache copiado; menus=5
+Timeline unfreeze: ctx=(u'game/script.rpy', 1793049147, 3135) roots_keys=134
+Timeline on_load: overlay screens hidden after snapshot jump
+Timeline on_load: path=synthetic target={u'option_ast_index': 1, u'option_index': 1, u'node_index': 1} replay_path_len=4
+Timeline on_load: shadow_path set count=2
+Timeline: validação após o carregamento concluída (1 nós)
+Timeline menu enter: node=1 ast=(u'game/script.rpy', 2660) site=(u'game/script.rpy', 2660) opts=3 current_type=Menu
+Timeline replay: chegou ao nó=1 opção=1
+Timeline choice: node=1 idx=1 label=u'Knock Again.[KoGa3ChoiceView1]' source=index
+Timeline do_load: dispatching load slot=wf_recovery
+Timeline: migração de imagens: total=4 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (4 nós)
+Timeline snapshot: idx=4 ctx=(u'game/script.rpy', 1793049147, 3592) roots_keys=134
+Timeline menu enter: node=4 ast=(u'game/script.rpy', 3179) site=(u'game/script.rpy', 3179) opts=2 current_type=Menu
+Timeline snapshot: cached idx=4 cache_menu_total=5
+Timeline thumb: captura da choice indisponível; node=4 ast=(u'game/script.rpy', 3179)
+Timeline choice: node=4 idx=1 label=u'Look again[KoGa3ChoiceView1]' source=index
+Timeline: analisando 130201 nós identificados no AST
+Timeline: índice de rotas: 35 variáveis atribuídas
+Timeline: varredura de padrões: encontrados 133 nós Default, capturados 40
+Timeline: índice de rotas: 57 variáveis no total, 4 com condições if (máximo=2)
+Timeline: índice de cobertura: 14 descrições de ramificações
+Timeline thumbs init: no pkl file — starting empty
+Timeline: migração de imagens: total=4 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (4 nós)
+Timeline snapshot: idx=4 ctx=(u'game/script.rpy', 1793049147, 3592) roots_keys=134
+Timeline menu enter: node=4 ast=(u'game/script.rpy', 3179) site=(u'game/script.rpy', 3179) opts=2 current_type=Menu
+Timeline snapshot: cached idx=4 cache_menu_total=5
+Timeline thumb: captura da choice indisponível; node=4 ast=(u'game/script.rpy', 3179)
+Timeline choice: node=4 idx=1 label=u'Look again[KoGa3ChoiceView1]' source=index
+Timeline snapshot: idx=5 ctx=(u'game/script.rpy', 1793049147, 3699) roots_keys=134
+Timeline menu enter: node=5 ast=(u'game/script.rpy', 3308) site=(u'game/script.rpy', 3308) opts=2 current_type=Menu
+Timeline snapshot: cached idx=5 cache_menu_total=6
+Timeline thumb: captura da choice indisponível; node=5 ast=(u'game/script.rpy', 3308)
+Timeline do_load: dispatching snapshot unfreeze
+Timeline unfreeze: cache copiado; menus=6
+Timeline unfreeze: ctx=(u'game/script.rpy', 1793049147, 3592) roots_keys=134
+Timeline on_load: overlay screens hidden after snapshot jump
+Timeline on_load: path=synthetic target={u'option_ast_index': 0, u'option_index': 0, u'node_index': 4} replay_path_len=5
+Timeline on_load: shadow_path set count=None
+Timeline: validação após o carregamento concluída (4 nós)
+Timeline menu enter: node=4 ast=(u'game/script.rpy', 3179) site=(u'game/script.rpy', 3179) opts=2 current_type=Menu
+Timeline replay: chegou ao nó=4 opção=0
+Timeline choice: node=4 idx=0 label=u'Go back to her room.' source=index
+Timeline do_load: dispatching load slot=wf_recovery
+Timeline: migração de imagens: total=5 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (5 nós)
+Timeline snapshot: idx=5 ctx=(u'game/script.rpy', 1793049147, 3699) roots_keys=134
+Timeline menu enter: node=5 ast=(u'game/script.rpy', 3308) site=(u'game/script.rpy', 3308) opts=2 current_type=Menu
+Timeline snapshot: cached idx=5 cache_menu_total=6
+Timeline thumb: captura da choice indisponível; node=5 ast=(u'game/script.rpy', 3308)
+Timeline: analisando 130201 nós identificados no AST
+Timeline: índice de rotas: 35 variáveis atribuídas
+Timeline: varredura de padrões: encontrados 133 nós Default, capturados 40
+Timeline: índice de rotas: 57 variáveis no total, 4 com condições if (máximo=2)
+Timeline: índice de cobertura: 14 descrições de ramificações
+Timeline thumbs init: no pkl file — starting empty
+Timeline: migração de imagens: total=5 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (5 nós)
+Timeline snapshot: idx=5 ctx=(u'game/script.rpy', 1793049147, 3699) roots_keys=132
+Timeline menu enter: node=5 ast=(u'game/script.rpy', 3308) site=(u'game/script.rpy', 3308) opts=2 current_type=Menu
+Timeline snapshot: cached idx=5 cache_menu_total=6
+Timeline thumb: captura da choice indisponível; node=5 ast=(u'game/script.rpy', 3308)
+Timeline choice: node=5 idx=0 label=u'Yes[KoGa3ChoiceView1]' source=index
+Timeline: analisando 130201 nós identificados no AST
+Timeline: índice de rotas: 35 variáveis atribuídas
+Timeline: varredura de padrões: encontrados 133 nós Default, capturados 40
+Timeline: índice de rotas: 57 variáveis no total, 4 com condições if (máximo=2)
+Timeline: índice de cobertura: 14 descrições de ramificações
+Timeline thumbs init: no pkl file — starting empty
+Timeline: migração de imagens: total=6 alteradas=0 não encontradas=0
+Timeline: validação após o carregamento concluída (6 nós)

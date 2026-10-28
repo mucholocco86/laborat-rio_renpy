@@ -1,0 +1,27 @@
+To install the Mod for "Guilty Pleasure" you have to:
+=====================================================
+
+1. of course the original game must be installed first
+
+2. extract the archive in a temporary folder
+
+3. move the unziped files and folders "audio" (only audio Mod version), "music" and "images"
+   into your game folder  (.../GuiltyPleasure-0.xx/game)
+
+
+That´s it.
+If you are using my Mod for the first it is recommended to start a new game!
+
+
+===========================================================================================
+General advice!
+This mod changes the game files! Old saves without my Mod can maybe not work anymore!
+Also, saves with my mod installed will maybe not work WITHOUT my Mod afterwards, too.
+As this Mod overwrites game files, other Mods/addons may also not work after installing it.
+
+Sorry about that.
+===========================================================================================
+
+
+Yours
+KoGa3
