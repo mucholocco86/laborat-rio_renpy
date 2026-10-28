@@ -1,0 +1,2 @@
+screen load ():
+    use GameLoad ()
