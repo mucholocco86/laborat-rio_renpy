@@ -48,11 +48,15 @@ A adaptação do URM faz `x52URM` produzir deltas vazios e remove entradas desse
 
 Portanto, o nome “snapshot” do URM não significa que ele seja um slot de save nativo nem um arquivo persistente próprio.
 
+## Inspeção da interface original
+
+A tela original `screens/snapshots.rpy.x52`, blob SHA `5766c7f74987738de8d14cbe407f66e8c49b9871`, oferece criar, comparar, mostrar mudanças e remover. O diálogo `URM_snapshot_create` chama `Snapshots.create`. Não foi encontrado, nessa tela, botão ou caminho de exportação/salvamento do conjunto de snapshots. Isso é uma conclusão da interface examinada; não exclui funções externas ou módulos adicionais.
+
 ## Limites e pendências
 
 - Teste integrado em runtime com o URM original e SDK 7.4.11, executado em cópia descartável.
 - O harness cobre criação de snapshot, save nativo e load em processo novo; não cobre salvar e carregar dentro do mesmo processo, comparar snapshots após load, ou o fluxo visual da tela de Snapshots.
-- Não foi testado se alguma ação externa/exportação da interface cria outro arquivo ou cópia; este circuito específico não chama tal ação.
+- A tela original examinada não apresenta ação de exportação. Não foi feita busca exaustiva por módulos externos ao URM ou por extensões de terceiros que exportem dados.
 - Não extrapolar o comportamento para Ren'Py 6.99.4, 8.5.3 ou versões >= 7.6, nas quais o URM não instala essa adaptação conforme a condição da fonte.
 - A frase da tela original de que snapshots se perdem ao fechar o jogo é uma declaração de interface; o teste acima é a evidência runtime do percurso de save/load.
 
@@ -61,6 +65,7 @@ Portanto, o nome “snapshot” do URM não significa que ele seja um slot de sa
 - URM original `classes/main.rpy`, SHA `14f93406d2946eaed664ed72c1d47063984ce24f`.
 - URM original `classes/snapshots.rpy`, SHA `20b45be23df8f12d7f4dfca7a1f401642d6fedba`.
 - URM original `classes/ConstantStoreHandler.rpy`, SHA `0464cff856d2c03b79cada452fa55216e627dacd`.
+- URM original `screens/snapshots.rpy.x52`, SHA `5766c7f74987738de8d14cbe407f66e8c49b9871`.
 - SDK Ren'Py 7.4.11: `renpy/python.py` (`RollbackLog.complete/get_roots/freeze`) e `renpy/loadsave.py` (`save/load`), conforme inspeção do SDK e fontes registradas na revisão de persistência.
 - Fixture isolada: `URM_REVERSO/tools/fixtures/urm_snapshot_save_persistence_probe.rpy`, blob SHA `063fc1d8e0436abc9807f99e37ce172d22f3c55d`.
 - Workflow isolado: `.github/workflows/urm-snapshot-save-persistence-probe.yml`.
