@@ -44,3 +44,13 @@ Em fixture descartável no Ren'Py 7.4.11:
 6. Repetir com stores vars e watched, separando configuração e estado de gameplay.
 
 Nenhuma fonte original, SDK ou diretório Wells deve ser alterado para esse teste.
+
+## Atualização posterior — runtime do arquivo `.urm` (2026-10-28)
+
+O status acima descreve corretamente a etapa estática de 2026-10-27. A pendência foi parcialmente resolvida por testes posteriores:
+
+- [Documento 49](49_PERSISTENCIA_URM_RUNTIME_STORES_E_ESTADO.md), run [40657558715](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40657558715): `URMFiles.save/load` foi executado em dois processos com o URM original. O valor de gameplay editado para 7 não apareceu nos stores do `.urm`; após load em processo novo, a variável permaneceu em 0 enquanto `vars`/`watched` foram restaurados.
+- [Documento 50](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md), run [40666090480](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40666090480): `labels` e `replacements` também foram serializados e recarregados; uma regra carregada foi aplicada quando o callback de filtro foi chamado diretamente.
+- [Mapa dos canais](../06_VARIABLES/03_MAPA_CANAIS_PERSISTENCIA_URM.md): registra também o teste de `textboxCustomizations` e os canais distintos de Settings.
+
+**Conclusão atual:** há runtime observado para esses stores e para o cenário de variável escalar testado. Isso fortalece a conclusão de que o `.urm` armazena dados operacionais/configurações das ferramentas, não um snapshot geral do gameplay. Não prova a exaustividade de stores em arquivos de todas as versões nem a integração visual dos modais.
