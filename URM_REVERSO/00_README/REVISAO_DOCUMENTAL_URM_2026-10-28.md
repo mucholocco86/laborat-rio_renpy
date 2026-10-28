@@ -15,13 +15,14 @@ A análise atual confirma que o núcleo prioritário já tem evidência bem alé
 - **Save nativo:** o valor editado e a rota sobreviveram ao save/load e ao carregamento por um segundo processo Ren'Py (docs 46 e 47).
 - **Arquivo `.urm`:** testes em dois processos mostraram que `vars`, `watched`, `textboxCustomizations`, `labels` e `replacements` guardam dados/configurações próprios do URM; os probes não restauraram um snapshot geral das variáveis de gameplay (docs 49, 50 e `06_VARIABLES/02–03`).
 - **Configurações:** `persistent.URMSettings` e o ZIP global `settings` são canais separados e foram recuperados em processo novo no run 40666289110, descrito em `06_VARIABLES/03_MAPA_CANAIS_PERSISTENCIA_URM.md`.
-- **Snapshots:** o diff do URM observou substituição de escalar, mas não alterações in-place nas listas/dicionários simples usados no teste; isso não transforma Snapshots em rollback (doc 51).
+- **Snapshots:** o diff do URM detectou escalares e substituição de containers por conteúdo diferente; não detectou mutação in-place nem novas listas/dicionários de conteúdo igual (doc 51). Snapshots não é rollback.
 
 ## Correções de status aplicadas nesta revisão
 
 1. **Doc 48:** a pendência de teste de `.urm` foi atualizada com os resultados posteriores dos docs 49–50. O documento continua registrando que sua própria etapa foi estática.
 2. **Doc 50:** passou de “runtime pendente” a um relatório de inspeção mais runtime para `labels`/`replacements` e Snapshots, com limites explícitos.
-9. **Doc 53:** teste runtime em dois processos encerrou a pendência sobre restauração do singleton Snapshots por save nativo no cenário coberto; outras rotas de exportação permanecem fora do teste.
+9. **Doc 51:** ampliação runtime com substituição de containers e comparação de conteúdo igual/diferente; fixture usa checagens explícitas.
+10. **Doc 53:** teste runtime em dois processos encerrou a pendência sobre restauração do singleton Snapshots por save nativo no cenário coberto; outras rotas de exportação permanecem fora do teste.
 3. **Doc 14:** recebeu uma nota de atualização que encaminha os casos inicialmente pendentes para os testes integrados 36–47.
 4. **Doc 15 duplicado (ChoiceReturn/checkpoint/rollback):** recebeu referências aos testes posteriores que comprovaram runtime em cenários delimitados.
 5. **Doc 21:** a pendência de seleção de condição falsa foi atualizada com os resultados 41–42.
