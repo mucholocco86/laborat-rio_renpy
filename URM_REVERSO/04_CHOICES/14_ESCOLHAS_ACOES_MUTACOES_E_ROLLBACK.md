@@ -69,3 +69,9 @@ A tela oferece botão para `URM_add_textrepl` associado a `choice.text` (`screen
 5. Identificar os hooks de `after_load_callbacks` e as condições de rollback ao carregar saves.
 
 **Regra:** somente após esse cruzamento e testes afirmar quais edições sobrevivem ao avanço, quais são desfeitas por rollback e quais são persistidas por arquivos `.urm`.
+
+## Revisão posterior — estado comprovado até 2026-10-28
+
+O cabeçalho acima descreve o estado em 2026-10-15. As pendências de runtime então abertas foram cobertas em percursos posteriores: a tela original do URM selecionou Choice com condição falsa e executou seu bloco (docs [41](41_CHOICE_CONDICAO_FALSA_EXECUTADA_PELO_URM.md) e [42](42_ROLLBACK_APOS_CHOICE_CONDICAO_FALSA.md)); edição via tela original e reversão por rollback foram observadas (docs [38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md), [44](44_ROLLBACK_VARIAVEL_CONDICAO_CHOICE.md) e [45](45_EDITOR_GRAFICO_CHOICE_DINAMICA_ROLLBACK.md)); save/load nativo foi validado nos docs [46](46_SAVE_LOAD_NATIVO_APOS_EDICAO_CHOICE.md) e [47](47_SAVE_LOAD_CHOICE_PROCESSO_NOVO.md).
+
+A relação entre edição e callback de monitor continua dependente do ponto do ciclo: no cenário integrado do doc [39](39_STOREMONITOR_DELTA_E_EDICAO_POR_SCREEN.md), rollback capturou o delta, mas o callback não recebeu aquela chave após a ciclagem. Não generalizar para todas as mutações/telas. O arquivo `.urm` e os stores atuais são revisados nos docs [49](49_PERSISTENCIA_URM_RUNTIME_STORES_E_ESTADO.md) e [50](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md).
