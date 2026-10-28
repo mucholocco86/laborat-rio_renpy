@@ -529,7 +529,7 @@ O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra o run [406584
 - [51 — diff de snapshots](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md): escalar substituído detectado; mutações in-place simples não listadas no diff.
 - O [mapa 06_VARIABLES/03](../06_VARIABLES/03_MAPA_CANAIS_PERSISTENCIA_URM.md) separa save nativo, arquivo `.urm`, persistent, settings global e snapshots.
 
-**Ainda não comprovado:** renderização end-to-end de Choice com substituição de texto; persistência de Snapshots em save nativo; interação visual completa dos modais de save/load.
+**Ainda não comprovado:** renderização end-to-end de Choice com substituição de texto; interação visual completa dos modais de save/load. A persistência do singleton Snapshots em save nativo foi testada em dois processos no doc 53: no caso coberto, o objeto não foi restaurado.
 
 ### Continuação — TextRepl e identidade estrutural da Choice (2026-10-28)
 
