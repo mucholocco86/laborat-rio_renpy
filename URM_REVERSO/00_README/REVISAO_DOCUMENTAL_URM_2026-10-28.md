@@ -1,12 +1,12 @@
 # Revisão documental do URM — estado em 2026-10-28
 
 **Repositório:** [mucholocco86/laborat-rio_renpy](https://github.com/mucholocco86/laborat-rio_renpy)  
-**Escopo auditado:** 78 documentos Markdown nas áreas de documentação de `URM_REVERSO` listadas abaixo.  
+**Escopo auditado:** 79 documentos Markdown nas áreas de documentação de `URM_REVERSO` listadas abaixo.  
 **Método:** conferência do inventário, dos índices, das classificações de evidência e das afirmações de pendência contra os documentos e execuções posteriores até 2026-10-28. Os registros de cada experimento permanecem cronológicos; quando uma conclusão antiga foi superada, a atualização aponta para a evidência posterior em vez de apagar o histórico.
 
 ## Resultado da revisão
 
-**Adição após a primeira auditoria:** o doc 52 examina no SDK como `Menu.execute()` aplica `say_menu_text_filter` antes de passar o índice AST como valor da alternativa. Isso confirma estaticamente que alterações de texto e identidade estrutural são camadas separadas; o texto final renderizado continua pendente de validação runtime.
+**Adições após a primeira auditoria:** o doc 53 testa save/load nativo de Snapshots em processo novo: o slot carregou, mas o singleton URM permaneceu vazio. O doc 52 examina no SDK como `Menu.execute()` aplica `say_menu_text_filter` antes de passar o índice AST como valor da alternativa. Isso confirma estaticamente que alterações de texto e identidade estrutural são camadas separadas; o texto final renderizado continua pendente de validação runtime.
 
 A análise atual confirma que o núcleo prioritário já tem evidência bem além da inspeção estática inicial:
 
@@ -21,6 +21,7 @@ A análise atual confirma que o núcleo prioritário já tem evidência bem alé
 
 1. **Doc 48:** a pendência de teste de `.urm` foi atualizada com os resultados posteriores dos docs 49–50. O documento continua registrando que sua própria etapa foi estática.
 2. **Doc 50:** passou de “runtime pendente” a um relatório de inspeção mais runtime para `labels`/`replacements` e Snapshots, com limites explícitos.
+9. **Doc 53:** teste runtime em dois processos encerrou a pendência sobre restauração do singleton Snapshots por save nativo no cenário coberto; outras rotas de exportação permanecem fora do teste.
 3. **Doc 14:** recebeu uma nota de atualização que encaminha os casos inicialmente pendentes para os testes integrados 36–47.
 4. **Doc 15 duplicado (ChoiceReturn/checkpoint/rollback):** recebeu referências aos testes posteriores que comprovaram runtime em cenários delimitados.
 5. **Doc 21:** a pendência de seleção de condição falsa foi atualizada com os resultados 41–42.
@@ -32,7 +33,7 @@ A análise atual confirma que o núcleo prioritário já tem evidência bem alé
 
 - O teste de `TextRepl` após load chamou diretamente `renpy.config.say_menu_text_filter`; não demonstrou o texto final renderizado numa screen real de Choice.
 - A interação visual automatizada com o modal de Gamesaves e o clique físico no hyperlink de CodeView continuam pendentes; alguns testes usam o handler original diretamente, com os limites indicados nos respectivos documentos.
-- A persistência de instâncias Snapshots em save nativo não foi testada.
+- A o teste runtime do doc 53 mostrou que a instância Snapshots não foi restaurada após save/load nativo em processo novo, no percurso específico da fixture.
 - As conclusões runtime são específicas do Ren'Py 7.4.11, das fixtures e dos percursos descritos. Não há comparação validada com SDK 6.99.4 ou 8.5.3.
 - A fonte convertida por unrpyc é uma representação de análise; quando a conclusão depende de runtime, os testes integrados com fontes originais são identificados separadamente.
 - A enumeração dos seis stores `.urm` conhecidos deriva das classes convertidas examinadas; o loader aceita entradas genéricas, então ela não prova que arquivos históricos/externos contenham somente esses nomes.
@@ -40,14 +41,14 @@ A análise atual confirma que o núcleo prioritário já tem evidência bem alé
 ## Continuidade recomendada
 
 1. Fechar a validação end-to-end do filtro de texto numa Choice realmente exibida, separando texto AST, filtro de menu e texto final renderizado.
-2. Testar persistência de Snapshots no save nativo e comportamento após novo processo.
+2. Investigar se algum fluxo da interface exporta ou persiste Snapshots fora do save nativo; o teste em processo novo está documentado no doc 53.
 3. Completar a matriz de save/load `.urm` + save nativo em ordens diferentes, sem tratar os formatos como equivalentes.
 4. Revisar os módulos restantes do URM por produtor, consumidor, estado, persistência e dependências do SDK.
 5. Comparar outras versões do SDK somente após fechar cada comportamento no 7.4.11.
 
 ## Inventário revisado
 
-O inventário abaixo identifica os 78 documentos Markdown incluídos nesta revisão. As notas em si permanecem como registros técnicos cronológicos; os índices e correções acima indicam quando evidência posterior amplia ou substitui uma pendência antiga.
+O inventário abaixo identifica os 79 documentos Markdown incluídos nesta revisão. As notas em si permanecem como registros técnicos cronológicos; os índices e correções acima indicam quando evidência posterior amplia ou substitui uma pendência antiga.
 
 
 ### 00_README
@@ -64,6 +65,7 @@ O inventário abaixo identifica os 78 documentos Markdown incluídos nesta revis
 
 ### 04_CHOICES
 
+- `53_PERSISTENCIA_SNAPSHOTS_SAVE_NATIVO.md`
 - `52_TEXTREPL_MENU_AST_FILTER_PATH.md`
 - `01_FLUXO_CHOICE_ROLLBACK.md`
 - `02_LIMITES_E_CASOS_ESPECIAIS.md`
