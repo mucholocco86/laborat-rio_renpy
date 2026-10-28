@@ -7,4 +7,4 @@
 
 ## Atualização de revisão — 2026-10-28
 
-O mapa `03` foi conferido contra os testes concluídos: persistência em dois processos para `vars`, `watched`, `textboxCustomizations`, `labels` e `replacements); Settings por jogo/global; diff superficial de Snapshots. Para os detalhes e limites de cada fixture, consulte o mapa e os documentos 49–51 de Choices. A revisão transversal está em [00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md).
+O mapa `03` foi conferido contra os testes concluídos: persistência em dois processos para `vars`, `watched`, `textboxCustomizations`, `labels` e `replacements); Settings por jogo/global; diff superficial de Snapshots. Para os detalhes e limites de cada fixture, consulte o mapa e os documentos 49–53 de Choices. O doc 53 comprovou em runtime que o singleton Snapshots não foi restaurado por save/load nativo em processo novo. A revisão transversal está em [00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md).
