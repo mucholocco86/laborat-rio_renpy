@@ -56,3 +56,7 @@ No SDK 7.4.11, `DictItems` preserva referências a objetos valor; `as_dict()` cr
 - Os testes são específicos do Ren'Py 7.4.11 e das fixtures documentadas.
 
 Próximo passo: validar o texto final de uma Choice exibida após `.urm` load e, em cenário separado, verificar persistência da instância `Snapshots` através de save/load nativo.
+
+## Relação com o circuito nativo de Choice
+
+O [documento 52](52_TEXTREPL_MENU_AST_FILTER_PATH.md) confirma estaticamente que o SDK chama `say_menu_text_filter` durante `Menu.execute()`, mantendo separadamente o índice estrutural usado para continuar no bloco. O run citado acima valida o callback após load, mas não a renderização final da screen.
