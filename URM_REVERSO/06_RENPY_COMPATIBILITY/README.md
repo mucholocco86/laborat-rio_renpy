@@ -22,3 +22,7 @@ Esses resultados são específicos do Ren'Py 7.4.11 e dos roteiros documentados.
 4. Depois de fechar os comportamentos no 7.4.11, comparar com SDKs 6.99.4 e 8.5.3.
 
 Para a revisão consolidada dos documentos, consulte [Revisão documental URM — 2026-10-28](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md).
+
+## Atualização — filtro de texto de Menu
+
+O doc [04_CHOICES/52](../04_CHOICES/52_TEXTREPL_MENU_AST_FILTER_PATH.md) confirma em `ast.Menu.execute()` que `say_menu_text_filter` recebe o rótulo e que o índice original `i` é mantido como valor estrutural. `exports.menu()` processa condição e substituição depois. O callback de regra restaurada também foi chamado em runtime (doc 50), mas o texto visual final continua sem teste end-to-end.
