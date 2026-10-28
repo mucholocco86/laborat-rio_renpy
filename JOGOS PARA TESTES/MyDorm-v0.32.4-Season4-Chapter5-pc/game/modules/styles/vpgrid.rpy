@@ -1,0 +1,2 @@
+style MenuVPGrid:
+    xfill True
