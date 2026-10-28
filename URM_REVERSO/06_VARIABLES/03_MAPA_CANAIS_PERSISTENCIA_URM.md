@@ -14,7 +14,7 @@ Quais mecanismos diferentes guardam dados de gameplay, configurações de ferram
 | Arquivo `.urm` | Stores de configurações/dados das ferramentas URM | ZIP com JSON por store; `URMFiles.load()` restaura os stores sem restaurar snapshot geral do jogo | Runs 40657558715, 40665541175 e 40666090480 |
 | `persistent.URMSettings` | Preferências por jogo do URM | Usa o store persistent do Ren'Py; fixture chamou `renpy.persistent.save()` e processo novo leu a configuração | Run 40666289110 |
 | Arquivo URM `settings` | Dicionário classificado pelo URM como configuração global | ZIP fora do `.urm`, sob `Settings.saveDir`; contém `json`, `id` opcional e `urmVersion` | Código `settings.rpy`; run 40666289110 leu o JSON e o segundo processo recuperou a opção |
-| `SnapshotsClass` | Mapeamento da tabela `renpy.store` capturado em memória | Sem acesso a `URMFiles` no módulo; não demonstrado como persistido em `.urm` ou save nativo | Doc 51; persistência da instância segue pendente |
+| `SnapshotsClass` | Mapeamento da tabela `renpy.store` capturado em memória | Não foi restaurado pelo save nativo no teste em dois processos; não usa o circuito `.urm` examinado | Docs 51 e 53; run 40670191468 |
 
 Esses canais não devem ser tratados como intercambiáveis. Em particular, “configuração global” é o nome do parâmetro `globalSetting=True` no código; este documento não infere que o mesmo arquivo atravesse instalações de jogos diferentes.
 
