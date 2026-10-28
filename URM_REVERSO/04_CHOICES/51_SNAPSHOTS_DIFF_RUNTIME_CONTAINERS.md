@@ -1,6 +1,6 @@
 # 51 — Snapshots do diff: escalares versus containers mutados in-place
 
-**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) e [40677490829 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829).
+**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) e [40677490829 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829) e [40677934414 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677934414).
 
 ## Pergunta
 
@@ -71,6 +71,20 @@ URM_SNAPSHOT_PROBE_ADDED_VAR None 7 False True unknown False True 8 None
 
 Isso delimita a comparação: diferenças de presença são listadas, mas o lado ausente é uma projeção `Var` com valor `None`, não uma operação de criação/exclusão automática. A edição do estado atual só funciona quando a variável existe e tem tipo suportado.
 
+### Ampliação runtime: comparação entre dois snapshots
+
+O run [40677934414](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677934414) criou `pair-a` com `common=1` e `old_only=11`; depois mudou `common=2`, removeu `old_only`, criou `new_only=22` e registrou `pair-b`. A chamada `findChanges("pair-a", "pair-b")` produziu:
+
+~~~text
+URM_SNAPSHOT_PROBE_PAIR_VALUES (1, 2, 11, None, None, 22)
+URM_SNAPSHOT_PROBE_PAIR_EDITABLE (False, False, False, False, False, False)
+URM_SNAPSHOT_PROBE_PAIR_SET_RESULTS False False 2
+~~~
+
+Os dois lados guardam referências aos dicionários dos snapshots; logo, todos os objetos `Var` retornados são somente leitura. A tentativa de setar 99 nos dois lados retornou False e o store atual continuou 2. Uma chave presente apenas em um snapshot tem `None` no lado ausente. Esse `None` representa ausência da chave na tabela, não demonstra que o valor armazenado era Python `None`.
+
+Na tela, a comparação de dois snapshots passa seus nomes para `URM_snapshots_comparison(old, new)`, que chama `findChanges(old, new)`. Os botões antigo/novo abrem o mesmo `URM_modify_value`; como ambos os dicionários são explícitos, a regra `isEditable` classifica ambos como visualização. A tela foi inspecionada estaticamente; o run verificou a API em runtime, não cliques nem renderização.
+
 ## Conclusões e classificação
 
 - **OBSERVADO EM RUNTIME:** `Snapshots.findChanges()` detectou a substituição escalar 10→20.
@@ -80,6 +94,7 @@ Isso delimita a comparação: diferenças de presença são listadas, mas o lado
 - **CORROBORADO POR FONTE E RUNTIME:** o mecanismo de snapshots do URM conserva referências superficiais e compara os valores do nível superior por igualdade; não é uma captura histórica profunda de objetos mutáveis.
 - **OBSERVADO EM RUNTIME:** `Var.setValue` no objeto antigo associado ao snapshot recusou edição; o objeto novo associado ao store ativo alterou o estado atual e preservou o valor antigo do snapshot.
 - **OBSERVADO EM RUNTIME:** variáveis adicionadas/removidas aparecem com os lados ausentes como `None`; o objeto atual de uma variável removida não a recria via `setValue`, enquanto o lado atual de uma variável adicionada pode ser editado.
+- **OBSERVADO EM RUNTIME:** em comparação entre dois snapshots, os objetos `Var` dos dois lados são somente leitura, valores das chaves preservadas são distintos e chaves ausentes são representadas por `None`.
 - **NÃO TESTADO:** igualdade de containers complexos/customizados; mutações concorrentes ou efeitos colaterais em `__eq__`; integração com os menus originais de snapshots. A persistência nativa da instância foi testada depois no doc 53.
 
 ## Execução inválida anterior
