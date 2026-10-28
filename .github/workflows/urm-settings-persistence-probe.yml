@@ -1,0 +1,71 @@
+name: URM settings persistence channels runtime probe
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'URM_REVERSO/tools/fixtures/urm_settings_persistence_probe.rpy'
+      - '.github/workflows/urm-settings-persistence-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: urm-settings-persistence-probe
+  cancel-in-progress: true
+
+jobs:
+  urm-settings-persistence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out laboratory
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb xauth libgl1 libglu1-mesa libx11-6 libxext6 libxrender1 libxcursor1 libxi6 libxinerama1 libxrandr2 libxss1 libasound2
+      - name: Prepare disposable game
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_root="${RUNNER_TEMP}/urm-settings-persistence-probe"
+          rm -rf "$probe_root"
+          cp -a renpy-7.4.11-sdk/the_question "$probe_root"
+          mkdir -p "$probe_root/game/0x52-URM"
+          cp -a URM_REVERSO/01_MATERIAL_URM/1_URM_ORIGINAL/. "$probe_root/game/0x52-URM/"
+          cp URM_REVERSO/tools/fixtures/urm_settings_persistence_probe.rpy "$probe_root/game/zz_urm_settings_persistence_probe.rpy"
+          chmod +x renpy-7.4.11-sdk/renpy.sh
+          chmod +x renpy-7.4.11-sdk/lib/linux-x86_64/renpy
+          test -f "$probe_root/game/0x52-URM/framework/bootstrap.rpy"
+      - name: Write per-game persistent and global settings
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START URM settings write: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-settings-persistence-probe" test urm_settings_probe_write
+          result=$?
+          echo "END URM settings write: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
+      - name: Load both setting channels in a fresh Ren'Py process
+        shell: bash
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -u
+          echo "START URM settings load: $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-settings-persistence-probe" test urm_settings_probe_load
+          result=$?
+          echo "END URM settings load: $(date -u +%FT%TZ), exit=$result"
+          exit "$result"
