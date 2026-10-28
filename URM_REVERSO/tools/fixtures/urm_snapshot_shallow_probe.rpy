@@ -89,6 +89,29 @@ label urm_snapshot_probe_start:
     $ if added_old_editable or not added_new_editable or added_old_type != "unknown": raise Exception("unexpected added variable editor flags")
     $ if added_old_set_result or not added_new_set_result or renpy.store.urm_snapshot_probe_added != 8 or added_entry["old"].value is not None: raise Exception("added variable edit routing failed")
 
+    $ renpy.store.urm_snapshot_probe_pair_common = 1
+    $ renpy.store.urm_snapshot_probe_pair_old_only = 11
+    $ x52URM.Snapshots.create("pair-a")
+    $ renpy.store.urm_snapshot_probe_pair_common = 2
+    $ delattr(renpy.store, "urm_snapshot_probe_pair_old_only")
+    $ renpy.store.urm_snapshot_probe_pair_new_only = 22
+    $ x52URM.Snapshots.create("pair-b")
+    $ pair_changes = x52URM.Snapshots.findChanges("pair-a", "pair-b")
+    $ pair_by_name = dict((entry["old"].name, entry) for entry in pair_changes if entry["old"].name.startswith("urm_snapshot_probe_pair_"))
+    $ common_entry = pair_by_name["urm_snapshot_probe_pair_common"]
+    $ old_only_entry = pair_by_name["urm_snapshot_probe_pair_old_only"]
+    $ new_only_entry = pair_by_name["urm_snapshot_probe_pair_new_only"]
+    $ pair_summary = (common_entry["old"].value, common_entry["new"].value, old_only_entry["old"].value, old_only_entry["new"].value, new_only_entry["old"].value, new_only_entry["new"].value)
+    $ pair_editable = (common_entry["old"].isEditable, common_entry["new"].isEditable, old_only_entry["old"].isEditable, old_only_entry["new"].isEditable, new_only_entry["old"].isEditable, new_only_entry["new"].isEditable)
+    $ pair_edit_old = common_entry["old"].setValue("99")
+    $ pair_edit_new = common_entry["new"].setValue("99")
+    $ print("URM_SNAPSHOT_PROBE_PAIR_VALUES", pair_summary)
+    $ print("URM_SNAPSHOT_PROBE_PAIR_EDITABLE", pair_editable)
+    $ print("URM_SNAPSHOT_PROBE_PAIR_SET_RESULTS", pair_edit_old, pair_edit_new, renpy.store.urm_snapshot_probe_pair_common)
+    $ if pair_summary != (1, 2, 11, None, None, 22): raise Exception("unexpected snapshot pair values: {}".format(pair_summary))
+    $ if pair_editable != (False, False, False, False, False, False): raise Exception("snapshot pair Var unexpectedly editable: {}".format(pair_editable))
+    $ if pair_edit_old or pair_edit_new or renpy.store.urm_snapshot_probe_pair_common != 2: raise Exception("snapshot pair editor changed a snapshot or gameplay value")
+
     "URM snapshot shallow-reference probe completed."
     $ renpy.quit()
 
