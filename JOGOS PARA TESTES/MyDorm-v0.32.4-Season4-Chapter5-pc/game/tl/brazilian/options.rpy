@@ -1,0 +1,8 @@
+﻿
+
+translate brazilian strings:
+
+    # game/options.rpy:15
+    old "My Dorm"
+    new "Meu dormitório"
+
