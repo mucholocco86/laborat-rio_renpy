@@ -1,0 +1,904 @@
+{
+    "title" : _("Día 21 - Tres chicas en la habitación"),
+    "image" : "c20s007_005a",
+    "label" : "c21s001_Foursome",
+    "girls" : [ persistent.dap , persistent.eri , persistent.emm],
+    "kinks" : [ "Lewd" , "Anal" , "Topless" , "Creampie" , "Lesbian" , "Voyeur" , "Cowgirl" , "Cunnilingus" , "Blowjob" , "Vaginal Sex" , "Group Sex"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Solomon en la comisaría"),
+    "image" : "c21s002_010a",
+    "label" : "c21s002_PoliceStation",
+    "girls" : [ "Alexia"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Una monja en tu habitación"),
+    "image" : "c21s002_210a",
+    "label" : "c21s002_BettyMassageAndDrivingLicense",
+    "girls" : [ "Betty"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Llamada desde Aruba"),
+    "image" : "c21s002_350a",
+    "label" : "c21s002_AaronCall",
+    "girls" : [ "None"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Un café matutino"),
+    "image" : "c21s002_500a",
+    "label" : "c21s002_MarChat",
+    "girls" : [ persistent.mom],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Llevando a Megan"),
+    "image" : "c21s002_655a",
+    "label" : "c21s002_Megan",
+    "girls" : [ "Megan"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Cita con la bibliotecaria"),
+    "image" : "c21s003_100a",
+    "label" : "c21s003_KiaraDate",
+    "girls" : [ "Kiara"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Un café con una espía"),
+    "image" : "c21s004_015a",
+    "label" : "c21s004_AmandaCoffee",
+    "girls" : [ "Amanda"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - Visita al lago"),
+    "image" : "c21s005_280a",
+    "label" : "c21s005_DebRun",
+    "girls" : [ "Debbie" , "Kim" , "Kate"],
+    "kinks" : [ "No sex" , "Topless"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - A solas con Debbie en el lago"),
+    "image" : "c21s005_400pv",
+    "label" : "c21s005_DebLake",
+    "girls" : [ "Debbie" ],
+    "kinks" : [ "Lewd" , "Topless" , "Cunnilingus" , "Blowjob" , "Cumshot"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - 22 - Una noche con Norah"),
+    "image" : "c22s001_130pv",
+    "label" : "c22s001_NorSex",
+    "girls" : [ persistent.nor ],
+    "kinks" : [ "Lewd" , "Topless" , "Cunnilingus" , "Blowjob" , "Creampie" , "Reverse Cowgirl" , "Vaginal Sex" , "Sleep Sex" , "Standing Sex"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 21 - My Residence - Nellie"),
+    "image" : "c22s001_1000",
+    "label" : "c22s001_NoNorSex",
+    "girls" : [ persistent.nor ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Desayuno en Martha's"),
+    "image" : "c22s002_005b",
+    "label" : "c22s002_EmmMarChat",
+    "girls" : [ persistent.mom , persistent.emm , "Saira" , "Kate" , "Debbie" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Hablando con Martha sobre Edmund"),
+    "image" : "c22s002_275ba",
+    "label" : "c22s002_MarAboutEdmund",
+    "girls" : [ persistent.mom , persistent.emm , "Debbie"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Masaje con Meemaw"),
+    "image" : "c22s002_695aa",
+    "label" : "c22s002_MeemawMassage",
+    "girls" : [ persistent.mom , "Meemaw" , "Lisa" , "Debbie" , "Betty" ],
+    "kinks" : [ "Lewd" , "Topless" , "Cunnilingus" , "Blowjob" , "Lactation" , "Handjob" , "Fingering" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Disparos, traumas, y relaciones"),
+    "image" : "c22s003_080a",
+    "label" : "c22s003_AmaCalls",
+    "girls" : [ "Amanda" , "Eva" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Llamada de Iron Fist"),
+    "image" : "c22s003_515a",
+    "label" : "c22s003_IronFistCalls",
+    "girls" : [ "Amanda" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Belugas"),
+    "image" : "c22s004_005a",
+    "label" : "c22s004_EriPregnancyResult",
+    "girls" : [ "Kate" , persistent.eri ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Los resultados de Erika"),
+    "image" : "c22s004_055a",
+    "label" : "c22s004_EriPregnancy",
+    "girls" : [ persistent.eri ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Test de ADN"),
+    "image" : "c22s004_165",
+    "label" : "c22s004_ScarlettDNA",
+    "girls" : [ persistent.mom , "Meemaw" , "Lisa" , "Debbie" , "Betty" , "Amanda" , "Eva" , persistent.eri , persistent.dap , "Scarlett" , persistent.nor , persistent.emm ],
+    "kinks" : [ "No sex" , "Topless" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Un nuevo miembro en la familia. No cogiste el teléfono a tu padre"),
+    "image" : "c22s004_260a",
+    "label" : "c22s004_ScarlettReveal",
+    "girls" : [ persistent.mom , "Meemaw" , "Lisa" , "Debbie" , "Betty" , "Amanda" , "Eva" , persistent.eri , persistent.dap , "Scarlett" , persistent.nor , persistent.emm ],
+    "kinks" : [ "No sex" , "Topless" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Planeando un viaje"),
+    "image" : "c22s004_515a",
+    "label" : "c22s004_BetCallsBishop",
+    "girls" : [ "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Cerrando el círculo"),
+    "image" : "c22s004_565a",
+    "label" : "c22s004_MarChat",
+    "girls" : [ persistent.mom ],
+    "kinks" : [ "No sex" , "Topless" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Pastitas y pruebas de embarazo"),
+    "image" : "c22s005_010a",
+    "label" : "c22s005_SamCall",
+    "girls" : [ "Samantha" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Las mesas pueden ser útiles"),
+    "image" : "c22s005_100pv",
+    "label" : "c22s005_SamSex",
+    "girls" : [ "Samantha" ],
+    "kinks" : [ "Lewd" , "Topless" , "Cunnilingus" , "Vaginal Sex" , "Standing Sex" , "Creampie" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Pillados y pruebas de embarazo"),
+    "image" : "c22s006_070a",
+    "label" : "c22s006_Simone",
+    "girls" : [ "Samantha" , "Simone" ],
+    "kinks" : [ "No sex" , "Topless" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - ¡Es una trampa!"),
+    "image" : "c22s007_030a",
+    "label" : "c22s007_LisChat",
+    "girls" : [ "Debbie" , "Lisa" , "Kim" , "Kate" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 22 - Mensajes y una nueva hermana"),
+    "image" : "c22s008_020a",
+    "label" : "c22s008_Sca",
+    "girls" : [ "Debbie" , "Lisa" , "Kim" , "Kate" , "Debbie" , "Jamaal" , persistent.dap , persistent.eri , "Kiara" , "Eileen" , "Saira" , "Meemaw" , "Betty" , "Megan" , persistent.mom , persistent.nor , "Scarlett" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - Despertar con la chica de ayer"),
+    "image" : "c23s001_915pv",
+    "label" : "c23s001_ScaSex",
+    "girls" : [ "Scarlett" ],
+    "kinks" : [ "Lewd" , "Topless" , "Vaginal Sex" , "Anal" , "Creampie" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - Otro test de embarazo"),
+    "image" : "c23s002_025a",
+    "label" : "c23s002_SaiPregnancy",
+    "girls" : [ "Saira" , "Scarlett" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - Hablando de equipaje"),
+    "image" : "c23s002_165aa",
+    "label" : "c23s002_Lugagge",
+    "girls" : [ persistent.mom , persistent.emm ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - Cambios de estudiantes"),
+    "image" : "c23s002_300a",
+    "label" : "c23s002_NoPatty",
+    "girls" : [ persistent.nor ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - Una animadora en tu habitación"),
+    "image" : "c23s003_345a",
+    "label" : "c23s003_Eil",
+    "girls" : [ "Eileen" ],
+    "kinks" : [ "Lewd" , "Topless" , "Blowjob" , "Vaginal Sex" , "Standing Sex" , "Creampie" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - La bibliotecaria busca a su hija"),
+    "image" : "c23s004_060a",
+    "label" : "c23s004_Kia",
+    "girls" : [ "Kiara" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - La policía taxista"),
+    "image" : "c23s004_235a",
+    "label" : "c23s004_Oma",
+    "girls" : [ "Kiara" , "Eileen" , "Alexia" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23 - Una azafata cazavampiros"),
+    "image" : "c23s004_260a",
+    "label" : "c23s004_Kim",
+    "girls" : [ "Kim" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 23/24 - Una noche en otra habitación"),
+    "image" : "c23s005_685a",
+    "label" : "c23s005_MarVisit",
+    "girls" : [ persistent.mom ],
+    "kinks" : [ "Lewd" , "Topless" , "Vaginal Sex" , "Anal" , "Creampie" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - Viaje por carretera"),
+    "image" : "c23s006_145da",
+    "label" : "c23s006_AfterBreakfastBetConfession",
+    "girls" : [ persistent.mom , persistent.emm , "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - Un coche rosa"),
+    "image" : "c23s006_440f",
+    "label" : "c23s006_Rent",
+    "girls" : [ persistent.emm , "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - Llevando a Betty a la iglesia"),
+    "image" : "c23s006_500a",
+    "label" : "c23s006_RideBetChurch",
+    "girls" : [ "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - La chica del Ferrarini"),
+    "image" : "c23s006_600a",
+    "label" : "c23s006_FerrariniGirl",
+    "girls" : [ persistent.emm ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - Después de la reunión"),
+    "image" : "c23s006_705d",
+    "label" : "c23s006_AfterTheMeeting",
+    "girls" : [ persistent.emm , "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - Llamada de las mercenarias"),
+    "image" : "c23s007_010a",
+    "label" : "c23s007_AmaCalls",
+    "girls" : [ "Amanda" , "Eva" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - Arreglos para dormir"),
+    "image" : "c23s007_100a",
+    "label" : "c23s007_SleepingArrangements",
+    "girls" : [ persistent.emm , "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - La monja descubre el paraiso"),
+    "image" : "c24s001_920pv",
+    "label" : "c24s001_Bet",
+    "girls" : [ "Betty" ],
+    "kinks" : [ "Lewd" , "Topless" , "Vaginal Sex" , "Cowgirl" , "Creampie" , "Side sex" , "Standing Sex" , "Blowjob" , "Cunnilingus"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 24 - My Residence - Vilma"),
+    "image" : "c24s001_500",
+    "label" : "c24s001_NoBetSex",
+    "girls" : [ "Betty" ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - Una hermana y una monja"),
+    "image" : "c24s002_025a",
+    "label" : "c24s002_Breakfast",
+    "girls" : [ persistent.emm , "Betty" ],
+    "kinks" : [ "No sex" , "Topless"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - ¡Es una trampa! (II)"),
+    "image" : "c24s002_070d",
+    "label" : "c24s002_Meanwhile_Kim_Mar_Kat",
+    "girls" : [ persistent.mom , "Kate" , "Kim" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - Iglesias y Turismo"),
+    "image" : "c24s002_485c",
+    "label" : "c24s002_BetNoNun",
+    "girls" : [ persistent.emm , "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - Bienvenidos a casa"),
+    "image" : "c24s003_015a",
+    "label" : "c24s003_Mar",
+    "girls" : [ persistent.mom , persistent.emm , "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - My Residence - Claire"),
+    "image" : "c24s003_060a",
+    "label" : "c24s003_NoKia",
+    "girls" : [ "Kiara" ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - Una cena con la bibliotecaria"),
+    "image" : "c24s003_190a",
+    "label" : "c24s003_KiaDate",
+    "girls" : [ "Kiara" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - Un beso a la puesta de sol"),
+    "image" : "c24s003_315a",
+    "label" : "c24s003_KiaBeach",
+    "girls" : [ "Kiara" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - ¿He hecho bien?"),
+    "image" : "c24s004_205a",
+    "label" : "c24s004_Eri_Dap_Kat_Nor",
+    "girls" : [ persistent.nor , persistent.dap , persistent.eri , "Kate" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25 - La bibliotecaria come hombres"),
+    "image" : "c24s003_910pv",
+    "label" : "c24s003_KiaSex",
+    "girls" : [ "Kiara" ],
+    "kinks" : [ "Lewd" , "Topless" , "Vaginal Sex" , "Cowgirl" , "Creampie" , "Missionary" , "Striptease"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 25/26 - La gatita en la ducha"),
+    "image" : "c24s003_945pv",
+    "label" : "c24s003_KiaSex2",
+    "girls" : [ "Kiara" ],
+    "kinks" : [ "Lewd" , "Topless" , "Vaginal Sex" , "Creampie" , "Standing Sex" , "Urination" , "Missionary" , "Cowgirl" , "Reverse Cowgirl" , "Doggy" , "Cowgirl"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Dos sirenas"),
+    "image" : "c24s004_210c",
+    "label" : "c24s004_Deb_Sim",
+    "girls" : [ "Simone" , "Debbie" ],
+    "kinks" : [ "No sex" , "Topless"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Sobre vestidos"),
+    "image" : "c24s004_550b",
+    "label" : "c24s004_Mad_Lis_Emm",
+    "girls" : [ persistent.emm , "Lisa" , "Maddie" , "Kim" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Uniformes y discos"),
+    "image" : "c24s004_750d",
+    "label" : "c24s004_Kim_Mee_Meg",
+    "girls" : [ "Megan" , "Meemaw" , "Kim" ],
+    "kinks" : [ "No sex" , "Topless" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Tu primera orden ejecutiva"),
+    "image" : "c24s005_120a",
+    "label" : "c24s005_Ama",
+    "girls" : [ "Amanda" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Motos y curvas"),
+    "image" : "c24s005_150a",
+    "label" : "c24s005_Eva",
+    "girls" : [ "Eva" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Entrenamiento"),
+    "image" : "c25s001_935pv",
+    "label" : "c25s001_Eva",
+    "girls" : [ "Eva" ],
+    "kinks" : [ "Lewd" , "Cowgirl" , "Cunnilingus" , "Standing Sex" , "Vaginal Sex" , "Creampie" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Helicóptero"),
+    "image" : "c25s002_070a",
+    "label" : "c25s002_AmaHelo",
+    "girls" : [ "Amanda" , "Eva" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Iron Fist"),
+    "image" : "c25s002_140f",
+    "label" : "c25s002_IronFist",
+    "girls" : [ "Amanda" , "Kim" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 26 - Salvar al soldado Brown"),
+    "image" : "c25s002_400a",
+    "label" : "c25s002_KimSaved",
+    "girls" : [ "Amanda" , "Kim" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - My Residence filtrado"),
+    "image" : "c25s003_005a",
+    "label" : "c25s003_MyResidence",
+    "girls" : [ "Debbie" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Desayuno con yoga"),
+    "image" : "c25s003_065a",
+    "label" : "c25s003_Yoga",
+    "girls" : [ "Alexia" , "Kiara" , "Kim" , "Kate" , "Eileen" , "Saira" , "Scarlett" , "Samantha" , persistent.emm , persistent.nor , persistent.eri , persistent.dap , persistent.mom ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Una cantante y un espejo"),
+    "image" : "c25s003_915pv",
+    "label" : "c25s003_Meg",
+    "girls" : [ "Megan" ],
+    "kinks" : [ "Lewd" , "Topless" , "Vaginal Sex" , "Reverse Cowgirl" , "Creampie" , "Doggy" , "Striptease" , "Anal" , "Blowjob" , "Handjob" , "Cunnilingus"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - My Residence - Kimberly"),
+    "image" : "c25s003_150e",
+    "label" : "c25s003_NoMeg",
+    "girls" : [ "Megan" ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Estrechando lazos"),
+    "image" : "c25s004_100a",
+    "label" : "c25s004_IceCream",
+    "girls" : [ "Meemaw" , persistent.nor ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Maestras y Alumnas"),
+    "image" : "c25s004_200g",
+    "label" : "c25s004_KimDebLisaSai",
+    "girls" : [ "Kate" , "Kim" , "Debbie" , "Lisa" , "Saira" , "Eileen"  ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Pepinillos"),
+    "image" : "c25_pickles",
+    "label" : "c25s004_Pickles",
+    "girls" : [ "Alexia" , "Megan" , "Eileen" , "Saira" , "Scarlett" , "Samantha" , persistent.emm , persistent.nor , persistent.eri , persistent.dap , persistent.mom ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - El Retorno del Rey"),
+    "image" : "c25s004_040a",
+    "label" : "c25s004_GetMad",
+    "girls" : [ "Maddie" , "Zeus" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - El Gran Harén"),
+    "image" : "c25s005_015a",
+    "label" : "c25s005_ZeusAtHome",
+    "girls" : [ "Maddie" , "Zeus" , "Alexia" , "Megan" , "Eileen" , "Saira" , "Scarlett" , "Samantha" , persistent.emm , persistent.nor , persistent.eri , persistent.dap , persistent.mom , "Simone" , "Eva" , "Amanda" , "Meemaw" , "Kim" , "Kate" , "Debbie" , "Lisa" , "Betty" , "Kiara" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Abrazos y camas rotas"),
+    "image" : "c25s006_175d",
+    "label" : "c25s006_AmaCuddle",
+    "girls" : [ "Zeus" , "Saira" , persistent.nor , persistent.eri , persistent.dap , persistent.mom , "Amanda" , "Lisa" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Helado"),
+    "image" : "c25s007_005a",
+    "label" : "c25s007_iceCream",
+    "girls" : [ "Meemaw"  ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Cita con Meemaw"),
+    "image" : "c26s001_080a",
+    "label" : "c26s001_MeeDate",
+    "girls" : [ "Meemaw"  ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - My Residence - Nana"),
+    "image" : "c26s001_1000",
+    "label" : "c26s001_NoMee",
+    "girls" : [ "Meemaw"  ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 27 - Una noche con Meemaw"),
+    "image" : "c26s001_375a",
+    "label" : "c26s001_MeeSex",
+    "girls" : [ "Meemaw" ],
+    "kinks" : [ "Lewd" , "Topless" , "Vaginal Sex" , "Creampie" , "Blowjob" , "Handjob" , "Cunnilingus" , "Missionary" , "Lactation" , "Fingering"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Una Transferencia Bancaria"),
+    "image" : "c26s002_005a",
+    "label" : "c26s002_EriDapSca",
+    "girls" : [ persistent.eri , persistent.dap , persistent.emm , "Scarlett" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Fotos"),
+    "image" : "c26s003_010a",
+    "label" : "c26s003_Sai",
+    "girls" : [ "Saira" , "Megan" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Solomon"),
+    "image" : "c26s002_200i",
+    "label" : "c26s002_Solomon",
+    "girls" : [ "Alexia" , "Kiara" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Sacando tiempo de donde no lo hay"),
+    "image" : "c26s003_205a",
+    "label" : "c26s003_SaiSex",
+    "girls" : [ "Saira" ],
+    "kinks" : [ "Lewd" , "Topless" , "Cowgirl" , "Doggy" , "Creampie" , "Cunnilingus" , "Vaginal Sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - My Residence - Aishwarya"),
+    "image" : "c26s003_1000",
+    "label" : "c26s003_NoSai",
+    "girls" : [ "Saira" ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Demasiado dinero"),
+    "image" : "c26s004_005a",
+    "label" : "c26s004_MarEmm",
+    "girls" : [ persistent.mom , persistent.emm ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - En el café"),
+    "image" : "c26s004_250d",
+    "label" : "c26s004_Cafe",
+    "girls" : [ persistent.eri , "Eileen" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - En el supermercado"),
+    "image" : "c26s004_360a",
+    "label" : "c26s004_SamSim",
+    "girls" : [ "Samantha" , "Simone" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Un encuentro inesperado"),
+    "image" : "c26s004_610a",
+    "label" : "c26s004_Jamaal",
+    "girls" : [ "Jamaal" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Atún, Préstamos, y Trenzas"),
+    "image" : "c26s005_015d",
+    "label" : "c26s005_EvaDap",
+    "girls" : [ persistent.nor , persistent.dap , "Eva" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 28 - Citas, citas, y no-citas"),
+    "image" : "c26s005_100a",
+    "label" : "c26s005_LisDebKat",
+    "girls" : [ "Lisa" , "Debbie" , "Kate" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - No es una puta cita"),
+    "image" : "c26s006_255a",
+    "label" : "c26s006_KatBreakfast",
+    "girls" : [ persistent.eri , "Kim" , persistent.emm , "Kate" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Finalmente Ex Monja"),
+    "image" : "c26s007_005a",
+    "label" : "c26s007_Bet",
+    "girls" : [ "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Una cama nueva"),
+    "image" : "c26s007_175e",
+    "label" : "c26s007_Bed",
+    "girls" : [ persistent.eri , persistent.mom , persistent.emm ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Una Cita con la Sirena"),
+    "image" : "c27s001_055a",
+    "label" : "c27s001_DebDate",
+    "girls" : [ "Debbie" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - My Residence - Missy"),
+    "image" : "c27s001_1000",
+    "label" : "c27s001_NoDeb",
+    "girls" : [ "Debbie" ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - La Primera Vez"),
+    "image" : "c27s001_900pv",
+    "label" : "c27s001_DebLewd",
+    "girls" : [ "Debbie" ],
+    "kinks" : [ "Lewd" , "Missionary" , "Choking" , "Blowjob" , "Vaginal Sex" , "Cunnilingus" , "Creampie"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Preparación para el Estudio de Fotografía"),
+    "image" : "c27s001_640a",
+    "label" : "c27s001_EmmVisit",
+    "girls" : [ persistent.emm ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Beca, Trampas, y Multas"),
+    "image" : "c27s002_035a",
+    "label" : "c27s002_AmaSimSamJam",
+    "girls" : [ "Amanda" , "Samantha" , "Simone" , "Jamaal" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Una Video Conferencia con Sorpresas"),
+    "image" : "c27s002_275a",
+    "label" : "c27s002_AaronVC",
+    "girls" : [ persistent.mom , "Betty" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Mudanzas y Construcciones"),
+    "image" : "c27s002_400h",
+    "label" : "c27s002_KiaEilNor",
+    "girls" : [ persistent.nor , "Betty" , "Eileen" , "Kiara"],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Misión Cumplida (I)"),
+    "image" : "c27s002_555a",
+    "label" : "c27s002_AmaAtCollege1",
+    "girls" : [ "Amanda" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Secretos y Compras"),
+    "image" : "c27s002_785e",
+    "label" : "c27s002_LisShopping",
+    "girls" : [ "Lisa" , "Maddie" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - Misión Cumplida (II)"),
+    "image" : "c27s002_830a",
+    "label" : "c27s002_AmaAtCollege2",
+    "girls" : [ "Amanda" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - En el Café"),
+    "image" : "c27s003_005a",
+    "label" : "c27s003_MadLis",
+    "girls" : [ "Lisa" , "Maddie" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 29 - My Residence - Dee-Dee."),
+    "image" : "c27s003_1000",
+    "label" : "c27s003_NoMad",
+    "girls" : [ "Maddie" ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Días 29-30 - Experiencia Matrimonial"),
+    "image" : "c27s003_950pv",
+    "label" : "c27s003_MadLewd",
+    "girls" : [ "Maddie" ],
+    "kinks" : [ "Lewd" , "Blowjob" , "Reverse Cowgirl" , "Missionary" , "Standing Sex" , "Vaginal Sex" , "Creampie" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 30 - Una Huída y un Desayuno Multitudinario"),
+    "image" : "c27s004_010a",
+    "label" : "c27s004_KatBreakfast",
+    "girls" : [ "Amanda" , "Kate" , "Eva" , "Alexia" , persistent.emm , persistent.mom ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 30 - Despedidas"),
+    "image" : "c27s004_155d",
+    "label" : "c27s004_MeeBetFarewell",
+    "girls" : [ "Betty" , "Kate" , "Meemaw" , "Kim" , persistent.nor ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 30 - Una Entrevista de Trabajo"),
+    "image" : "c27s004_200b",
+    "label" : "c27s004_ScaInterview",
+    "girls" : [ "Alexia" , "Eileen" , "Scarlett" , persistent.eri ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 30 - Pintando el Sótano"),
+    "image" : "c27s005_005a",
+    "label" : "c27s005_PaintBasement",
+    "girls" : [ "Kim" , persistent.nor , persistent.emm , persistent.mom ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 30 - La Guarida del Yeti"),
+    "image" : "c27s006_005a",
+    "label" : "c27s006_OmaHouse",
+    "girls" : [ "Alexia" ],
+    "kinks" : [ "No sex" ],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 30 - My Residence - Alejandra"),
+    "image" : "c27s008_1000",
+    "label" : "c27s008_NoOma",
+    "girls" : [ "Alexia" ],
+    "kinks" : [ "No sex" , "My Residence"],
+    "lewd"  : 10    # not used in this gallery
+},
+{
+    "title" : _("Día 30 - Esposado"),
+    "image" : "c27s008_915pv",
+    "label" : "c27s008_Oma",
+    "girls" : [ "Alexia" ],
+    "kinks" : [ "Lewd" , "Blowjob" , "Reverse Cowgirl" , "Cunnilingus" , "Vaginal Sex" , "Creampie" ],
+    "lewd"  : 10    # not used in this gallery
+},

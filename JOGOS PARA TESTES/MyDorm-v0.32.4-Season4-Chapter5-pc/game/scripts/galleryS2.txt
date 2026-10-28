@@ -1,0 +1,817 @@
+label galleryS2:
+        {
+            "title" : _("Día 15-Recogiendo a Kiara y Eileen"),
+            "image" : "c13s001_005a",
+            "label" : "c13s001_KiaraEileen",
+            "girls" : [ "Kiara", "Eileen" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Charla con Kate"),
+            "image" : "c13s001_410a",
+            "label" : "c13s001_SleepingInTheCouch",
+            "girls" : [ "Kate" , "Martha" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Charla con la familia"),
+            "image" : "c13s002_060a",
+            "label" : "c13s002_TalkToTheFamily",
+            "girls" : [ "Martha" , "Norah" , "Eileen" , "Kiara"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-El Hospital"),
+            "image" : "c13s002_245a",
+            "label" : "c13s002_TheHospital",
+            "girls" : [ "Samantha" , "Kiara" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-En Casa de Scarlett"),
+            "image" : "c13s003_295",
+            "label" : "c13s003_ScarlettHouse",
+            "girls" : [ "Scarlett" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Kiara y Scarlett"),
+            "image" : "c13s004_110a",
+            "label" : "c13s004_KiaraAndScarlett",
+            "girls" : [ "Scarlett" , "Kiara" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Recogiendo a Saira"),
+            "image" : "c13s004_325a",
+            "label" : "c13s004_GetSaira",
+            "girls" : [ "Scarlett" , "Saira" , "Martha" , "Norah" , "Daphne" , "Erika" , "Emma"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Visitando a Samantha"),
+            "image" : "c13s005_600a",
+            "label" : "c13s005_SamanthaHouse",
+            "girls" : [ "Samantha" , "Simone" , "Jamaal"],
+            "kinks" : [ "Lewd" , "Blowjob", "Cumshot", "Rimjob", "Reverse Cowgirl", "Creampie" , "Vaginal Sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Pillados por Samantha"),
+            "image" : "c13s005_310d",
+            "label" : "c13s005_SamanthaNoSex",
+            "girls" : [ "Samantha" , "Simone" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Pillados por Simone"),
+            "image" : "c14s001_005a",
+            "label" : "c14s001_ContinuationSam",
+            "girls" : [ "Samantha" , "Simone" ],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-En la piscina con Norah y Erika"),
+            "image" : "c14s002_005a",
+            "label" : "c14s002_Pool",
+            "girls" : [ "Norah" , "Erika" , "Martha" ],
+            "kinks" : [ "Lewd" , "Fingering" , "Blowjob" , "Cumswap" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 15-Conversación con Saira"),
+            "image" : "c14s003_045a",
+            "label" : "c14s003_SairaChat",
+            "girls" : [ "Saira" , "Emma" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 16-¡A la playa!"),
+            "image" : "c14s004_005f",
+            "label" : "c14s004_ToTheBeach",
+            "girls" : [ "Saira" , "Kate" , "Betty" , "Martha" , "Norah" , "Erika" , "Lisa" , "Debbie" , "Meemaw" , "Kiara" , "Daphne" , "Kim" , "Scarlett" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 16-Verdad o Reto"),
+            "image" : "c14s005_005dap",
+            "label" : "c14s005_BallGame",
+            "girls" : [ "Kate" , "Lisa" , "Debbie" , "Daphne" , "Kim" , "Scarlett" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 16-Navidad en la playa"),
+            "image" : "c14s006_645a",
+            "label" : "c14s006_Christmas",
+            "girls" : [ "Saira" , "Kate" , "Betty" , "Martha" , "Norah" , "Erika" , "Lisa" , "Debbie" , "Meemaw" , "Kiara" , "Daphne" , "Kim" , "Scarlett", "Samantha" , "Simone" , "Alexia" , "Eileen" , "Eva" , "Amanda" , "Megan", "Emma"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 16-Visitando a Maddie"),
+            "image" : "c14s007_035",
+            "label" : "c14s007_MaddieDnD",
+            "girls" : [ "Maddie" , "Daphne" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 16-Llamada de Amanda"),
+            "image" : "c15s001_070a",
+            "label" : "c15s001_AmandaCall",
+            "girls" : [ "Amanda" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 16-Cena Medieval"),
+            "image" : "c15s001_195a",
+            "label" : "c15s001_DapDate",
+            "girls" : [ "Amanda" , "Daphne" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 16-Sexo Medieval"),
+            "image" : "c15s002_175pv",
+            "label" : "c15s002_DapLewd",
+            "girls" : [ "Debbie" , "Daphne" ],
+            "kinks" : [ "Lewd" , "Creampie" , "Missionary" , "Cowgirl" , "Doggy" , "Vaginal Sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Pillados por Debbie"),
+            "image" : "c15s002_505e",
+            "label" : "c15s002_ReturnHome",
+            "girls" : [ "Debbie" , "Daphne" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-My Residence Daphne"),
+            "image" : "c15s001_400",
+            "label" : "c15s001_WakeUp",
+            "girls" : [ "Amanda" , "Daphne"],
+            "kinks" : [ "No sex" , "My Residence" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Recogiendo a Eileen"),
+            "image" : "c15s003_045a",
+            "label" : "c15s003_PickUpEileen",
+            "girls" : [ "Erika" , "Eileen" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Comida con Eileen"),
+            "image" : "c15s003_105a",
+            "label" : "c15s003_LunchEileen",
+            "girls" : [ "Eileen" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-En el columpio con Eileen"),
+            "image" : "c15s004_095bc",
+            "label" : "c15s004_LewdEileen",
+            "girls" : [ "Eileen" ],
+            "kinks" : [ "Lewd" , "Cunnilingus" , "Standing up sex" , "Vaginal Sex" , "Creampie"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Lisa se va con Anthony"),
+            "image" : "c15s005_010a",
+            "label" : "c15s005_LisaDate",
+            "girls" : [ "Lisa" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Pillados en la cocina"),
+            "image" : "c15s005_165a",
+            "label" : "c15s005_BeforeAaronVisit",
+            "girls" : [ "Martha" , "Norah" , "Meemaw" , "Betty" , "Kiara" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Discusión con Meemaw"),
+            "image" : "c15s005_440a",
+            "label" : "c15s005_MeemawDiscussion",
+            "girls" : [ "Martha" , "Norah" , "Meemaw" , "Betty" , "Kiara" , "Eileen" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Reunión con Aaron"),
+            "image" : "c15s006_035c",
+            "label" : "c15s006_AaronVisit",
+            "girls" : [ "Martha" , "Norah" , "Amanda" , "Eva"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Visitando la casa de Kiara"),
+            "image" : "c15s007_020a",
+            "label" : "c15s007_KiaraHouse",
+            "girls" : [ "Kiara" , "Eileen" , "Alexia" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Noche de Chicas"),
+            "image" : "c15s007_280a",
+            "label" : "c15s007_Night",
+            "girls" : [ "Kate" , "Kim" , "Debbie" , "Saira" , "Lisa" , "Martha" , "Emma" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 17-Lecciones con Emma y Martha"),
+            "image" : "c16s001_045d",
+            "label" : "c16s001_EmmaLessons",
+            "girls" : [ "Emma" , "Martha" ],
+            "kinks" : [ "Lewd" , "Group Sex" , "Fingering" , "Blowjob" , "Boobjob" , "Cumswap" , "Lesbian" , "Cunnilingus" , "Vaginal Sex" , "Cumshot" , "Topless" , "Creampie" , "Handjob" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Acompañando a Meemaw al médico"),
+            "image" : "c16s002_150ba",
+            "label" : "c16s002_TakeMeemawDoc",
+            "girls" : [ "Meemaw" , "Martha" ],
+            "kinks" : [ "Milking" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Corriendo con Debbie"),
+            "image" : "c16s002_480c",
+            "label" : "c16s002_RunWithDebbie",
+            "girls" : [ "Debbie" , "Eva" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Lecciones de tiro"),
+            "image" : "c16s003_245c",
+            "label" : "c16s003_ShootingLessons",
+            "girls" : [ "Eva" ],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Primera comida con Eva"),
+            "image" : "c16s003_455j",
+            "label" : "c16s003_LunchWithEva",
+            "girls" : [ "Eva" , "Saira" , "Kate" , "Betty" , "Martha" , "Norah" , "Erika" , "Debbie" , "Meemaw" , "Daphne" , "Scarlett", "Emma" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Llamada a Maddie"),
+            "image" : "c16s004_065a",
+            "label" : "c16s004_DateWithMaddie",
+            "girls" : [ "Maddie" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Conversación con Saira"),
+            "image" : "c16s004_155a",
+            "label" : "c16s004_ConvoSairaAboutMegan",
+            "girls" : [ "Saira" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Recogiendo a Megan"),
+            "image" : "c16s005_005c",
+            "label" : "c16s005_PickUpMegan",
+            "girls" : [ "Megan" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Test de embarazo de Martha"),
+            "image" : "c16s006_005b",
+            "label" : "c16s006_MarPregnant",
+            "girls" : [ "Martha" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Test de embarazo de Norah"),
+            "image" : "c16s007_005a",
+            "label" : "c16s007_NorPregnant",
+            "girls" : [ "Norah" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Llamada de Amanda"),
+            "image" : "c16s008_020f",
+            "label" : "c16s008_DinnerWithAmanda",
+            "girls" : [ "Norah" , "Amanda" , "Martha" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Cena con Amanda"),
+            "image" : "c17s001_580f",
+            "label" : "c17s001_AmandaDinner",
+            "girls" : [ "Norah" , "Amanda" , "Martha" , "Eva" , "Daphne" , "Betty" , "Alexia" , "Kiara" , "Eileen" , "Meemaw" , "Kim" , "Kate" , "Debbie" , "Saira" , "Erika" , "Lisa" , "Scarlett" , "Emma" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Test de embarazo de Alexia"),
+            "image" : "c17s001_255d",
+            "label" : "c17s001_AlexiaPregnancyResult",
+            "girls" : [ "Alexia" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Test de embarazo de Eileen"),
+            "image" : "c17s001_260d",
+            "label" : "c17s001_EileenPregnancyResult",
+            "girls" : [ "Eileen" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Test de embarazo de Eileen y Alexia"),
+            "image" : "c17s001_250c",
+            "label" : "c17s001_EileenAlexiaPregnancyResult",
+            "girls" : [ "Eileen" , "Alexia"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-My Residence Maddie"),
+            "image" : "c17s002_005e",
+            "label" : "c17s002_MaddieResidence",
+            "girls" : [ "Maddie" ],
+            "kinks" : [ "My Residence" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 18-Cita con Maddie"),
+            "image" : "c17s002_040a",
+            "label" : "c17s002_MaddieDate",
+            "girls" : [ "Maddie" ],
+            "kinks" : [ "Lewd" , "Dom" , "Sub" , "Creampie" , "Cunnilingus" , "Vaginal Sex" , "Cumshot" , "Fingering" , "Blowjob" , "Cowgirl" , "Reverse Cowgirl" , "Handjob" , "Missionary" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Haciendo pruebas a Daphne y Scarlett"),
+            "image" : "c17s003_115a",
+            "label" : "c17s003_DapScaTests",
+            "girls" : [ "Daphne" , "Scarlett" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Meemaw y Betty hablan sobre sueños"),
+            "image" : "c17s003_150a",
+            "label" : "c17s003_BettyMassage",
+            "girls" : [ "Meemaw" , "Betty" ],
+            "kinks" : [ "No sex" , "Topless" , "Missionary" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Contándoselo a Kiara"),
+            "image" : "c17s003_300b",
+            "label" : "c17s003_TellKiara",
+            "girls" : [ "Kiara" , "Eileen" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Comida con Amanda"),
+            "image" : "c17s003_730a",
+            "label" : "c17s003_AmandaLunch",
+            "girls" : [ "Norah" , "Amanda" , "Martha" , "Megan" , "Daphne" , "Betty" , "Kiara" , "Kim" , "Kate" , "Erika" , "Emma" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Erika no quiere saber"),
+            "image" : "c17s003_775a",
+            "label" : "c17s003_EriPregnancyResult",
+            "girls" : [ "Erika" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Megan quiere más"),
+            "image" : "c17s004_200c",
+            "label" : "c17s004_MeganLewd",
+            "girls" : [ "Megan" ],
+            "kinks" : [ "Lewd" , "Creampie" , "Vaginal Sex" , "Fingering" , "Handjob" , "Missionary" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Recogiendo a Eva"),
+            "image" : "c17s005_020a",
+            "label" : "c17s005_EvaDinner",
+            "girls" : [ "Eva" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Jazz Corner"),
+            "image" : "c18s001_105d",
+            "label" : "c18s001_Dinner",
+            "girls" : [ "Norah" , "Amanda" , "Martha" , "Eva" , "Daphne" , "Kim" , "Kate" , "Debbie" , "Saira" , "Erika" , "Lisa" , "Scarlett" , "Emma" , "Megan"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Scarlett"),
+            "image" : "c18s001_325a",
+            "label" : "c18s001_Scarlett",
+            "girls" : [ "Scarlett" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Eva"),
+            "image" : "c18s001_345a",
+            "label" : "c18s001_Eva",
+            "girls" : [ "Scarlett" , "Eva" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Hablando con Kate"),
+            "image" : "c18s001_395a",
+            "label" : "c18s001_Kate",
+            "girls" : [ "Kate" , "Emma" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Emma"),
+            "image" : "c18s001_450a",
+            "label" : "c18s001_Emma",
+            "girls" : [ "Emma" , "Megan" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Saira"),
+            "image" : "c18s001_510a",
+            "label" : "c18s001_Saira",
+            "girls" : [ "Saira" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Erika"),
+            "image" : "c18s001_580a",
+            "label" : "c18s001_Erika",
+            "girls" : [ "Saira" , "Erika" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Volando con Debbie"),
+            "image" : "c18s001_685e",
+            "label" : "c18s001_Debbie",
+            "girls" : [ "Debbie" , "Daphne" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Amanda"),
+            "image" : "c18s001_785a",
+            "label" : "c18s001_Amanda",
+            "girls" : [ "Amanda" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Lisa"),
+            "image" : "c18s001_885a",
+            "label" : "c18s001_Lisa",
+            "girls" : [ "Amanda" , "Eva" , "Lisa" , "Kim"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Bailando con Kim"),
+            "image" : "c18s002_105a",
+            "label" : "c18s001_Kim",
+            "girls" : [ "Kate" , "Kim"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Fin de la noche"),
+            "image" : "c18s002_225a",
+            "label" : "c18s001_Common",
+            "girls" : [  "Amanda" , "Eva" , "Daphne" , "Kim" , "Kate" , "Debbie" , "Saira" , "Erika" , "Lisa" , "Scarlett" , "Emma" , "Megan" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-My Residence Saira"),
+            "image" : "c18s002_300a",
+            "label" : "c18s002_NoSaira",
+            "girls" : [ "Saira" ],
+            "kinks" : [ "My Residence" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 19-Saira entra en acción"),
+            "image" : "c18s002_455a",
+            "label" : "c18s002_Saira",
+            "girls" : [ "Saira" ],
+            "kinks" : [ "Lewd" , "Creampie" , "Vaginal Sex" , "Side Sex" , "Cowgirl" , "Missionary" , "Reverse Cowgirl" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Resultados de Daphne y Scarlett"),
+            "image" : "c18s003_005a",
+            "label" : "c18s003_DaphScarPregnancyResults",
+            "girls" : [ "Daphne" , "Scarlett" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Masajeando a Meemaw"),
+            "image" : "c18s004_070a",
+            "label" : "c18s004_Meemaw",
+            "girls" : [ "Meemaw" ],
+            "kinks" : [ "Lewd" , "Milking" , "Lactation" , "Fingering" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Fiesta de Cumpleaños (I)"),
+            "image" : "c18s005_060b",
+            "label" : "c18s005_BirthdayOne",
+            "girls" : [ "Maddie" , "Norah" , "Erika" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Samantha y Jamaal"),
+            "image" : "c19s001_015b",
+            "label" : "c19s001_JamaalSamantha",
+            "girls" : [ "Samantha" , "Jamaal" , "Norah" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Samantha y Martha"),
+            "image" : "c19s001_235d",
+            "label" : "c19s001_Samantha",
+            "girls" : [ "Samantha" , "Martha" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Kim y Martha"),
+            "image" : "c19s001_300a",
+            "label" : "c19s001_MarthaKim",
+            "girls" : [ "Martha" , "Kim" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Twerking con Simone"),
+            "image" : "c19s002_190a",
+            "label" : "c19s002_Simone",
+            "girls" : [ "Martha" , "Simone" , "Emma" , "Amanda" , "Eva" ],
+            "kinks" : [ "Lewd" , "Vaginal Sex" , "Twerking" , "Topless" , "Doggy" , "Creampie"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Fiesta de Cumpleaños (II)-Comida y Regalos"),
+            "image" : "c19s003_135b",
+            "label" : "c19s003_Gifts",
+            "girls" : [ "Amanda" , "Eva" , "Daphne" , "Kim" , "Kate" , "Debbie" , "Saira" , "Erika" , "Lisa" , "Scarlett" , "Emma" , "Megan" , "Martha" , "Norah" , "Meemaw" , "Betty" , "Kiara" , "Alexia" , "Eileen" , "Maddie" , "Samantha" , "Simone" , "Jamaal" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-La Gran Revelación"),
+            "image" : "c19s004_015a",
+            "label" : "c19s004_PhoneMessage",
+            "girls" : [ "Amanda" , "Eva" , "Daphne" , "Kim" , "Kate" , "Debbie" , "Saira" , "Erika" , "Lisa" , "Scarlett" , "Emma" , "Megan" , "Martha" , "Norah" , "Meemaw" , "Betty" , "Kiara" , "Alexia" , "Eileen" , "Maddie" , "Samantha" , "Simone" , "Jamaal" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Los problemas de Betty"),
+            "image" : "c19s004_225a",
+            "label" : "c19s004_Betty",
+            "girls" : [ "Betty" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Más regalos"),
+            "image" : "c19s004_410a",
+            "label" : "c19s004_AmandaEva",
+            "girls" : [ "Amanda" , "Eva" ],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Conversación con Maddie"),
+            "image" : "c19s004_620ba",
+            "label" : "c19s004_MaddieDebbie",
+            "girls" : [ "Maddie" , "Debbie" ],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Conversación con Meemaw"),
+            "image" : "c19s005_185a",
+            "label" : "c19s005_Meemaw",
+            "girls" : [ "Meemaw" ],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-La historia de Kiara"),
+            "image" : "c19s005_345e",
+            "label" : "c19s005_Kiara",
+            "girls" : [ "Kiara" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Conversación con Kate y Norah"),
+            "image" : "c19s005_600b",
+            "label" : "c19s005_KateNorah",
+            "girls" : [ "Kate" , "Norah" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Conversación con Eileen y Lisa"),
+            "image" : "c19s007_100a",
+            "label" : "c19s007_EileenLisa",
+            "girls" : [ "Lisa" , "Eileen" , "Megan" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Conversación entre Kate y Norah"),
+            "image" : "c19s007_090d",
+            "label" : "c19s007_KateWithNor",
+            "girls" : [ "Kate" , "Norah" ],
+            "kinks" : [ "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Conversación con Megan y Jamaal"),
+            "image" : "c19s007_325b",
+            "label" : "c19s007_MeganJamaal",
+            "girls" : [ "Jamaal" , "Megan" ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-En el Jacuzzi"),
+            "image" : "c19s008_005a",
+            "label" : "c19s006_Alexia",
+            "girls" : [ "Martha" , "Simone" , "Kiara" , "Amanda" , "Eva" , "Kim" , "Eileen" , "Betty" , "Alexia" ],
+            "kinks" : [ "Lewd" , "Reverse Cowgirl" , "Topless" , "Doggy" , "Creampie" , "Voyeur" , "Fingering" , "Handjob" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-Leroy Jenkins"),
+            "image" : "c19s008_035a",
+            "label" : "c19s008_LeeroyJenkins",
+            "girls" : [ "Martha" , "Norah" , "Kiara" , "Amanda" , "Eva" , "Erika" , "Eileen" , "Betty" , "Alexia" , "Betty" , "Emma" , "Debbie" , "Lisa" , "Maddie" , "Scarlett" , "Daphne" ],
+            "kinks" : [  "No sex" , "Topless" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20-DnD Teaser"),
+            "image" : "c19s009_010d",
+            "label" : "c19s009_Teaser",
+            "girls" : [ "Scarlett" , "Daphne" ],
+            "kinks" : [  "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Empezando la partida"),
+            "image" : "c20s001_070a",
+            "label" : "c20s001_Setup",
+            "girls" : [ "Scarlett" , persistent.dap , "Maddie" , persistent.eri , persistent.emm ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Fanáticos en Novum Templum"),
+            "image" : "c20s001_150e",
+            "label" : "c20s001_NovumTemplum",
+            "girls" : [ "Scarlett" , persistent.dap , "Maddie" , persistent.eri , persistent.emm , persistent.mom ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Unas cervezas después"),
+            "image" : "c20s002_015f",
+            "label" : "c20s002_Tavern",
+            "girls" : [ "Scarlett" , persistent.dap , "Maddie" , persistent.eri , persistent.emm , persistent.mom ],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Un Hada en la habitación"),
+            "image" : "c20s003_290a",
+            "label" : "c20s002_AMosquitoe",
+            "girls" : [ "Scarlett" , persistent.dap , "Maddie"],
+            "kinks" : [ "Lewd" , "Cowgirl" , "Topless" , "Creampie" , "Handjob" , "Blowjob" , "Vaginal Sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Ángel y Demonio"),
+            "image" : "c20s003_180d",
+            "label" : "c20s003_DevilAngelTeam",
+            "girls" : [ "Scarlett" , persistent.dap , persistent.eri , persistent.emm , "Maddie" , "Betty" ],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Una monja Semielfa"),
+            "image" : "c20s003_430a",
+            "label" : "c20s003_SexWithPia",
+            "girls" : [ "Scarlett" , persistent.dap ],
+            "kinks" : [ "Lewd" , "Cowgirl" , "Topless" , "Creampie" , "Lesbian" , "Voyeur" , "Vaginal Sex" , "Group Sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Tomando una decisión"),
+            "image" : "c20s003_640a",
+            "label" : "c20s003_SexWithAeliaAndPaula",
+            "girls" : [ "Scarlett" , persistent.dap, persistent.eri , persistent.emm , "Maddie" , "Betty" ],
+            "kinks" : [ "Lewd" , "Cowgirl" , "Topless" , "Creampie" , "Lesbian" , "Voyeur" , "Vaginal Sex", "Group Sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Rechazando a las chicas"),
+            "image" : "c20s003_640b",
+            "label" : "c20s003_RejectAeliaPaula",
+            "girls" : [ "Scarlett" , persistent.dap, persistent.eri , persistent.emm , "Maddie" , "Betty" ],
+            "kinks" : [ "Lewd" , "Cowgirl" , "Topless" , "Creampie" , "Lesbian" , "Voyeur" , "Vaginal Sex", "Group Sex"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Aceptando a las chicas"),
+            "image" : "c20s004_090a",
+            "label" : "c20s004_SexWithAeliaPaula",
+            "girls" : [ "Scarlett" , persistent.dap, persistent.eri , persistent.emm , "Maddie" , "Betty" ],
+            "kinks" : [ "Lewd" , "Froggy" , "Topless" , "Cumshot" , "Lesbian" , "Voyeur" , "Vaginal Sex" , "Group Sex"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - DnD - Fin de partida"),
+            "image" : "c20s004_320c",
+            "label" : "c20s004_Farewell",
+            "girls" : [ "Scarlett" , persistent.dap , persistent.eri , persistent.emm , "Maddie" , "Betty" ],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 20 - Despedidas y planes"),
+            "image" : "c20s005_105a",
+            "label" : "c20s005_EndGameFarewell",
+            "girls" : [ "Scarlett" , persistent.dap , persistent.eri , persistent.emm , "Maddie" , "Betty" , "Kiara"],
+            "kinks" : [ "No sex" , "Topless"],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 21 - Llevando a Maddie a casa"),
+            "image" : "c20s005_215a",
+            "label" : "c20s005_GivingMaddieARide",
+            "girls" : [ "Maddie"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
+        {
+            "title" : _("Día 21 - Aclarando cosas con Kiara"),
+            "image" : "c20s006_160a",
+            "label" : "c20s005_Kia",
+            "girls" : [ "Kiara"],
+            "kinks" : [ "No sex" ],
+            "lewd"  : 10    # not used in this gallery
+        },
