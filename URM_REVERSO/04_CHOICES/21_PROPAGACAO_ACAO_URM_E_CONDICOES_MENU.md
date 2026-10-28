@@ -67,3 +67,9 @@ Em uma fixture descartável no Ren'Py 7.4.11, sem alterar Wells, SDK ou fonte or
 6. Repetir em fixed rollback, comparando a ação com e sem a atribuição URM a `rollback_is_fixed`.
 
 Até esse teste, a seleção de alternativa invisível permanece hipótese de comportamento ponta a ponta, não resultado observado.
+
+## Atualização runtime posterior — 2026-10-28
+
+A pendência indicada acima para alternativa de condição falsa foi resolvida em percursos limitados com o URM original: o doc [41](41_CHOICE_CONDICAO_FALSA_EXECUTADA_PELO_URM.md) observou Choice C com condição literal `False` ser devolvida por ChoiceReturn e seu bloco executar; o doc [42](42_ROLLBACK_APOS_CHOICE_CONDICAO_FALSA.md) observou rollback posterior e reabertura para reescolha.
+
+A conclusão não é “condições sempre ignoradas”. Trata-se da ação direta da tela do URM no contexto/fixture descrito. As variantes de configuração não foram todas cobertas.
