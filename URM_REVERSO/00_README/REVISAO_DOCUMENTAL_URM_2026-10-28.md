@@ -41,7 +41,7 @@ A análise atual confirma que o núcleo prioritário já tem evidência bem alé
 ## Continuidade recomendada
 
 1. Fechar a validação end-to-end do filtro de texto numa Choice realmente exibida, separando texto AST, filtro de menu e texto final renderizado.
-2. Investigar se algum fluxo da interface exporta ou persiste Snapshots fora do save nativo; o teste em processo novo está documentado no doc 53.
+2. A tela original de Snapshots foi inspecionada no doc 53 e não mostra ação de exportação; uma busca mais ampla por extensões externas não faz parte desta etapa.
 3. Completar a matriz de save/load `.urm` + save nativo em ordens diferentes, sem tratar os formatos como equivalentes.
 4. Revisar os módulos restantes do URM por produtor, consumidor, estado, persistência e dependências do SDK.
 5. Comparar outras versões do SDK somente após fechar cada comportamento no 7.4.11.
