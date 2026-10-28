@@ -59,3 +59,18 @@ O usuário confirmou (🟡 observação de testes) que o Walkthrough do Wells es
 A pesquisa principal avançou para `04_CHOICES/12_CIRCUITOS_LEITURA_EDICAO_PESQUISA_PERSISTENCIA.md` (commit `ada15fa`): leitura de valores em `Var.value`, edição em `Var.setValue`, pesquisa em `SearchClass`, arquivos `.urm` (ZIP + JSON), configurações `persistent`/globais, saves nativos e snapshots. Trata-se de **mapa inicial, não conclusão**. O próximo passo prioritário é seguir todos os produtores/consumidores de stores e ações de interface, detalhar a recursão da pesquisa, comprovar reaplicação de dados carregados e cruzar APIs com o SDK 7.4.11. Não confundir edição do store com edição física de scripts, nem `.urm` com save nativo.
 
 **Plano de versões:** completar URM usando somente o SDK 7.4.11 como referência nativa; **após** fechar a investigação, comparar mecanismos com os SDKs 6.99.4 e 8.5.3 presentes no laboratório. Preservar versões como fontes separadas e não misturar semânticas.
+
+## Retomada atual — 2026-10-28
+
+Esta atualização substitui como prioridade imediata os próximos passos antigos deste arquivo. O foco continua sendo Choices, edição de estado, rollback e persistência no SDK 7.4.11; o loader permanece documentado, mas não é o próximo eixo.
+
+Estado verificado:
+- Choices original do URM conseguiu selecionar alternativa com condição falsa e executar o bloco nas fixtures dos docs 41–42.
+- Edição original de variável, rollback e save/load nativo foram observados nos docs 38–47.
+- Persistência em `.urm` foi observada para os stores examinados; o valor geral de gameplay não foi restaurado pelo `.urm` nos casos testados (docs 49–50).
+- Snapshots demonstraram diff superficial para escalares versus containers simples mutados in-place (doc 51).
+- Settings por jogo e globais foram testados em dois processos; substituição de texto foi validada chamando diretamente o callback, sem render final de Menu.
+
+Próximas perguntas: filtro de texto numa Choice renderizada; persistência de Snapshots em save nativo; combinações de ordem entre save/load nativo e `.urm`; lacunas visuais das interfaces. Não comparar SDKs 6.99.4/8.5.3 antes de fechar os contratos do 7.4.11.
+
+Leia [REVISAO_DOCUMENTAL_URM_2026-10-28.md](REVISAO_DOCUMENTAL_URM_2026-10-28.md) para inventário dos 77 documentos, correções e limites atuais.
