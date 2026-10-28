@@ -72,3 +72,7 @@ Essa separação evita tratar uma descoberta do SDK como se fosse código do URM
 A partir da migração de outubro de 2026, o repositório canônico desta engenharia reversa é [`mucholocco86/laborat-rio_renpy`](https://github.com/mucholocco86/laborat-rio_renpy). O repositório anterior [`mucholocco86/modulos`](https://github.com/mucholocco86/modulos) é mantido como origem de comparação/histórico.
 
 A comparação de migração está documentada em [`MIGRACAO_LABORATORIO_COMPARACAO.md`](MIGRACAO_LABORATORIO_COMPARACAO.md). Na comparação-base, antes das novas notas desta migração, a árvore `URM_REVERSO/` estava idêntica por caminho e SHA Git. Depois, foram adicionados/atualizados documentos de continuidade e análise do loader, conforme a seção 6 do relatório. O SDK não é byte a byte idêntico: arquivos-fonte centrais comparados têm SHA igual, mas existem arquivos compilados e materiais adicionais/diferentes no laboratório. Não apagar nem sincronizar essas diferenças automaticamente.
+
+## Revisão transversal — 2026-10-28
+
+Foram auditados 77 documentos Markdown das áreas de documentação. O circuito prioritário agora tem provas runtime integradas para Choice com condição falsa, edição/rollback e save/load nativo, além de testes separados para stores `.urm`, Settings e snapshots. Veja a [revisão documental completa](REVISAO_DOCUMENTAL_URM_2026-10-28.md), que preserva registros cronológicos e separa conclusões comprovadas das pendências.
