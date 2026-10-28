@@ -1,6 +1,6 @@
 # 51 — Snapshots do diff: escalares versus containers mutados in-place
 
-**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliação:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550).
+**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686).
 
 ## Pergunta
 
@@ -44,6 +44,19 @@ Depois da fase in-place, a fixture substituiu a lista e o dicionário por contai
 
 O resultado é coerente com comparação de igualdade no nível superior, não identidade do container: uma nova instância com conteúdo diferente aparece, uma nova instância igual não aparece. Como o primeiro snapshot reteve referências, a mutação interna alterou também o conteúdo visto pelo snapshot antigo; ele já não representa os valores originais `[1, 2]`/`{'a': 1}` para esses containers.
 
+### Ampliação runtime: valor antigo versus atual no editor
+
+A mesma fixture criou um escalar com valor 10, capturou o snapshot, alterou o store atual para 20 e obteve a entrada correspondente por `Snapshots.findChanges()`. O run [40676920686](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) registrou:
+
+~~~text
+URM_SNAPSHOT_PROBE_EDIT_VARS False True 10 20
+URM_SNAPSHOT_PROBE_EDIT_RESULTS False 20 True 30 10
+~~~
+
+A ordem é: `old.isEditable`, `new.isEditable`, valores antigo/atual; depois, resultado da tentativa de editar o antigo, valor atual após essa tentativa, resultado da edição do atual, valor atual depois e leitura antiga final. Portanto o objeto antigo apontou ao dicionário do snapshot (valor 10) e recusou `setValue`; o objeto novo resolveu pelo store atual (20), aceitou 30 e não alterou o valor 10 retido no snapshot.
+
+A ligação visual estática na fonte original confirma que os dois botões da comparação chamam `URM_modify_value` com `var['old']` e `var['new']`. O modal inicializa o campo a partir de `var.value`, usa `var.isEditable` para permitir ou bloquear edição e encaminha a ação a `SetVarValue`. Assim, o lado antigo é apresentado como “View variable” e o atual como “Modify variable”. A fixture executou a API original `Var` e a semântica de edição; não automatizou a interação visual/click do modal.
+
 ## Conclusões e classificação
 
 - **OBSERVADO EM RUNTIME:** `Snapshots.findChanges()` detectou a substituição escalar 10→20.
@@ -51,7 +64,8 @@ O resultado é coerente com comparação de igualdade no nível superior, não i
 - **OBSERVADO EM RUNTIME:** substituir containers por novos conteúdos diferentes foi detectado; substituir por novos containers de conteúdo igual não foi detectado.
 - **CONFIRMADO NO SDK 7.4.11:** `renpy.python.DictItems` em `renpy/pydict.pyx` guarda referências aos objetos valor, sem copiá-los profundamente.
 - **CORROBORADO POR FONTE E RUNTIME:** o mecanismo de snapshots do URM conserva referências superficiais e compara os valores do nível superior por igualdade; não é uma captura histórica profunda de objetos mutáveis.
-- **NÃO TESTADO:** edição via `Var.setValue` neste probe específico; igualdade de containers complexos/customizados; mutações concorrentes ou efeitos colaterais em `__eq__`; integração com os menus originais de snapshots. A persistência nativa da instância foi testada depois no doc 53.
+- **OBSERVADO EM RUNTIME:** `Var.setValue` no objeto antigo associado ao snapshot recusou edição; o objeto novo associado ao store ativo alterou o estado atual e preservou o valor antigo do snapshot.
+- **NÃO TESTADO:** igualdade de containers complexos/customizados; mutações concorrentes ou efeitos colaterais em `__eq__`; integração com os menus originais de snapshots. A persistência nativa da instância foi testada depois no doc 53.
 
 ## Execução inválida anterior
 
