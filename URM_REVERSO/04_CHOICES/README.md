@@ -530,3 +530,7 @@ O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra o run [406584
 - O [mapa 06_VARIABLES/03](../06_VARIABLES/03_MAPA_CANAIS_PERSISTENCIA_URM.md) separa save nativo, arquivo `.urm`, persistent, settings global e snapshots.
 
 **Ainda não comprovado:** renderização end-to-end de Choice com substituição de texto; persistência de Snapshots em save nativo; interação visual completa dos modais de save/load.
+
+### Continuação — TextRepl e identidade estrutural da Choice (2026-10-28)
+
+O [documento 52](52_TEXTREPL_MENU_AST_FILTER_PATH.md) rastreia no SDK 7.4.11 `Menu.execute()` → `say_menu_text_filter` → tupla com índice AST original → processamento de menu → continuação do bloco. Isso confirma que o texto transformado não substitui o índice usado pela seleção. O teste runtime do doc 50 validou o callback chamado diretamente; renderização final na screen segue pendente.
