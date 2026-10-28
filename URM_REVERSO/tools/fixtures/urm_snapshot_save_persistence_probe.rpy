@@ -14,11 +14,18 @@ label urm_snapshot_save_write_start:
     $ x52URM.afterLoad()
     $ x52URM.Settings.lastLoadedFile = None
 
+    menu:
+        "Snapshot persistence checkpoint":
+            pass
+    $ renpy.fix_rollback()
+
     $ assert not x52URM.Snapshots.exists("native-save-probe")
     $ x52URM.Snapshots.create("native-save-probe")
     $ assert x52URM.Snapshots.exists("native-save-probe")
     $ print("URM_SNAPSHOT_SAVE_BEFORE", x52URM.Snapshots.snapshotNames, x52URM.Snapshots.getSnapshotTime("native-save-probe"))
     $ renpy.save("urm-snapshot-native-save-probe", "URM snapshot persistence probe")
+    if renpy.session.get("urm_snapshot_fresh_load_marker", False):
+        jump urm_snapshot_save_verify
     $ print("URM_SNAPSHOT_SAVE_AFTER", x52URM.Snapshots.snapshotNames)
     "Snapshot was created and native save was written."
     $ renpy.quit()
@@ -41,6 +48,7 @@ label urm_snapshot_save_verify:
 
 testcase urm_snapshot_native_save_write:
     run Jump("urm_snapshot_save_write_start")
+    type alt_1
     "Snapshot was created and native save was written."
 
 testcase urm_snapshot_native_save_load:
