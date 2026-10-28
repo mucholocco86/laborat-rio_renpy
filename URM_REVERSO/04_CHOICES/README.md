@@ -519,7 +519,7 @@ O [documento 50](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md) distingue os stor
 
 ### Validação runtime dos snapshots (2026-10-28)
 
-O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra os runs [40658456177](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177) e [40676323550](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550): o diff detectou escalar alterado e containers substituídos por conteúdo diferente; não detectou mutações in-place nem novas listas/dicionários com conteúdo igual. A fixture ampliada usa checagens explícitas. O mesmo doc valida que o objeto `Var` antigo é somente leitura e o objeto atual pode editar o store; a ligação à screen foi confirmada estaticamente, sem clique automatizado. O documento 53 trata separadamente da persistência no save nativo.
+O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra os runs [40658456177](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177) e [40676323550](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550): o diff detectou escalar alterado e containers substituídos por conteúdo diferente; não detectou mutações in-place nem novas listas/dicionários com conteúdo igual. A fixture ampliada usa checagens explícitas. O mesmo doc valida que o objeto `Var` antigo é somente leitura e o atual pode editar o store; valores ausentes retornam `None`, e uma variável removida não é recriada por `setValue`. A ligação à screen foi confirmada estaticamente, sem clique automatizado. O documento 53 trata separadamente da persistência no save nativo.
 
 ## Consolidação de persistência — atualização 2026-10-28
 
