@@ -512,3 +512,8 @@ O [documento 49](49_PERSISTENCIA_URM_RUNTIME_STORES_E_ESTADO.md) registra o run 
 ### Continuação — labels, substituições de texto e snapshots
 
 O [documento 50](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md) distingue os stores `.urm` `labels` (nomes lembrados), `replacements` (regras de filtro de apresentação) e o recurso `Snapshots` (tabela de variáveis guardada em memória, fora dos stores `.urm`). A leitura do SDK `pydict.pyx` mostra que `DictItems.as_dict()` preserva referências a valores, sem cópia profunda; efeitos para listas/dicionários mutados in-place são uma inferência estática e seguem pendentes de runtime.
+
+
+### Validação runtime dos snapshots (2026-10-28)
+
+O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra o run [40658456177](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177): `Snapshots.findChanges()` detectou a substituição do escalar 10→20, mas não listou a lista/dicionário após mutações in-place, embora os novos conteúdos fossem `[9, 2]` e `{a: 9}`. O primeiro probe não alterou os valores e foi excluído como evidência; a execução corrigida confirmou os valores antes do diff. A prova não cobre substituição integral de containers ou persistência de snapshots em save nativo.
