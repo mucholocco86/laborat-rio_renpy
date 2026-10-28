@@ -1,6 +1,6 @@
 # 51 — Snapshots do diff: escalares versus containers mutados in-place
 
-**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686).
+**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) e [40677490829 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829).
 
 ## Pergunta
 
@@ -57,6 +57,20 @@ A ordem é: `old.isEditable`, `new.isEditable`, valores antigo/atual; depois, re
 
 A ligação visual estática na fonte original confirma que os dois botões da comparação chamam `URM_modify_value` com `var['old']` e `var['new']`. O modal inicializa o campo a partir de `var.value`, usa `var.isEditable` para permitir ou bloquear edição e encaminha a ação a `SetVarValue`. Assim, o lado antigo é apresentado como “View variable” e o atual como “Modify variable”. A fixture executou a API original `Var` e a semântica de edição; não automatizou a interação visual/click do modal.
 
+### Ampliação runtime: variáveis adicionadas e removidas
+
+O run [40677490829](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829) testou dois casos adicionais:
+
+~~~text
+URM_SNAPSHOT_PROBE_DELETED_VAR 41 None False True unknown False False
+URM_SNAPSHOT_PROBE_ADDED_VAR None 7 False True unknown False True 8 None
+~~~
+
+- **Removida após o snapshot:** o objeto antigo lê 41 e é somente leitura. O objeto novo lê `None`, é marcado editável por não ter `storeDict` explícito, mas seu tipo é `unknown`; `setValue("42")` retorna False e a variável continua ausente. Na screen, a fonte mostra que “Change” só aparece para string, boolean, int ou float; o caso `unknown` não oferece esse botão. O teste não clicou no botão “Delete” disponível nem mediu sua interação visual.
+- **Adicionada após o snapshot:** o objeto antigo lê `None`, é somente leitura e tipo `unknown`. O objeto novo lê 7 e é editável; `setValue("8")` retorna True, muda o store atual para 8 e o antigo segue lendo `None`.
+
+Isso delimita a comparação: diferenças de presença são listadas, mas o lado ausente é uma projeção `Var` com valor `None`, não uma operação de criação/exclusão automática. A edição do estado atual só funciona quando a variável existe e tem tipo suportado.
+
 ## Conclusões e classificação
 
 - **OBSERVADO EM RUNTIME:** `Snapshots.findChanges()` detectou a substituição escalar 10→20.
@@ -65,6 +79,7 @@ A ligação visual estática na fonte original confirma que os dois botões da c
 - **CONFIRMADO NO SDK 7.4.11:** `renpy.python.DictItems` em `renpy/pydict.pyx` guarda referências aos objetos valor, sem copiá-los profundamente.
 - **CORROBORADO POR FONTE E RUNTIME:** o mecanismo de snapshots do URM conserva referências superficiais e compara os valores do nível superior por igualdade; não é uma captura histórica profunda de objetos mutáveis.
 - **OBSERVADO EM RUNTIME:** `Var.setValue` no objeto antigo associado ao snapshot recusou edição; o objeto novo associado ao store ativo alterou o estado atual e preservou o valor antigo do snapshot.
+- **OBSERVADO EM RUNTIME:** variáveis adicionadas/removidas aparecem com os lados ausentes como `None`; o objeto atual de uma variável removida não a recria via `setValue`, enquanto o lado atual de uma variável adicionada pode ser editado.
 - **NÃO TESTADO:** igualdade de containers complexos/customizados; mutações concorrentes ou efeitos colaterais em `__eq__`; integração com os menus originais de snapshots. A persistência nativa da instância foi testada depois no doc 53.
 
 ## Execução inválida anterior
