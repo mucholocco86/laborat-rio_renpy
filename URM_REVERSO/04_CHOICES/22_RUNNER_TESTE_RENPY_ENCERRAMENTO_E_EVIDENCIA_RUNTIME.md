@@ -395,3 +395,9 @@ Isso sustenta a distinção do usuário entre alteração ativa no estado do jog
 ### Próxima etapa
 
 A cronologia do StoreMonitor continua sem prova de runtime. O próximo experimento deve instrumentar a sequência exata: ação de screen altera store/container; interação seguinte executa nó Python; callback python_callbacks do URM é chamado; Context.force_checkpoint é transferido ao RollbackLog; rollback/save fecha o registro. Compare com a mesma sequência sem o monitor e não atribua ao monitor a reversão nativa já observada.
+
+## Atualização de cobertura — 2026-10-28
+
+O estado do cabeçalho corresponde à primeira fase do runner, em 2026-10-16. Os contratos reduzidos deste documento continuam úteis para isolar o SDK. As pendências de integração com URM original foram parcialmente cobertas depois: docs [36](36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md), [38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md), [41](41_CHOICE_CONDICAO_FALSA_EXECUTADA_PELO_URM.md)–[47](47_SAVE_LOAD_CHOICE_PROCESSO_NOVO.md) exercitam telas/classes originais em jogo descartável, rollback e save/load. Docs [49](49_PERSISTENCIA_URM_RUNTIME_STORES_E_ESTADO.md)–[51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) cobrem persistência de stores e snapshots.
+
+Isso não fecha a integração visual de Gamesaves, o clique físico do hyperlink CodeView, o render final de substituições de texto, nem toda mutação de variável/container. Consulte cada documento posterior para a fronteira de evidência; o cabeçalho original é histórico, não o status geral atual.
