@@ -370,3 +370,15 @@ CHOICE NOVAMENTE
 ```
 
 Não reconstruir URW. Não criar segundo Ren'Py. Não criar segundo executor. Não criar segundo rollback. Não modificar `wells/`, SDK ou `__urw`.
+
+## Adendo de continuidade — engenharia reversa URM em 2026-10-28
+
+O manifesto original registra o contexto da transferência. Desde então, o eixo Choices/estado/rollback avançou para testes integrados com o URM original no Ren'Py 7.4.11. As conclusões mais recentes estão nos docs `04_CHOICES/36–51` e `06_VARIABLES/02–03`; pendências antigas neste manifesto são históricas e não substituem esses resultados.
+
+- Choice com condição literal falsa foi selecionada pela tela original URM e seu bloco executou nos cenários 41–42.
+- Edição pelo URM entrou no histórico nativo e foi desfeita por rollback em cenários controlados; callback do StoreMonitor é um circuito distinto.
+- Save nativo restaurou variável e rota em processo novo (doc 47).
+- `.urm` restaurou metadados/configurações próprios dos stores testados, não snapshot geral de gameplay.
+- Snapshots não equivalem a rollback; o diff não listou mutações in-place nos containers simples testados.
+
+A [revisão documental de 2026-10-28](REVISAO_DOCUMENTAL_URM_2026-10-28.md) relaciona os 77 documentos revisados, atualizações feitas e questões abertas.
