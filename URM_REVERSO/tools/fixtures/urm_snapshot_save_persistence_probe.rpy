@@ -13,6 +13,9 @@ label urm_snapshot_save_write_start:
     $ x52URM.States.updateNotificationShown = True
     $ x52URM.afterLoad()
     $ x52URM.Settings.lastLoadedFile = None
+    $ renpy.config.fix_rollback_without_choice = False
+    $ renpy.game.context().rollback = True
+    $ renpy.store._rollback = True
 
     "Checkpoint before snapshot save."
     $ renpy.fix_rollback()
