@@ -133,3 +133,9 @@ Até esses testes, não atribuir um checkpoint específico à edição feita dur
 ## Continuação — inspeção estática de save/load (2026-10-16)
 
 O fluxo nativo de serialização e restauração do RollbackLog foi examinado em seguida, junto ao callback de Python do SDK e ao autoLoad dos arquivos URM. Consulte [02 — Save/load do SDK e persistência própria do URM](../06_RENPY_COMPATIBILITY/02_SDK_SAVELOAD_URM_PERSISTENCIA.md). A distinção entre save nativo e arquivo .urm está documentada; testes runtime e o ciclo completo de persistent/settings continuam pendentes.
+
+## Atualização runtime posterior — 2026-10-28
+
+Este documento registra corretamente a etapa estática inicial. A integração original do URM com o SDK 7.4.11 foi testada depois: docs [36](36_CHOICES_ORIGINAL_URM_FIXED_ROLLBACK_RUNTIME.md), [38](38_EDICAO_VARIAVEL_URM_ROLLBACK_RUNTIME.md), [41](41_CHOICE_CONDICAO_FALSA_EXECUTADA_PELO_URM.md) e [42](42_ROLLBACK_APOS_CHOICE_CONDICAO_FALSA.md) cobrem abertura da tela durante fixed rollback, seleção de condição falsa, execução do bloco e rollback nos roteiros descritos. Docs [46–47](47_SAVE_LOAD_CHOICE_PROCESSO_NOVO.md) cobrem save/load nativo.
+
+Esses resultados resolvem somente os casos executados. Não demonstram todas as combinações de configuração, nem equivalência com outros SDKs.
