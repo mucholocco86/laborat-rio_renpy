@@ -63,7 +63,8 @@ No runtime, `textboxesEnabled=True` foi salvo em persistent e `quickmenuEnabled=
 - **OBSERVADO EM RUNTIME:** `.urm` restaurou metadados dos quatro stores `vars`, `watched`, `labels`, `replacements` e `textboxCustomizations` em fixtures isoladas; a regra de substituição foi chamada após load.
 - **OBSERVADO EM RUNTIME:** dois modos de Settings, persistent por jogo e arquivo global, foram recuperados em processo Ren'Py novo.
 - **OBSERVADO EM RUNTIME:** save nativo restaurou condição dinâmica/rota de Choice nas fixtures dos docs 46–47.
-- **PENDENTE:** integração visual de todas as telas de salvar/carregar `.urm`; renderização final do customizer; interação completa com stores `labels`/`replacements` via interface; persistência de snapshots no save nativo; comparação desses detalhes em outros SDKs.
+- **OBSERVADO EM RUNTIME:** após criar um Snapshots e gravar/carregar save nativo em processo novo, o singleton começou e permaneceu vazio após load, enquanto um valor de gameplay foi restaurado. Doc 53/run 40670191468.
+- **PENDENTE:** integração visual de todas as telas de salvar/carregar `.urm`; renderização final do customizer; interação completa com stores `labels`/`replacements` via interface; comparação desses detalhes em outros SDKs.
 
 ## Fontes principais
 
