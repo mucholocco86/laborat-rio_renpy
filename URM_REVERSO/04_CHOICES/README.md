@@ -507,3 +507,8 @@ O [documento 48](48_FRONTEIRA_PERSISTENCIA_SAVE_NATIVO_E_URM.md) registra inspe�
 ### Validação runtime — stores próprios do .urm
 
 O [documento 49](49_PERSISTENCIA_URM_RUNTIME_STORES_E_ESTADO.md) registra o run [40657558715](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40657558715), SUCCESS, em dois processos Ren'Py 7.4.11 com o URM original. `URMFiles.save()` gerou ZIP com `properties`, `vars` e `watched`; o JSON guardou nome/freeze/monitor/watch, não o valor de gameplay 7. Em outro processo, `URMFiles.load()` restaurou esses metadados e a variável permaneceu no default 0. O teste usa os métodos originais diretamente, sem automação da interface gráfica. Fixture e workflow: `tools/fixtures/urm_file_persistence_probe.rpy` e `.github/workflows/urm-file-persistence-probe.yml`.
+
+
+### Continuação — labels, substituições de texto e snapshots
+
+O [documento 50](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md) distingue os stores `.urm` `labels` (nomes lembrados), `replacements` (regras de filtro de apresentação) e o recurso `Snapshots` (tabela de variáveis guardada em memória, fora dos stores `.urm`). A leitura do SDK `pydict.pyx` mostra que `DictItems.as_dict()` preserva referências a valores, sem cópia profunda; efeitos para listas/dicionários mutados in-place são uma inferência estática e seguem pendentes de runtime.
