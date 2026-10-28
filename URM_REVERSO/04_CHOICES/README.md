@@ -1,5 +1,8 @@
 # Choices — sistema completo identificado até agora
 
+> **Estado consolidado em 2026-10-28:** a investigação passou de leitura estática a runtime integrado com o URM original no Ren'Py 7.4.11. A tela do URM selecionou uma Choice de condição falsa e executou seu bloco (docs 41–42); edição de variável, rollback e save/load nativo foram observados em percursos específicos (docs 38–47). Stores `.urm` e Snapshots foram examinados em runtime nos docs 49–51. Pendências abaixo registram o estado da etapa original e devem ser lidas junto com os resultados posteriores e a [revisão documental](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md).
+
+
 ## Estado da investigação
 
 A análise do sistema de Choices avançou de uma simples identificação de `ChoicesClass` para um modelo arquitetural mais completo: **AST/Choice estrutural**, **estado dinâmico**, **seleção real**, **checkpoint**, **rollback**, **Context** e **estrutura interna dos blocos AST** são canais relacionados, mas não são a mesma coisa.
@@ -517,3 +520,13 @@ O [documento 50](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md) distingue os stor
 ### Validação runtime dos snapshots (2026-10-28)
 
 O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra o run [40658456177](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177): `Snapshots.findChanges()` detectou a substituição do escalar 10→20, mas não listou a lista/dicionário após mutações in-place, embora os novos conteúdos fossem `[9, 2]` e `{a: 9}`. O primeiro probe não alterou os valores e foi excluído como evidência; a execução corrigida confirmou os valores antes do diff. A prova não cobre substituição integral de containers ou persistência de snapshots em save nativo.
+
+## Consolidação de persistência — atualização 2026-10-28
+
+- [48 — fronteira entre save nativo e `.urm`](48_FRONTEIRA_PERSISTENCIA_SAVE_NATIVO_E_URM.md), atualizado com provas runtime posteriores.
+- [49 — stores `.urm` e estado de gameplay](49_PERSISTENCIA_URM_RUNTIME_STORES_E_ESTADO.md): metadados URM restaurados em processo novo; o valor de gameplay ficou no default.
+- [50 — labels, replacements e snapshots](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md): labels/replacements persistiram; regra carregada foi aplicada ao chamar diretamente o filtro; status atualizado com runtime.
+- [51 — diff de snapshots](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md): escalar substituído detectado; mutações in-place simples não listadas no diff.
+- O [mapa 06_VARIABLES/03](../06_VARIABLES/03_MAPA_CANAIS_PERSISTENCIA_URM.md) separa save nativo, arquivo `.urm`, persistent, settings global e snapshots.
+
+**Ainda não comprovado:** renderização end-to-end de Choice com substituição de texto; persistência de Snapshots em save nativo; interação visual completa dos modais de save/load.
