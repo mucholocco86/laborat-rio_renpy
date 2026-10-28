@@ -73,4 +73,4 @@ Estado verificado:
 
 Próximas perguntas: filtro de texto numa Choice renderizada; persistência de Snapshots em save nativo; combinações de ordem entre save/load nativo e `.urm`; lacunas visuais das interfaces. Não comparar SDKs 6.99.4/8.5.3 antes de fechar os contratos do 7.4.11.
 
-Leia [REVISAO_DOCUMENTAL_URM_2026-10-28.md](REVISAO_DOCUMENTAL_URM_2026-10-28.md) para inventário dos 77 documentos, correções e limites atuais.
+O doc 52 confirma pela fonte SDK que `Menu.execute()` chama `say_menu_text_filter` e preserva o índice original como valor; o teste pendente agora é observar a renderização efetiva da Choice.\n\nLeia [REVISAO_DOCUMENTAL_URM_2026-10-28.md](REVISAO_DOCUMENTAL_URM_2026-10-28.md) para inventário dos 77 documentos, correções e limites atuais.
