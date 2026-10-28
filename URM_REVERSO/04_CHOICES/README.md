@@ -1,6 +1,6 @@
 # Choices — sistema completo identificado até agora
 
-> **Estado consolidado em 2026-10-28:** a investigação passou de leitura estática a runtime integrado com o URM original no Ren'Py 7.4.11. A tela do URM selecionou uma Choice de condição falsa e executou seu bloco (docs 41–42); edição de variável, rollback e save/load nativo foram observados em percursos específicos (docs 38–47). Stores `.urm` e Snapshots foram examinados em runtime nos docs 49–51. Pendências abaixo registram o estado da etapa original e devem ser lidas junto com os resultados posteriores e a [revisão documental](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md).
+> **Estado consolidado em 2026-10-28:** a investigação passou de leitura estática a runtime integrado com o URM original no Ren'Py 7.4.11. A tela do URM selecionou uma Choice de condição falsa e executou seu bloco (docs 41–42); edição de variável, rollback e save/load nativo foram observados em percursos específicos (docs 38–47). Stores `.urm` e Snapshots foram examinados em runtime nos docs 49–53. Pendências abaixo registram o estado da etapa original e devem ser lidas junto com os resultados posteriores e a [revisão documental](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md).
 
 
 ## Estado da investigação
