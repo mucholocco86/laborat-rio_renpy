@@ -1,4 +1,4 @@
-# Isolated runtime probe for URM Snapshots shallow values.
+# Isolated runtime probe for URM Snapshots shallow values and equality comparison.
 default urm_snapshot_probe_scalar = 10
 default urm_snapshot_probe_list = [1, 2]
 default urm_snapshot_probe_dict = {"a": 1}
@@ -19,11 +19,24 @@ label urm_snapshot_probe_start:
     $ print("URM_SNAPSHOT_PROBE_AFTER_MUTATION", renpy.store.urm_snapshot_probe_scalar, renpy.store.urm_snapshot_probe_list, renpy.store.urm_snapshot_probe_dict)
     $ changed = x52URM.Snapshots.findChanges("shallow-probe")
     $ names = sorted([entry["old"].name for entry in changed])
-    $ print("URM_SNAPSHOT_PROBE_VALUES", urm_snapshot_probe_scalar, urm_snapshot_probe_list, urm_snapshot_probe_dict)
     $ print("URM_SNAPSHOT_PROBE_CHANGED_NAMES", names)
-    $ assert "urm_snapshot_probe_scalar" in names
-    $ assert "urm_snapshot_probe_list" not in names
-    $ assert "urm_snapshot_probe_dict" not in names
+    $ assert names == ["urm_snapshot_probe_scalar"]
+
+    $ renpy.store.urm_snapshot_probe_list = [3, 4]
+    $ renpy.store.urm_snapshot_probe_dict = {"a": 3}
+    $ changed_after_replacement = x52URM.Snapshots.findChanges("shallow-probe")
+    $ replacement_names = sorted([entry["old"].name for entry in changed_after_replacement])
+    $ print("URM_SNAPSHOT_PROBE_REPLACED_NAMES", replacement_names)
+    $ assert replacement_names == ["urm_snapshot_probe_dict", "urm_snapshot_probe_list", "urm_snapshot_probe_scalar"]
+
+    $ x52URM.Snapshots.create("equal-content-probe")
+    $ renpy.store.urm_snapshot_probe_list = [3, 4]
+    $ renpy.store.urm_snapshot_probe_dict = {"a": 3}
+    $ changed_equal_content = x52URM.Snapshots.findChanges("equal-content-probe")
+    $ equal_content_names = sorted([entry["old"].name for entry in changed_equal_content])
+    $ print("URM_SNAPSHOT_PROBE_EQUAL_CONTENT_NAMES", equal_content_names)
+    $ assert equal_content_names == []
+
     "URM snapshot shallow-reference probe completed."
     $ renpy.quit()
 
