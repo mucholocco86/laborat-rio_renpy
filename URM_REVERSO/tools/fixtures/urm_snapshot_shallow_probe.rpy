@@ -3,6 +3,7 @@ default urm_snapshot_probe_scalar = 10
 default urm_snapshot_probe_list = [1, 2]
 default urm_snapshot_probe_dict = {"a": 1}
 default urm_snapshot_probe_deleted = 41
+default urm_snapshot_probe_none_deleted = None
 
 label urm_snapshot_probe_start:
     $ x52URM.Settings.seenWelcome = 2
@@ -111,6 +112,15 @@ label urm_snapshot_probe_start:
     $ if pair_summary != (1, 2, 11, None, None, 22): raise Exception("unexpected snapshot pair values: {}".format(pair_summary))
     $ if pair_editable != (False, False, False, False, False, False): raise Exception("snapshot pair Var unexpectedly editable: {}".format(pair_editable))
     $ if pair_edit_old or pair_edit_new or renpy.store.urm_snapshot_probe_pair_common != 2: raise Exception("snapshot pair editor changed a snapshot or gameplay value")
+
+    $ x52URM.Snapshots.create("none-a")
+    $ delattr(renpy.store, "urm_snapshot_probe_none_deleted")
+    $ x52URM.Snapshots.create("none-b")
+    $ none_changes = x52URM.Snapshots.findChanges("none-a", "none-b")
+    $ none_entry = [entry for entry in none_changes if entry["old"].name == "urm_snapshot_probe_none_deleted"][0]
+    $ none_pair = (none_entry["old"].value, none_entry["new"].value, none_entry["old"].varType, none_entry["new"].varType, "urm_snapshot_probe_none_deleted" in none_entry["old"].storeDict, "urm_snapshot_probe_none_deleted" in none_entry["new"].storeDict)
+    $ print("URM_SNAPSHOT_PROBE_NONE_VS_ABSENT", none_pair)
+    $ if none_pair != (None, None, "unknown", "unknown", True, False): raise Exception("None and absent comparison did not match expected result: {}".format(none_pair))
 
     "URM snapshot shallow-reference probe completed."
     $ renpy.quit()
