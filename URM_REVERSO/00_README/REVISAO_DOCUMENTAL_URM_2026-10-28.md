@@ -1,10 +1,12 @@
 # Revisão documental do URM — estado em 2026-10-28
 
 **Repositório:** [mucholocco86/laborat-rio_renpy](https://github.com/mucholocco86/laborat-rio_renpy)  
-**Escopo auditado:** 77 documentos Markdown nas áreas de documentação de `URM_REVERSO` listadas abaixo.  
+**Escopo auditado:** 78 documentos Markdown nas áreas de documentação de `URM_REVERSO` listadas abaixo.  
 **Método:** conferência do inventário, dos índices, das classificações de evidência e das afirmações de pendência contra os documentos e execuções posteriores até 2026-10-28. Os registros de cada experimento permanecem cronológicos; quando uma conclusão antiga foi superada, a atualização aponta para a evidência posterior em vez de apagar o histórico.
 
 ## Resultado da revisão
+
+**Adição após a primeira auditoria:** o doc 52 examina no SDK como `Menu.execute()` aplica `say_menu_text_filter` antes de passar o índice AST como valor da alternativa. Isso confirma estaticamente que alterações de texto e identidade estrutural são camadas separadas; o texto final renderizado continua pendente de validação runtime.
 
 A análise atual confirma que o núcleo prioritário já tem evidência bem além da inspeção estática inicial:
 
@@ -45,7 +47,7 @@ A análise atual confirma que o núcleo prioritário já tem evidência bem alé
 
 ## Inventário revisado
 
-O inventário abaixo identifica os 77 documentos Markdown incluídos nesta revisão. As notas em si permanecem como registros técnicos cronológicos; os índices e correções acima indicam quando evidência posterior amplia ou substitui uma pendência antiga.
+O inventário abaixo identifica os 78 documentos Markdown incluídos nesta revisão. As notas em si permanecem como registros técnicos cronológicos; os índices e correções acima indicam quando evidência posterior amplia ou substitui uma pendência antiga.
 
 
 ### 00_README
@@ -62,6 +64,7 @@ O inventário abaixo identifica os 77 documentos Markdown incluídos nesta revis
 
 ### 04_CHOICES
 
+- `52_TEXTREPL_MENU_AST_FILTER_PATH.md`
 - `01_FLUXO_CHOICE_ROLLBACK.md`
 - `02_LIMITES_E_CASOS_ESPECIAIS.md`
 - `03_AST_MENU_BLOCOS_CALL_IF_JUMP.md`
