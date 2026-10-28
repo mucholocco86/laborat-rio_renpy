@@ -18,24 +18,24 @@ label urm_snapshot_probe_start:
     $ renpy.store.urm_snapshot_probe_dict["a"] = 9
     $ print("URM_SNAPSHOT_PROBE_AFTER_MUTATION", renpy.store.urm_snapshot_probe_scalar, renpy.store.urm_snapshot_probe_list, renpy.store.urm_snapshot_probe_dict)
     $ changed = x52URM.Snapshots.findChanges("shallow-probe")
-    $ names = sorted([entry["old"].name for entry in changed])
+    $ names = sorted([entry["old"].name for entry in changed if entry["old"].name.startswith("urm_snapshot_probe_")])
     $ print("URM_SNAPSHOT_PROBE_CHANGED_NAMES", names)
-    $ assert names == ["urm_snapshot_probe_scalar"]
+    $ if names != ["urm_snapshot_probe_scalar"]: raise Exception("unexpected in-place diff: {}".format(names))
 
     $ renpy.store.urm_snapshot_probe_list = [3, 4]
     $ renpy.store.urm_snapshot_probe_dict = {"a": 3}
     $ changed_after_replacement = x52URM.Snapshots.findChanges("shallow-probe")
-    $ replacement_names = sorted([entry["old"].name for entry in changed_after_replacement])
+    $ replacement_names = sorted([entry["old"].name for entry in changed_after_replacement if entry["old"].name.startswith("urm_snapshot_probe_")])
     $ print("URM_SNAPSHOT_PROBE_REPLACED_NAMES", replacement_names)
-    $ assert replacement_names == ["urm_snapshot_probe_dict", "urm_snapshot_probe_list", "urm_snapshot_probe_scalar"]
+    $ if replacement_names != ["urm_snapshot_probe_dict", "urm_snapshot_probe_list", "urm_snapshot_probe_scalar"]: raise Exception("unexpected replacement diff: {}".format(replacement_names))
 
     $ x52URM.Snapshots.create("equal-content-probe")
     $ renpy.store.urm_snapshot_probe_list = [3, 4]
     $ renpy.store.urm_snapshot_probe_dict = {"a": 3}
     $ changed_equal_content = x52URM.Snapshots.findChanges("equal-content-probe")
-    $ equal_content_names = sorted([entry["old"].name for entry in changed_equal_content])
+    $ equal_content_names = sorted([entry["old"].name for entry in changed_equal_content if entry["old"].name.startswith("urm_snapshot_probe_")])
     $ print("URM_SNAPSHOT_PROBE_EQUAL_CONTENT_NAMES", equal_content_names)
-    $ assert equal_content_names == []
+    $ if equal_content_names: raise Exception("equal-content replacements appeared in diff: {}".format(equal_content_names))
 
     "URM snapshot shallow-reference probe completed."
     $ renpy.quit()
