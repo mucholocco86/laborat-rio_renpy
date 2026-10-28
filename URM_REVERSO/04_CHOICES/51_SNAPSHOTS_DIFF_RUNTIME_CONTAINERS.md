@@ -1,6 +1,6 @@
 # 51 — Snapshots do diff: escalares versus containers mutados in-place
 
-**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) e [40677490829 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829) e [40677934414 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677934414).
+**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) e [40677490829 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829) e [40677934414 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677934414) e [40678157016 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40678157016).
 
 ## Pergunta
 
@@ -85,6 +85,16 @@ Os dois lados guardam referências aos dicionários dos snapshots; logo, todos o
 
 Na tela, a comparação de dois snapshots passa seus nomes para `URM_snapshots_comparison(old, new)`, que chama `findChanges(old, new)`. Os botões antigo/novo abrem o mesmo `URM_modify_value`; como ambos os dicionários são explícitos, a regra `isEditable` classifica ambos como visualização. A tela foi inspecionada estaticamente; o run verificou a API em runtime, não cliques nem renderização.
 
+### Ampliação runtime: valor real `None` versus chave ausente
+
+No run [40678157016](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40678157016), a fixture capturou uma chave cujo valor era Python `None`, removeu a chave e comparou os dois snapshots:
+
+~~~text
+URM_SNAPSHOT_PROBE_NONE_VS_ABSENT (None, None, 'unknown', 'unknown', True, False)
+~~~
+
+A tupla registra valores antigo/novo, tipos antigo/novo e a presença da chave nos dicionários antigo/novo. O diff distinguiu a mudança de presença e listou a variável, mas os dois objetos `Var` retornaram valor `None` e tipo `unknown`. A tela usa `getButtonValue()`, que para tipo desconhecido exibe o próprio rótulo do tipo; assim, as duas colunas não comunicam visualmente que uma chave existia com valor `None` e a outra estava ausente. Essa conclusão combina o resultado runtime com a implementação da fonte; a renderização de tela não foi automatizada.
+
 ## Conclusões e classificação
 
 - **OBSERVADO EM RUNTIME:** `Snapshots.findChanges()` detectou a substituição escalar 10→20.
@@ -95,6 +105,7 @@ Na tela, a comparação de dois snapshots passa seus nomes para `URM_snapshots_c
 - **OBSERVADO EM RUNTIME:** `Var.setValue` no objeto antigo associado ao snapshot recusou edição; o objeto novo associado ao store ativo alterou o estado atual e preservou o valor antigo do snapshot.
 - **OBSERVADO EM RUNTIME:** variáveis adicionadas/removidas aparecem com os lados ausentes como `None`; o objeto atual de uma variável removida não a recria via `setValue`, enquanto o lado atual de uma variável adicionada pode ser editado.
 - **OBSERVADO EM RUNTIME:** em comparação entre dois snapshots, os objetos `Var` dos dois lados são somente leitura, valores das chaves preservadas são distintos e chaves ausentes são representadas por `None`.
+- **OBSERVADO EM RUNTIME:** uma chave cujo valor armazenado era `None` e depois foi removida aparece como `None/unknown` nos dois lados; a presença difere nos dicionários, mas não é exposta pelo objeto `Var.value`/tipo.
 - **NÃO TESTADO:** igualdade de containers complexos/customizados; mutações concorrentes ou efeitos colaterais em `__eq__`; integração com os menus originais de snapshots. A persistência nativa da instância foi testada depois no doc 53.
 
 ## Execução inválida anterior
