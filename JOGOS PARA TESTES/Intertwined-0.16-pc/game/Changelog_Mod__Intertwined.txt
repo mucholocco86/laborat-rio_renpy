@@ -1,0 +1,201 @@
+Mod changelog for the game "Intertwined"
+========================================
+
+v0.16 (Oct. 9, 2026):
+- updated my Mod for the new bugfix game version v0.16
+
+v0.15.5 (July 20, 2026):
+- updated my Mod for the new bugfix game version v0.15.5
+
+v0.15.4 (May 20, 2026):
+- updated my Mod for the new bugfix game version v0.15.4
+
+v0.15.3 (May 15, 2026):
+- updated my Mod for the new bugfix game version v0.15.3
+
+v0.15.2 (May 12, 2026):
+- updated my Mod for the new bugfix game version v0.15.2
+
+v0.15.1c (May 11, 2026):
+- updated my Mod for the new bugfix game version v0.15.1 from May 11, 2026
+
+v0.15.1b (May 10, 2026):
+- updated my Mod for the new bugfix game version v0.15.1 from May 10, 2026
+
+v0.15.1 (May 9, 2026):
+- updated my Mod for the new game version v0.15.1
+- some Mod UI changes
+- re-added the "auto choice hints"
+
+v0.14 (May 27, 2025):
+- updated my Mod for the new game version v0.14
+- some small Mod UI changes
+
+v0.13.2 (Jan. 13, 2025):
+- updated my Mod for the new, bugfixed game version v0.13.2
+- adpated my gallery unlocker (to be compatible to the one from scrappy again)
+
+v0.13 (Dec. 21, 2024):
+- updated my Mod for the new game version v0.13 / EP13
+
+v0.12.1 (Feb. 17, 2024):
+- updated my Mod for the new game version v0.12.1 / EP12
+
+v0.11.2 (Aug. 26, 2023):
+- updated my Mod for the bugfixed game version v0.11.2
+
+v0.11a (Aug. 20, 2023):
+- added MC renaming again (available in the "Additional game settings" in my full Mod menu)
+
+v0.11 (Aug. 19, 2023):
+- quick-update for my Chet-Mod to be compatible to the game version v0.11 / Ep11
+- updated the gallery unlocker
+- added enhanced Quick menu settings
+
+v0.10.5a (Jan. 22, 2023):
+- made my Mod compatible to the WT Mod from scrappy
+- added an option to rename the MC in the gallery
+
+v0.10.5 (Jan. 8, 2023):
+- updated my Mod for the new reworked game version v0.10.5 / Ep10
+
+
+
+
+
+
+Old changelogs before the game rework v0.10.5:
+==============================================
+
+v0.10Cheat (Nov.5, 2022):
+- updated my Mod for the new game version v0.10 / Ep10
+- added add. game settings (main game has now a compatible RePy version)
+
+v0.9Cheat (Mai 1, 2022):
+- updated my Mod for the new game version v0.9 / Ep9
+- adapted the game save dialog
+
+v0.8_cheat:
+- updated my Mod for the new game version v0.8
+- some Mod UI adjustments (background pic etc)
+- new: named saves function
+- new: quick menu settings
+- new: shortcut key for my Mod menu ("Shift" + "k")
+
+v0.7b_cheat:
+- Mod UI overhaul
+
+v0.7a_cheat:
+- bugfix (changing the game points was disabled for new games)
+- added the ability to set choices/variables even they are not set in the game
+  (click on the greyed "n/a", then it is set to "False")
+
+v0.7_cheat:
+- first "cheat only" Mod for the game version v0.7
+
+
+v0.6a:
+- Bugfix (EP4)
+
+v0.6:
+- finished the music and audio for the new game content 0.6
+- some Mod menu corrections
+
+v0.6pre/v0.6pre2:
+- finished the walkthrough and the cheating for the new game content 0.6
+- compatibility update for my Mod v0.5.5b to the game version v0.6
+- some minor Mod menu changes
+
+v0.5.5c1
+- bugfix for EP4
+
+v0.5.5c
+- bugfix (typo in EP4: "MusicLakelyn1" -> "MusicLakeyn1")
+
+v0.5.5b Reworked the complete Mod for the revamped game version 0.5.5!
+   - integrated music and audio effects again
+   - integrated the walkthrough again
+   - reworked the info screen for the game points
+   - integrated the cheating function for the game variables again + rework
+
+   - New: Integrated a Mod menu button into the game quick menu
+     (with that maybe saves without my Mod can be used)
+   - New: a Route change option to temporarly show the content of 
+     some events from side girls/plots without a new playthrough
+     (so far content for Rachel in EP3,EP4,EP4a and Gabi in EP5)
+   - game patch for the saves - now you can also delete them ingame
+
+
+v0.5.5a
+- first version of a "cheat only" Mod for the game version v0.5.5
+
+
+==================================================================================
+old Mod versions:
+
+v0.5
+-music/audio and walkthrough done for EP5
+
+v0.5pre:
+- compatibility update for my Mod to the game version 5
+- the game variables for EP5 are done (+ new counter for Adriana)
+
+  not done yet for EP5:  music/audio and walkthrough
+
+v0.4a:
+- game variables for chapter 4 added to the Mod
+
+v0.4:
+- second half of the new game chapter 4 done
+
+  Info: the game variables for EP4 are NOT done yet, I will release maybe a patch for that 
+  or I wait till the next game version v0.5
+
+
+v0.3c:
+- first half of the new game chapter 4 done (Cara/Nikki flashback)
+
+v0.3b:
+- reworked my former done 3 chapters because of the rework of the original game v0.4
+- compatibility patch to work with the new game content (but without audio and walkthrough)
+
+v0.3a:
+- added "more cheating" - Mod option for changing game variables
+- some minor Mod menu changes
+
+v0.3:
+- Mod adapted for the new game version v0.3
+- fixed some walkthrough bugs from Mod version v0.2f
+
+v0.2f:
+- Compatibility patch for my Mod v0.2e to the new game version v0.3
+  new game content still needs to be done! 
+- fixed an audio bug (using wrong mixer for the new audio channels)
+
+v0.2e:
+- added erotic sounds (for 3 events so far: 2x Alexis, 1x Flight Attendant)
+- minor changes for the Mod menu
+
+v0.2d:
+- little rework for the new "choices help"
+
+v0.2c:
+- added a game choices help ("Walkthrough")
+
+v0.2b:
+reworked the Mod!
+- added an ingame Mod menu
+- added a jukebox function for the music
+- added an info screen
+- added some cheating functions
+
+v0.2a:
+- bugfix version
+
+v0.2:
+- added music to the new game version v0.2
+
+v0.1:
+- first release of the Mod
+- added music to the game
+

@@ -1,0 +1,37 @@
+# Intertwined credits file.
+# Format:
+#   == Section Heading ==
+#   Line of credit text
+
+== Story & Art ==
+NyxValeria
+
+== Programming & Development ==
+NyxValeria — Lead Programmer
+LovBlueFox — UI & Systems Integration
+Patreus
+
+== Music ==
+NyxValeria
+Alessio
+
+== Testing & QA ==
+LovBlueFox
+Tony Murray — Proofreading
+Sača
+
+
+== Community Management ==
+LovBlueFox
+Numa
+
+== Translators ==
+BlackViper — French
+
+== Special Thanks ==
+The patrons who made this season possible.
+The community for the feedback, bug reports, and support.
+
+== Find us ==
+Website — valerianyx.com
+Steam — steam.valerianyx.com

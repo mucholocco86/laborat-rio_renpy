@@ -1,0 +1,25 @@
+To install the Mod for the game "Intertwined" you have to:
+==========================================================
+
+1. the original game must be installed first
+
+2. extract the archive in a temporary folder
+
+3. move the extracted files into your game folder, overwriting files if asked
+  (.../Intertwined-0.xx-pc/game)
+
+
+That´s it.
+
+
+
+There should be now a Mod button in the games quick menu
+and also another one in the game settings/preferences
+
+You also can activate the Mod menu while playing a game 
+when pressing "Shift" +"k" on PC's.
+
+
+
+Yours
+KoGa3
