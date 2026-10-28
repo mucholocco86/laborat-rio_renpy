@@ -2,6 +2,7 @@
 default urm_snapshot_probe_scalar = 10
 default urm_snapshot_probe_list = [1, 2]
 default urm_snapshot_probe_dict = {"a": 1}
+default urm_snapshot_probe_deleted = 41
 
 label urm_snapshot_probe_start:
     $ x52URM.Settings.seenWelcome = 2
@@ -56,6 +57,37 @@ label urm_snapshot_probe_start:
     $ if old_value_before != 10 or new_value_before != 20: raise Exception("unexpected old/new values")
     $ if old_edit_result or current_after_old_edit != 20: raise Exception("snapshot-side Var changed current gameplay")
     $ if not new_edit_result or current_after_new_edit != 30 or edit_entry["old"].value != 10: raise Exception("current-side Var did not edit gameplay independently")
+
+    $ x52URM.Snapshots.create("deleted-probe")
+    $ delattr(renpy.store, "urm_snapshot_probe_deleted")
+    $ deleted_changes = x52URM.Snapshots.findChanges("deleted-probe")
+    $ deleted_entry = [entry for entry in deleted_changes if entry["old"].name == "urm_snapshot_probe_deleted"][0]
+    $ deleted_old_value = deleted_entry["old"].value
+    $ deleted_new_value = deleted_entry["new"].value
+    $ deleted_old_editable = deleted_entry["old"].isEditable
+    $ deleted_new_editable = deleted_entry["new"].isEditable
+    $ deleted_new_type = deleted_entry["new"].varType
+    $ deleted_new_set_result = deleted_entry["new"].setValue("42")
+    $ print("URM_SNAPSHOT_PROBE_DELETED_VAR", deleted_old_value, deleted_new_value, deleted_old_editable, deleted_new_editable, deleted_new_type, deleted_new_set_result, hasattr(renpy.store, "urm_snapshot_probe_deleted"))
+    $ if deleted_old_value != 41 or deleted_new_value is not None: raise Exception("unexpected deleted variable values")
+    $ if deleted_old_editable or not deleted_new_editable or deleted_new_type != "unknown": raise Exception("unexpected deleted variable editor flags")
+    $ if deleted_new_set_result or hasattr(renpy.store, "urm_snapshot_probe_deleted"): raise Exception("deleted variable unexpectedly recreated by setValue")
+
+    $ x52URM.Snapshots.create("added-probe")
+    $ setattr(renpy.store, "urm_snapshot_probe_added", 7)
+    $ added_changes = x52URM.Snapshots.findChanges("added-probe")
+    $ added_entry = [entry for entry in added_changes if entry["old"].name == "urm_snapshot_probe_added"][0]
+    $ added_old_value = added_entry["old"].value
+    $ added_new_value = added_entry["new"].value
+    $ added_old_editable = added_entry["old"].isEditable
+    $ added_new_editable = added_entry["new"].isEditable
+    $ added_old_type = added_entry["old"].varType
+    $ added_old_set_result = added_entry["old"].setValue("8")
+    $ added_new_set_result = added_entry["new"].setValue("8")
+    $ print("URM_SNAPSHOT_PROBE_ADDED_VAR", added_old_value, added_new_value, added_old_editable, added_new_editable, added_old_type, added_old_set_result, added_new_set_result, renpy.store.urm_snapshot_probe_added, added_entry["old"].value)
+    $ if added_old_value is not None or added_new_value != 7: raise Exception("unexpected added variable values")
+    $ if added_old_editable or not added_new_editable or added_old_type != "unknown": raise Exception("unexpected added variable editor flags")
+    $ if added_old_set_result or not added_new_set_result or renpy.store.urm_snapshot_probe_added != 8 or added_entry["old"].value is not None: raise Exception("added variable edit routing failed")
 
     "URM snapshot shallow-reference probe completed."
     $ renpy.quit()
