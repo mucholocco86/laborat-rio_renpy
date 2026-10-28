@@ -127,3 +127,7 @@ Durante a fase de arqueologia, componentes não devem ser removidos apenas porqu
 ## Estado
 
 O manual está sendo construído progressivamente. A investigação continua; portanto páginas podem registrar perguntas abertas em vez de preencher lacunas com suposições.
+
+## Evidência de persistência e relação com o SDK — atualização 2026-10-28
+
+Os testes dos docs `04_CHOICES/49–52` ampliam o mapa: stores `.urm` (incluindo labels/replacements) foram carregados em processo novo; snapshots apresentaram diff superficial para os casos testados; o SDK aplica `say_menu_text_filter` ao rótulo antes da interação e conserva separadamente o índice da Choice. Consulte [revisão documental](../00_README/REVISAO_DOCUMENTAL_URM_2026-10-28.md) para estados históricos e limites.
