@@ -519,7 +519,7 @@ O [documento 50](50_STORES_LABELS_REPLACEMENTS_E_SNAPSHOTS.md) distingue os stor
 
 ### Validação runtime dos snapshots (2026-10-28)
 
-O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra o run [40658456177](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177): `Snapshots.findChanges()` detectou a substituição do escalar 10→20, mas não listou a lista/dicionário após mutações in-place, embora os novos conteúdos fossem `[9, 2]` e `{a: 9}`. O primeiro probe não alterou os valores e foi excluído como evidência; a execução corrigida confirmou os valores antes do diff. A prova não cobre substituição integral de containers ou persistência de snapshots em save nativo.
+O [documento 51](51_SNAPSHOTS_DIFF_RUNTIME_CONTAINERS.md) registra os runs [40658456177](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177) e [40676323550](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550): o diff detectou escalar alterado e containers substituídos por conteúdo diferente; não detectou mutações in-place nem novas listas/dicionários com conteúdo igual. A fixture ampliada usa checagens explícitas. O documento 53 trata separadamente da persistência no save nativo.
 
 ## Consolidação de persistência — atualização 2026-10-28
 
