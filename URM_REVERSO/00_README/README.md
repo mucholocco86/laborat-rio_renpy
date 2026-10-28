@@ -75,4 +75,4 @@ A comparação de migração está documentada em [`MIGRACAO_LABORATORIO_COMPARA
 
 ## Revisão transversal — 2026-10-28
 
-Foram auditados 77 documentos Markdown das áreas de documentação. O circuito prioritário agora tem provas runtime integradas para Choice com condição falsa, edição/rollback e save/load nativo, além de testes separados para stores `.urm`, Settings e snapshots. Veja a [revisão documental completa](REVISAO_DOCUMENTAL_URM_2026-10-28.md), que preserva registros cronológicos e separa conclusões comprovadas das pendências.
+Foram auditados 78 documentos Markdown; o documento 52 também confirma no SDK 7.4.11 que `say_menu_text_filter` altera o rótulo antes da interação, enquanto o índice AST continua sendo o valor de seleção. das áreas de documentação. O circuito prioritário agora tem provas runtime integradas para Choice com condição falsa, edição/rollback e save/load nativo, além de testes separados para stores `.urm`, Settings e snapshots. Veja a [revisão documental completa](REVISAO_DOCUMENTAL_URM_2026-10-28.md), que preserva registros cronológicos e separa conclusões comprovadas das pendências.
