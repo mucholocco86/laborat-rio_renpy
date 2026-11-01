@@ -74,7 +74,6 @@ screen wells_road_tracker():
                                     for record in wells_tracker_records[row_start:row_start + 3]:
                                         frame:
                                             xysize (wells_ui(360), wells_ui(262))
-                                            spacing wells_ui(5)
                                             background None
 
                                             fixed:
