@@ -41,6 +41,7 @@ testcase wells_checkpoint_capture:
         assert len(wells_tracker_choices) == 1
         assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
         assert wells_tracker_choices[0]["choice_value"] == 0
+    $ renpy.show("wells_test_anchor")
     $ wells_salvar_checkpoint()
     $ wells_test_records = wells_tracker_list_records()
     python:
