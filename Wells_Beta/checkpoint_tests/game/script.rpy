@@ -32,6 +32,7 @@ screen choice(items):
 
 
 label wells_checkpoint_entry:
+    show wells_test_anchor
     menu:
         "Escolha A":
             $ evRel += 10
