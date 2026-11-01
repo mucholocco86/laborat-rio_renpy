@@ -45,8 +45,9 @@ jobs:
           cp Wells_Beta/checkpoint_tests/game/*.rpy "$fixture/game/"
           if [[ "${{ matrix.runtime_tests }}" != "true" ]]; then
             sed '/^testcase wells_checkpoint_capture:/,$d' Wells_Beta/checkpoint_tests/game/script.rpy > "$fixture/game/script.rpy"
-          elif [[ "${{ matrix.sdk_dir }}" == "renpy-7.4.11-sdk" ]]; then
-            sed -i 's/^    click "Escolha A"/    "Escolha A"/' "$fixture/game/script.rpy"
+          elif [[ "${{ matrix.sdk_dir }}" == "renpy-8.5.3-sdk" ]]; then
+            sed -i '/^testcase wells_checkpoint_rebuild:/i\\    exit' "$fixture/game/script.rpy"
+            echo "    exit" >> "$fixture/game/script.rpy"
           fi
           cp Wells_Beta/wells_tracker_backend.rpy Wells_Beta/wells_road_tracker.rpy "$fixture/game/wells/"
           cp -a Wells_Beta/gui/. "$fixture/game/wells/gui/"
