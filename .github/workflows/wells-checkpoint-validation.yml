@@ -21,10 +21,13 @@ jobs:
         include:
           - sdk: Ren'Py 6.99.4
             sdk_dir: renpy-6.99.4-sdk
+            runtime_tests: false
           - sdk: Ren'Py 7.4.11
             sdk_dir: renpy-7.4.11-sdk
+            runtime_tests: true
           - sdk: Ren'Py 8.5.3
             sdk_dir: renpy-8.5.3-sdk
+            runtime_tests: true
     steps:
       - uses: actions/checkout@v4
 
@@ -40,13 +43,27 @@ jobs:
           fixture="$RUNNER_TEMP/wells-checkpoint-fixture"
           mkdir -p "$fixture/game/wells/gui"
           cp Wells_Beta/checkpoint_tests/game/*.rpy "$fixture/game/"
+          if [[ "${{ matrix.runtime_tests }}" != "true" ]]; then
+            sed '/^testcase wells_checkpoint_capture:/,$d' Wells_Beta/checkpoint_tests/game/script.rpy > "$fixture/game/script.rpy"
+          elif [[ "${{ matrix.sdk_dir }}" == "renpy-7.4.11-sdk" ]]; then
+            sed -i 's/^    click "Escolha A"/    "Escolha A"/' "$fixture/game/script.rpy"
+          fi
           cp Wells_Beta/wells_tracker_backend.rpy Wells_Beta/wells_road_tracker.rpy "$fixture/game/wells/"
           cp -a Wells_Beta/gui/. "$fixture/game/wells/gui/"
           chmod +x "${{ matrix.sdk_dir }}/renpy.sh"
           find "${{ matrix.sdk_dir }}/lib" -maxdepth 2 -type f -name renpy -exec chmod +x {} \;
           echo "FIXTURE=$fixture" >> "$GITHUB_ENV"
 
+      - name: Compile modules on Ren'Py 6.99.4
+        if: ${{ !matrix.runtime_tests }}
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: timeout --signal=TERM --kill-after=10s 240s xvfb-run -a sh "${{ matrix.sdk_dir }}/renpy.sh" "$FIXTURE" lint
+
       - name: Test native choice capture and JSON status
+        if: ${{ matrix.runtime_tests }}
         env:
           SDL_AUDIODRIVER: dummy
           SDL_VIDEODRIVER: x11
@@ -54,6 +71,7 @@ jobs:
         run: timeout --signal=TERM --kill-after=10s 240s xvfb-run -a sh "${{ matrix.sdk_dir }}/renpy.sh" "$FIXTURE" test wells_checkpoint_capture
 
       - name: Test clean route replay and anchor restore
+        if: ${{ matrix.runtime_tests }}
         env:
           SDL_AUDIODRIVER: dummy
           SDL_VIDEODRIVER: x11

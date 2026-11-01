@@ -35,18 +35,21 @@ label start:
 testcase wells_checkpoint_capture:
     run Jump("wells_checkpoint_entry")
     click "Escolha A"
-    assert len(wells_tracker_choices) == 1
-    assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
-    assert wells_tracker_choices[0]["choice_value"] == 0
+    python:
+        assert len(wells_tracker_choices) == 1
+        assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
+        assert wells_tracker_choices[0]["choice_value"] == 0
     $ wells_salvar_checkpoint()
     $ wells_test_records = wells_tracker_list_records()
-    assert wells_test_records
+    python:
+        assert wells_test_records
     $ wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
-    assert wells_test_payload["version"] == 3
-    assert wells_test_payload["choices"][0]["selected_label"] == "Escolha A"
-    assert wells_test_payload["variables"]["evRel"] == 10
-    assert wells_test_payload["variables"]["kaRel"] == 3
-    assert wells_test_payload["variables"]["active_patch"] is True
+    python:
+        assert wells_test_payload["version"] == 3
+        assert wells_test_payload["choices"][0]["selected_label"] == "Escolha A"
+        assert wells_test_payload["variables"]["evRel"] == 10
+        assert wells_test_payload["variables"]["kaRel"] == 3
+        assert wells_test_payload["variables"]["active_patch"] is True
     $ renpy.quit()
 
 testcase wells_checkpoint_rebuild:
@@ -72,10 +75,11 @@ testcase wells_checkpoint_rebuild:
     }
     $ renpy.config.skipping = "fast"
     run Jump("wells_checkpoint_entry")
-    assert wells_tracker_replay is None
-    assert evRel == 56
-    assert kaRel == 12
-    assert active_patch is True
-    assert len(wells_tracker_choices) == 1
-    assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
+    python:
+        assert wells_tracker_replay is None
+        assert evRel == 56
+        assert kaRel == 12
+        assert active_patch is True
+        assert len(wells_tracker_choices) == 1
+        assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
     $ renpy.quit()
