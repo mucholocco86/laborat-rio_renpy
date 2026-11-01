@@ -47,6 +47,8 @@ label wells_checkpoint_entry:
             jump wells_checkpoint_target
 
 label wells_checkpoint_target:
+    if wells_tracker_replay is not None:
+        "Intervening unseen dialogue."
     show wells_test_anchor
     $ wells_test_anchor_state = _wells_tracker_current_anchor()
     python:
@@ -96,6 +98,8 @@ testcase wells_checkpoint_rebuild:
         wells_test_records = wells_tracker_list_records()
         wells_test_expect(wells_test_records, "Capture fixture must write a checkpoint before rebuild")
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
+        wells_test_original_skip_unseen = renpy.game.preferences.skip_unseen
+        wells_test_original_skip_after_choices = renpy.game.preferences.skip_after_choices
         wells_test_restart_args = []
         wells_test_original_restart = renpy.full_restart
         def wells_test_record_restart(**kwargs):
@@ -116,5 +120,8 @@ testcase wells_checkpoint_rebuild:
         wells_test_expect(evRel == 56, "evRel was not restored: {!r}".format(evRel))
         wells_test_expect(kaRel == 12, "kaRel was not restored: {!r}".format(kaRel))
         wells_test_expect(active_patch is True, "active_patch was not restored: {!r}".format(active_patch))
+        wells_test_expect(renpy.game.preferences.skip_unseen == wells_test_original_skip_unseen, "skip-unseen preference was not restored")
+        wells_test_expect(renpy.game.preferences.skip_after_choices == wells_test_original_skip_after_choices, "skip-after-choices preference was not restored")
+        wells_test_expect(renpy.config.skipping is None, "Skip mode was not restored")
         wells_test_expect(len(wells_tracker_choices) == 1, "Replay choice count is wrong: {!r}".format(wells_tracker_choices))
         wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Replay selected wrong choice: {!r}".format(wells_tracker_choices))
