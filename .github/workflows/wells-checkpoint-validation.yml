@@ -46,7 +46,7 @@ jobs:
           if [[ "${{ matrix.runtime_tests }}" != "true" ]]; then
             sed '/^testcase wells_checkpoint_capture:/,$d' Wells_Beta/checkpoint_tests/game/script.rpy > "$fixture/game/script.rpy"
           elif [[ "${{ matrix.sdk_dir }}" == "renpy-8.5.3-sdk" ]]; then
-            sed -i '/^testcase wells_checkpoint_rebuild:/i\\    exit' "$fixture/game/script.rpy"
+            sed -i '/^testcase wells_checkpoint_rebuild:/i\    exit' "$fixture/game/script.rpy"
             echo "    exit" >> "$fixture/game/script.rpy"
           fi
           cp Wells_Beta/wells_tracker_backend.rpy Wells_Beta/wells_road_tracker.rpy "$fixture/game/wells/"
