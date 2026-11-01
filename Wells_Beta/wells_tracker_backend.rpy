@@ -554,8 +554,14 @@ init -100 python:
             renpy.notify("O arquivo de checkpoint está incompleto.")
             return
         try:
+            pending_filename = filename
+            try:
+                if not isinstance(pending_filename, unicode):
+                    pending_filename = pending_filename.decode("utf-8")
+            except NameError:
+                pass
             with io.open(WELLS_TRACKER_PENDING, "w", encoding="utf-8") as stream:
-                stream.write(filename)
+                stream.write(pending_filename)
         except Exception as error:
             try:
                 if os.path.exists(WELLS_TRACKER_PENDING):
