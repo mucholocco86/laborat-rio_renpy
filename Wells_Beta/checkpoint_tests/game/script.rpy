@@ -64,7 +64,8 @@ label start:
 
 testcase wells_checkpoint_capture:
     run Call("wells_checkpoint_entry")
-    click pos (300, 135)
+    advance until screen "choice"
+    click pos (400, 135)
     python:
         wells_test_expect(len(wells_tracker_choices) == 1, "Expected one captured choice; got {!r}; capture_error={!r}".format(wells_tracker_choices, wells_test_capture_error))
         wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Wrong selected label: {!r}".format(wells_tracker_choices[0]))
