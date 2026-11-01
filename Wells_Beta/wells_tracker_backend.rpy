@@ -434,6 +434,9 @@ init -100 python:
         return restored
 
     def _wells_tracker_anchor_matches(replay):
+        # The displayed image is the checkpoint anchor. Script nodes are kept
+        # as diagnostics only: their exact location can differ between SDKs,
+        # versions, and the statement callback timing after a clean restart.
         target = replay.get("anchor", {}) if isinstance(replay, dict) else {}
         current = _wells_tracker_current_anchor()
         if not current or not target:
@@ -443,22 +446,9 @@ init -100 python:
             return False
         target_asset = target.get("asset_file")
         current_asset = current.get("asset_file")
-        if target_asset and current_asset and target_asset.replace("\\", "/").lower() != current_asset.replace("\\", "/").lower():
-            return False
-        target_node = target.get("script_node")
-        current_node = current.get("script_node")
-        if isinstance(target_node, dict) and isinstance(current_node, dict):
-            target_file = target_node.get("file")
-            current_file = current_node.get("file")
-            if target_file and current_file and target_file.replace("\\", "/").lower() != current_file.replace("\\", "/").lower():
+        if target_asset and current_asset:
+            if target_asset.replace("\\", "/").lower() != current_asset.replace("\\", "/").lower():
                 return False
-            target_name = target_node.get("name")
-            current_name = current_node.get("name")
-            if target_name is not None and current_name is not None and target_name != current_name:
-                target_line = target_node.get("line")
-                current_line = current_node.get("line")
-                if target_line is None or current_line is None or target_line != current_line:
-                    return False
         return True
 
     def _wells_tracker_try_finish_at_anchor():
