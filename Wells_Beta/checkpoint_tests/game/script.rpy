@@ -1,6 +1,7 @@
 default evRel = 0
 default kaRel = 0
 default active_patch = False
+default wells_test_capture_error = None
 
 image wells_test_anchor = Solid("#243044")
 
@@ -55,7 +56,7 @@ testcase wells_checkpoint_capture:
     run Call("wells_checkpoint_entry")
     click pos (640, 340)
     python:
-        wells_test_expect(len(wells_tracker_choices) == 1, "Expected one captured choice; got {!r}".format(wells_tracker_choices))
+        wells_test_expect(len(wells_tracker_choices) == 1, "Expected one captured choice; got {!r}; capture_error={!r}".format(wells_tracker_choices, wells_test_capture_error))
         wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Wrong selected label: {!r}".format(wells_tracker_choices[0]))
         wells_test_expect(wells_tracker_choices[0]["choice_value"] == 0, "Wrong choice return value: {!r}".format(wells_tracker_choices[0]))
         wells_test_records = wells_tracker_list_records()
