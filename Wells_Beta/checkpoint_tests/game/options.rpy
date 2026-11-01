@@ -27,3 +27,5 @@ init -2000 python:
         config.statement_callbacks = []
     if not hasattr(config, "developer"):
         config.developer = False
+    if not hasattr(config, "sound"):
+        config.sound = True
