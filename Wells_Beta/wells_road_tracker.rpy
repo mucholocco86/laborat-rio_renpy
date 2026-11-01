@@ -83,7 +83,6 @@ screen wells_road_tracker():
                                                 button:
                                                     xysize (wells_ui(360), wells_ui(230))
                                                     background Solid("#080808")
-                                                    sensitive record.get("version") == 3
                                                     action SetVariable("wells_pending_load", record["filename"])
 
                                                     vbox:

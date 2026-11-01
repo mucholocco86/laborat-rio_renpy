@@ -29,10 +29,12 @@ label wells_checkpoint_target:
     show wells_test_anchor
     return
 
+label start:
+    return
+
 testcase wells_checkpoint_capture:
     run Jump("wells_checkpoint_entry")
-    "Escolha A"
-    label wells_checkpoint_target
+    click "Escolha A"
     assert len(wells_tracker_choices) == 1
     assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
     assert wells_tracker_choices[0]["choice_value"] == 0
@@ -70,7 +72,6 @@ testcase wells_checkpoint_rebuild:
     }
     $ renpy.config.skipping = "fast"
     run Jump("wells_checkpoint_entry")
-    label wells_checkpoint_target
     assert wells_tracker_replay is None
     assert evRel == 56
     assert kaRel == 12
