@@ -12,3 +12,5 @@ init -2000 python:
     if not hasattr(config, "renpy_base"):
         import os
         config.renpy_base = os.path.dirname(renpy.__file__)
+    if not hasattr(config, "mode_callbacks"):
+        config.mode_callbacks = []
