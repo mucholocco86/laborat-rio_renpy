@@ -50,7 +50,6 @@ testcase wells_checkpoint_capture:
         assert wells_test_payload["variables"]["evRel"] == 10
         assert wells_test_payload["variables"]["kaRel"] == 3
         assert wells_test_payload["variables"]["active_patch"] is True
-    $ renpy.quit()
 
 testcase wells_checkpoint_rebuild:
     $ wells_tracker_choices = []
@@ -82,4 +81,3 @@ testcase wells_checkpoint_rebuild:
         assert active_patch is True
         assert len(wells_tracker_choices) == 1
         assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
-    $ renpy.quit()
