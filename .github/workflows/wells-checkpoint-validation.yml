@@ -43,6 +43,7 @@ jobs:
           cp Wells_Beta/wells_tracker_backend.rpy Wells_Beta/wells_road_tracker.rpy "$fixture/game/wells/"
           cp -a Wells_Beta/gui/. "$fixture/game/wells/gui/"
           chmod +x "${{ matrix.sdk_dir }}/renpy.sh"
+          find "${{ matrix.sdk_dir }}/lib" -maxdepth 2 -type f -name renpy -exec chmod +x {} \;
           echo "FIXTURE=$fixture" >> "$GITHUB_ENV"
 
       - name: Test native choice capture and JSON status
