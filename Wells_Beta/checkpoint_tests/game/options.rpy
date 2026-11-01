@@ -2,3 +2,8 @@
 define config.name = "Wells Checkpoint Probe"
 define config.version = "1.0"
 define config.save_directory = "wells-checkpoint-probe"
+
+init -2000 python:
+    # The archived Ren'Py 6.99 test SDK omits this config list.
+    if not hasattr(config, "overlay_functions"):
+        config.overlay_functions = []
