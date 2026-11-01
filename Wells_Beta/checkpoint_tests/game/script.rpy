@@ -20,11 +20,15 @@ init -100 python:
 screen choice(items):
     modal True
     vbox:
-        xpos 100
-        ypos 100
+        xpos 0
+        ypos 0
+        xsize config.screen_width
+        ysize config.screen_height
         spacing 0
         for i in items:
-            textbutton i.caption action i.action xsize 600 ysize 70
+            textbutton i.caption action i.action:
+                xfill True
+                ysize int(config.screen_height / len(items))
 
 
 label wells_checkpoint_entry:
@@ -64,7 +68,7 @@ label start:
 
 testcase wells_checkpoint_capture:
     run Jump("wells_checkpoint_entry")
-    click pos (400, 135)
+    click pos (0.5, 0.1)
     python:
         wells_test_expect(len(wells_tracker_choices) == 1, "Expected one captured choice; got {!r}; capture_error={!r}".format(wells_tracker_choices, wells_test_capture_error))
         wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Wrong selected label: {!r}".format(wells_tracker_choices[0]))
