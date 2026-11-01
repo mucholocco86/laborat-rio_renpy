@@ -17,6 +17,16 @@ init -100 python:
         if not condition:
             raise Exception(message)
 
+screen choice(items):
+    modal True
+    vbox:
+        xpos 100
+        ypos 100
+        spacing 0
+        for i in items:
+            textbutton i.caption action i.action xsize 600 ysize 70
+
+
 label wells_checkpoint_entry:
     menu:
         "Escolha A":
@@ -54,7 +64,7 @@ label start:
 
 testcase wells_checkpoint_capture:
     run Call("wells_checkpoint_entry")
-    click "Escolha A"
+    click pos (300, 135)
     python:
         wells_test_expect(len(wells_tracker_choices) == 1, "Expected one captured choice; got {!r}; capture_error={!r}".format(wells_tracker_choices, wells_test_capture_error))
         wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Wrong selected label: {!r}".format(wells_tracker_choices[0]))
