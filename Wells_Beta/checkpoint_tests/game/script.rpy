@@ -29,9 +29,16 @@ label wells_checkpoint_target:
     show wells_test_anchor
     pause 0.1
     $ wells_test_anchor_state = _wells_tracker_current_anchor()
-    $ renpy.log("WELLS_TEST_ANCHOR " + repr(wells_test_anchor_state))
-    if wells_test_anchor_state is None:
-        $ renpy.log("WELLS_TEST_ANCHOR_MISSING")
+    python:
+        _wells_ctx = renpy.game.context()
+        _wells_layers = getattr(getattr(_wells_ctx, "scene_lists", None), "layers", {})
+        _wells_scene_names = {}
+        for _wells_layer, _wells_entries in _wells_layers.items():
+            _wells_scene_names[_wells_layer] = [
+                (getattr(_wells_entry, "tag", None), getattr(_wells_entry, "name", None))
+                for _wells_entry in _wells_entries
+            ]
+        assert wells_test_anchor_state is not None, "No active image anchor; scene layers={!r}".format(_wells_scene_names)
     $ wells_salvar_checkpoint()
     return
 
@@ -48,7 +55,7 @@ testcase wells_checkpoint_capture:
         assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
         assert wells_tracker_choices[0]["choice_value"] == 0
         wells_test_records = wells_tracker_list_records()
-        assert wells_test_records
+        assert wells_test_records, "No checkpoint JSON; anchor={!r}, directory={!r}, files={!r}".format(wells_test_anchor_state, WELLS_TRACKER_DIR, os.listdir(WELLS_TRACKER_DIR) if os.path.isdir(WELLS_TRACKER_DIR) else None)
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
         assert wells_test_payload["version"] == 3
         assert wells_test_payload["choices"][0]["selected_label"] == "Escolha A"
