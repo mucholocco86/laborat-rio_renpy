@@ -189,7 +189,11 @@ init -100 python:
             filename = getattr(node, "filename", None)
             linenumber = getattr(node, "linenumber", None)
             if filename and _wells_tracker_is_valid_game_script(filename):
-                return {"file": _wells_tracker_text(filename), "line": linenumber}
+                return {
+                    "file": _wells_tracker_text(filename),
+                    "line": linenumber,
+                    "name": _wells_tracker_json_value(getattr(node, "name", None)),
+                }
         return None
 
     def _wells_tracker_current_anchor():
@@ -436,6 +440,10 @@ init -100 python:
             target_file = target_node.get("file")
             current_file = current_node.get("file")
             if target_file and current_file and target_file.replace("\\", "/").lower() != current_file.replace("\\", "/").lower():
+                return False
+            target_name = target_node.get("name")
+            current_name = current_node.get("name")
+            if target_name is not None and current_name is not None and target_name != current_name:
                 return False
         return True
 
