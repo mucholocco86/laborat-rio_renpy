@@ -1,7 +1,6 @@
 default evRel = 0
 default kaRel = 0
 default active_patch = False
-default wells_test_save_requested = False
 
 image wells_test_anchor = Solid("#243044")
 
@@ -28,8 +27,7 @@ label wells_checkpoint_entry:
 
 label wells_checkpoint_target:
     show wells_test_anchor
-    if wells_test_save_requested:
-        $ wells_salvar_checkpoint()
+    $ wells_salvar_checkpoint()
     return
 
 label start:
@@ -38,7 +36,6 @@ label start:
     pause 3600
 
 testcase wells_checkpoint_capture:
-    $ wells_test_save_requested = True
     run Call("wells_checkpoint_entry")
     click pos (640, 340)
     python:
