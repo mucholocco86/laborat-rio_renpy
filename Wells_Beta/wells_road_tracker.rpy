@@ -93,7 +93,10 @@ screen wells_road_tracker():
                                                         if preview is not None:
                                                             add Transform(preview, xsize=wells_ui(360), ysize=wells_ui(185))
                                                         else:
-                                                            frame:\n                                                                xsize wells_ui(360)\n                                                                ysize wells_ui(185)\n                                                                background Solid("#111111")
+                                                            frame:
+                                                                xsize wells_ui(360)
+                                                                ysize wells_ui(185)
+                                                                background Solid("#111111")
 
                                                         text record["filename"]:
                                                             xalign 0.5
