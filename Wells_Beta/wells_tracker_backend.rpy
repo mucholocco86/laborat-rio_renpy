@@ -535,6 +535,16 @@ init -100 python:
         except Exception as error:
             renpy.notify("Wells: não foi possível remover o checkpoint: " + _wells_tracker_text(error))
 
+    def _wells_tracker_write_pending(filename):
+        pending_filename = filename
+        try:
+            if not isinstance(pending_filename, unicode):
+                pending_filename = pending_filename.decode("utf-8")
+        except NameError:
+            pass
+        with io.open(WELLS_TRACKER_PENDING, "w", encoding="utf-8") as stream:
+            stream.write(pending_filename)
+
     def wells_tracker_request_load(filename):
         if not filename or os.path.basename(filename) != filename:
             renpy.notify("Nome de checkpoint inválido.")
@@ -554,14 +564,7 @@ init -100 python:
             renpy.notify("O arquivo de checkpoint está incompleto.")
             return
         try:
-            pending_filename = filename
-            try:
-                if not isinstance(pending_filename, unicode):
-                    pending_filename = pending_filename.decode("utf-8")
-            except NameError:
-                pass
-            with io.open(WELLS_TRACKER_PENDING, "w", encoding="utf-8") as stream:
-                stream.write(pending_filename)
+            _wells_tracker_write_pending(filename)
         except Exception as error:
             try:
                 if os.path.exists(WELLS_TRACKER_PENDING):
