@@ -444,7 +444,10 @@ init -100 python:
             target_name = target_node.get("name")
             current_name = current_node.get("name")
             if target_name is not None and current_name is not None and target_name != current_name:
-                return False
+                target_line = target_node.get("line")
+                current_line = current_node.get("line")
+                if target_line is None or current_line is None or target_line != current_line:
+                    return False
         return True
 
     def _wells_tracker_try_finish_at_anchor():
