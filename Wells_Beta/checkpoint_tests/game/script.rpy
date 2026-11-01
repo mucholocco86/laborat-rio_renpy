@@ -33,7 +33,7 @@ label start:
     return
 
 testcase wells_checkpoint_capture:
-    run Jump("wells_checkpoint_entry")
+    run Call("wells_checkpoint_entry")
     click "Escolha A"
     python:
         assert len(wells_tracker_choices) == 1
@@ -73,7 +73,7 @@ testcase wells_checkpoint_rebuild:
         "variables": {"evRel": 56, "kaRel": 12, "active_patch": True},
     }
     $ renpy.config.skipping = "fast"
-    run Jump("wells_checkpoint_entry")
+    run Call("wells_checkpoint_entry")
     python:
         assert wells_tracker_replay is None
         assert evRel == 56
