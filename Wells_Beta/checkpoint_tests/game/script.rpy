@@ -115,6 +115,7 @@ testcase wells_checkpoint_rebuild:
         wells_test_expect(wells_tracker_replay.get("filename") == wells_test_records[0]["filename"], "Bootstrap activated the wrong checkpoint")
     $ renpy.config.skipping = "fast"
     run Jump("wells_checkpoint_entry")
+    pause until eval (wells_tracker_replay is None) timeout 30.0
     python:
         wells_test_expect(wells_tracker_replay is None, "Replay did not finish: {!r}".format(wells_tracker_replay))
         wells_test_expect(evRel == 56, "evRel was not restored: {!r}".format(evRel))
