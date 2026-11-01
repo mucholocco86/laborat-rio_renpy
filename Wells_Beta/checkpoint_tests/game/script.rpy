@@ -3,6 +3,7 @@ default kaRel = 0
 default active_patch = False
 default wells_test_capture_error = None
 
+image wells_test_entry_anchor = Solid("#3b2020")
 image wells_test_anchor = Solid("#243044")
 
 init -100 python:
@@ -32,7 +33,7 @@ screen choice(items):
 
 
 label wells_checkpoint_entry:
-    show wells_test_anchor
+    show wells_test_entry_anchor
     menu:
         "Escolha A":
             $ evRel += 10
@@ -95,17 +96,19 @@ testcase wells_checkpoint_rebuild:
         wells_test_records = wells_tracker_list_records()
         wells_test_expect(wells_test_records, "Capture fixture must write a checkpoint before rebuild")
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
-        wells_tracker_replay = {
-            "filename": wells_test_records[0]["filename"],
-            "choices": wells_test_payload["choices"],
-            "cursor": 0,
-            "anchor": {
-                "image_name": wells_test_payload["checkpoint_image"],
-                "asset_file": wells_test_payload["checkpoint_asset"],
-                "script_node": wells_test_payload["script_node"],
-            },
-            "variables": {"evRel": 56, "kaRel": 12, "active_patch": True},
-        }
+        wells_test_restart_args = []
+        wells_test_original_restart = renpy.full_restart
+        def wells_test_record_restart(**kwargs):
+            wells_test_restart_args.append(kwargs)
+        renpy.full_restart = wells_test_record_restart
+        wells_tracker_request_load(wells_test_records[0]["filename"])
+        renpy.full_restart = wells_test_original_restart
+        wells_test_expect(wells_test_restart_args == [{"label": "_wells_tracker_bootstrap", "target": "_main_menu"}], "Checkpoint request did not ask Ren'Py to restart into the bootstrap: {!r}".format(wells_test_restart_args))
+        wells_test_expect(os.path.isfile(WELLS_TRACKER_PENDING), "Checkpoint request did not leave a pending-load marker")
+        with io.open(WELLS_TRACKER_PENDING, "r", encoding="utf-8") as wells_test_pending_stream:
+            wells_test_expect(wells_test_pending_stream.read().strip() == wells_test_records[0]["filename"], "Pending-load marker has the wrong checkpoint")
+        wells_test_expect(_wells_tracker_activate_pending_load(), "Bootstrap did not activate the pending checkpoint")
+        wells_test_expect(wells_tracker_replay.get("filename") == wells_test_records[0]["filename"], "Bootstrap activated the wrong checkpoint")
     $ renpy.config.skipping = "fast"
     run Jump("wells_checkpoint_entry")
     python:
