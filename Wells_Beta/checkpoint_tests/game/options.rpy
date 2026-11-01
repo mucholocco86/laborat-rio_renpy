@@ -16,3 +16,5 @@ init -2000 python:
         config.mode_callbacks = []
     if not hasattr(config, "interact_callbacks"):
         config.interact_callbacks = []
+    if not hasattr(config, "change_language_callbacks"):
+        config.change_language_callbacks = []
