@@ -78,6 +78,7 @@ testcase wells_checkpoint_capture:
         wells_test_expect(wells_test_records, "No checkpoint JSON; error={!r}, anchor={!r}, directory={!r}, files={!r}".format(wells_test_capture_error, wells_test_anchor_state, WELLS_TRACKER_DIR, os.listdir(WELLS_TRACKER_DIR) if os.path.isdir(WELLS_TRACKER_DIR) else None))
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
         wells_test_expect(wells_test_payload["version"] == 3, "Unexpected payload version: {!r}".format(wells_test_payload))
+        wells_test_expect(wells_test_payload.get("script_node") is not None, "Checkpoint did not capture a script-node anchor: {!r}".format(wells_test_payload))
         wells_test_expect(wells_test_payload["choices"][0]["selected_label"] == "Escolha A", "Choice missing from payload: {!r}".format(wells_test_payload))
         wells_test_expect(wells_test_payload["variables"].get("evRel") == 10, "evRel not captured: {!r}".format(wells_test_payload.get("variables")))
         wells_test_expect(wells_test_payload["variables"].get("kaRel") == 3, "kaRel not captured: {!r}".format(wells_test_payload.get("variables")))
