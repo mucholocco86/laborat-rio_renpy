@@ -1,6 +1,7 @@
 default evRel = 0
 default kaRel = 0
 default active_patch = False
+default wells_test_save_requested = False
 
 image wells_test_anchor = Solid("#243044")
 
@@ -27,6 +28,8 @@ label wells_checkpoint_entry:
 
 label wells_checkpoint_target:
     show wells_test_anchor
+    if wells_test_save_requested:
+        $ wells_salvar_checkpoint()
     return
 
 label start:
@@ -35,14 +38,13 @@ label start:
     pause 3600
 
 testcase wells_checkpoint_capture:
+    $ wells_test_save_requested = True
     run Call("wells_checkpoint_entry")
     click "Escolha A"
     python:
         assert len(wells_tracker_choices) == 1
         assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
         assert wells_tracker_choices[0]["choice_value"] == 0
-        renpy.show("wells_test_anchor")
-        wells_salvar_checkpoint()
         wells_test_records = wells_tracker_list_records()
         assert wells_test_records
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
