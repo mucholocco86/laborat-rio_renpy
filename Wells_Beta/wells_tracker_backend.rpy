@@ -493,6 +493,8 @@ init -100 python:
             renpy.notify("Checkpoint registrado.")
             renpy.restart_interaction()
         except Exception as error:
+            if hasattr(store, "wells_test_capture_error"):
+                store.wells_test_capture_error = _wells_tracker_text(error)
             renpy.notify("Wells: erro ao gravar checkpoint: " + _wells_tracker_text(error))
 
     def wells_tracker_preview(image_name, asset_file=None):
