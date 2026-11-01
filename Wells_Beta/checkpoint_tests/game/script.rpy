@@ -47,7 +47,6 @@ label wells_checkpoint_entry:
 
 label wells_checkpoint_target:
     show wells_test_anchor
-    pause 0.1
     $ wells_test_anchor_state = _wells_tracker_current_anchor()
     python:
         _wells_ctx = renpy.game.context()
@@ -60,6 +59,7 @@ label wells_checkpoint_target:
             ]
         wells_test_expect(wells_test_anchor_state is not None, "No active image anchor; scene layers={!r}".format(_wells_scene_names))
     $ wells_salvar_checkpoint()
+    pause 0.1
     return
 
 label start:
