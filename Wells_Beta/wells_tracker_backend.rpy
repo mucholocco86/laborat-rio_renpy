@@ -48,6 +48,25 @@ init -100 python:
         except Exception:
             return ""
 
+    def _wells_tracker_is_valid_game_script(filename):
+        """Accept original game scripts only; never treat TL or Wells modules as game source."""
+        if not isinstance(filename, WELLS_TRACKER_STRING_TYPES):
+            return False
+        try:
+            path = os.path.normpath(_wells_tracker_text(filename)).replace("\\", "/").lower()
+            parts = [part for part in path.split("/") if part]
+            game_indexes = [index for index, part in enumerate(parts) if part == "game"]
+            if not game_indexes:
+                return False
+            relative = parts[game_indexes[-1] + 1:]
+            if not relative or relative[0] in ("tl", "wells"):
+                return False
+            if "tl" in relative:
+                return False
+            return relative[-1].endswith((".rpy", ".rpyc"))
+        except Exception:
+            return False
+
     def _wells_tracker_json_value(value, depth=0):
         """Copy only plain JSON data; never pickle or inspect arbitrary objects."""
         if isinstance(value, WELLS_TRACKER_SCALAR_TYPES):
@@ -169,7 +188,7 @@ init -100 python:
                 continue
             filename = getattr(node, "filename", None)
             linenumber = getattr(node, "linenumber", None)
-            if filename:
+            if filename and _wells_tracker_is_valid_game_script(filename):
                 return {"file": _wells_tracker_text(filename), "line": linenumber}
         return None
 
