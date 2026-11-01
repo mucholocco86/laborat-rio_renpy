@@ -86,9 +86,16 @@ jobs:
       fail-fast: false
       matrix:
         game:
+          - "Eternum-0.9.5-pc"
           - "Godson-pc"
+          - "GuiltyPleasure-0.65-pc"
+          - "Him-0.5.0-pc"
+          - "Intertwined-0.16-pc"
+          - "MyBullyIsMyLover-Ch.2_Ep.2-pc"
           - "MyDorm-v0.32.4-Season4-Chapter5-pc"
           - "Nephilim-0.6.9-pc-Compressed-pc"
+          - "StrayIncubus-Season_1-pc"
+          - "ThiefofHeartsPart1-0.0.3b-pc"
     steps:
       - uses: actions/checkout@v4
 
