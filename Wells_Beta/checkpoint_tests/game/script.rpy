@@ -63,7 +63,7 @@ label start:
     pause 3600
 
 testcase wells_checkpoint_capture:
-    run Call("wells_checkpoint_entry")
+    run Jump("wells_checkpoint_entry")
     advance until screen "choice"
     click pos (400, 135)
     python:
@@ -101,7 +101,7 @@ testcase wells_checkpoint_rebuild:
         "variables": {"evRel": 56, "kaRel": 12, "active_patch": True},
     }
     $ renpy.config.skipping = "fast"
-    run Call("wells_checkpoint_entry")
+    run Jump("wells_checkpoint_entry")
     python:
         wells_test_expect(wells_tracker_replay is None, "Replay did not finish: {!r}".format(wells_tracker_replay))
         wells_test_expect(evRel == 56, "evRel was not restored: {!r}".format(evRel))
