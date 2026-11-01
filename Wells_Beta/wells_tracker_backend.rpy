@@ -222,8 +222,14 @@ init -100 python:
     def _wells_tracker_write_json(filename, payload):
         path = os.path.join(WELLS_TRACKER_DIR, filename)
         temp_path = path + ".tmp"
+        serialized = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
+        try:
+            if not isinstance(serialized, unicode):
+                serialized = serialized.decode("utf-8")
+        except NameError:
+            pass
         with io.open(temp_path, "w", encoding="utf-8") as stream:
-            json.dump(payload, stream, ensure_ascii=False, indent=2, sort_keys=True)
+            stream.write(serialized)
         if os.path.exists(path):
             os.remove(path)
         os.rename(temp_path, path)
