@@ -1,0 +1,132 @@
+name: Wells checkpoint runtime and game compatibility
+
+on:
+  push:
+    branches:
+      - wells-checkpoint-rebuild
+    paths:
+      - "Wells_Beta/wells_tracker_backend.rpy"
+      - "Wells_Beta/wells_road_tracker.rpy"
+      - "Wells_Beta/checkpoint_tests/**"
+      - ".github/workflows/wells-checkpoint-validation.yml"
+  workflow_dispatch:
+
+jobs:
+  runtime-fixture:
+    name: Runtime probe on ${{ matrix.sdk }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sdk: Ren'Py 6.99.4
+            sdk_dir: renpy-6.99.4-sdk
+          - sdk: Ren'Py 7.4.11
+            sdk_dir: renpy-7.4.11-sdk
+          - sdk: Ren'Py 8.5.3
+            sdk_dir: renpy-8.5.3-sdk
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install headless runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1 libglu1-mesa libxrender1 libxext6 libxi6 libxcursor1 libxrandr2 libxinerama1 libasound2-dev
+
+      - name: Prepare isolated game fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/wells-checkpoint-fixture"
+          mkdir -p "$fixture/game/wells/gui"
+          cp Wells_Beta/checkpoint_tests/game/*.rpy "$fixture/game/"
+          cp Wells_Beta/wells_tracker_backend.rpy Wells_Beta/wells_road_tracker.rpy "$fixture/game/wells/"
+          cp -a Wells_Beta/gui/. "$fixture/game/wells/gui/"
+          chmod +x "${{ matrix.sdk_dir }}/renpy.sh"
+          echo "FIXTURE=$fixture" >> "$GITHUB_ENV"
+
+      - name: Test native choice capture and JSON status
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: timeout --signal=TERM --kill-after=10s 240s xvfb-run -a sh "${{ matrix.sdk_dir }}/renpy.sh" "$FIXTURE" test wells_checkpoint_capture
+
+      - name: Test clean route replay and anchor restore
+        env:
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: timeout --signal=TERM --kill-after=10s 240s xvfb-run -a sh "${{ matrix.sdk_dir }}/renpy.sh" "$FIXTURE" test wells_checkpoint_rebuild
+
+  game-lint-comparison:
+    name: Static comparison on ${{ matrix.game }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        game:
+          - "Godson-pc"
+          - "MyDorm-v0.32.4-Season4-Chapter5-pc"
+          - "Nephilim-0.6.9-pc-Compressed-pc"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install headless runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1 libglu1-mesa libxrender1 libxext6 libxi6 libxcursor1 libxrandr2 libxinerama1 libasound2-dev
+
+      - name: Compare game lint before and after module injection
+        shell: bash
+        env:
+          GAME_DIR: "JOGOS PARA TESTES/${{ matrix.game }}"
+          SDL_AUDIODRIVER: dummy
+          SDL_VIDEODRIVER: x11
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -euo pipefail
+          sdk="renpy-8.5.3-sdk"
+          chmod +x "$sdk/renpy.sh"
+          baseline="$RUNNER_TEMP/game-baseline"
+          injected="$RUNNER_TEMP/game-with-checkpoint"
+          mkdir -p "$baseline" "$injected"
+          cp -a "$GAME_DIR/." "$baseline/"
+          cp -a "$GAME_DIR/." "$injected/"
+
+          mkdir -p "$injected/game/wells"
+          cp Wells_Beta/wells_tracker_backend.rpy Wells_Beta/wells_road_tracker.rpy "$injected/game/wells/"
+          cat > "$injected/game/_wells_checkpoint_test_adapter.rpy" <<'PY'
+          init -100 python:
+              if "wells_ui" not in globals():
+                  wells_ui = lambda value: value
+              if "wells_ui_signed" not in globals():
+                  wells_ui_signed = lambda value: value
+          PY
+          if [ -d Wells_Beta/gui ] && [ ! -d "$injected/game/wells/gui" ]; then
+            mkdir -p "$injected/game/wells/gui"
+            cp -a Wells_Beta/gui/. "$injected/game/wells/gui/"
+          fi
+
+          set +e
+          timeout --signal=TERM --kill-after=10s 600s xvfb-run -a sh "$sdk/renpy.sh" "$baseline" lint > "$RUNNER_TEMP/baseline-lint.log" 2>&1
+          baseline_status=$?
+          timeout --signal=TERM --kill-after=10s 600s xvfb-run -a sh "$sdk/renpy.sh" "$injected" lint > "$RUNNER_TEMP/injected-lint.log" 2>&1
+          injected_status=$?
+          set -e
+
+          {
+            echo "### ${{ matrix.game }}"
+            echo "Baseline lint exit: $baseline_status; checkpoint modules added: $injected_status."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$baseline_status" -eq 0 ] && [ "$injected_status" -ne 0 ]; then
+            tail -n 100 "$RUNNER_TEMP/injected-lint.log"
+            exit 1
+          fi
+          if [ "$baseline_status" -eq 0 ] && [ "$injected_status" -eq 0 ]; then
+            echo "Lint passed before and after the module injection."
+          else
+            echo "Baseline game lint already failed; this game's comparison is inconclusive."
+            tail -n 30 "$RUNNER_TEMP/baseline-lint.log"
+          fi
