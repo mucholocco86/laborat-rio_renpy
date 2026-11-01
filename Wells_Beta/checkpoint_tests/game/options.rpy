@@ -25,3 +25,5 @@ init -2000 python:
         config.say_sustain_callbacks = []
     if not hasattr(config, "statement_callbacks"):
         config.statement_callbacks = []
+    if not hasattr(config, "developer"):
+        config.developer = False
