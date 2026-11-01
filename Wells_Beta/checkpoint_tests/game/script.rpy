@@ -40,7 +40,7 @@ label start:
 testcase wells_checkpoint_capture:
     $ wells_test_save_requested = True
     run Call("wells_checkpoint_entry")
-    click "Escolha A"
+    click pos (640, 340)
     python:
         assert len(wells_tracker_choices) == 1
         assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
