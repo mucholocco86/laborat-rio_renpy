@@ -29,3 +29,9 @@ init -2000 python:
         config.developer = False
     if not hasattr(config, "sound"):
         config.sound = True
+    if not hasattr(config, "hyperlink_styler"):
+        config.hyperlink_styler = None
+    if not hasattr(config, "hyperlink_callback"):
+        config.hyperlink_callback = None
+    if not hasattr(config, "hyperlink_focus"):
+        config.hyperlink_focus = None
