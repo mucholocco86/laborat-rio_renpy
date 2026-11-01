@@ -30,7 +30,9 @@ label wells_checkpoint_target:
     return
 
 label start:
-    return
+    # Keep the test game in a stable interaction instead of bouncing back to
+    # the main menu while Ren'Py's test runner drives the fixture.
+    pause 3600
 
 testcase wells_checkpoint_capture:
     run Call("wells_checkpoint_entry")
