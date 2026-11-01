@@ -2,6 +2,7 @@ default evRel = 0
 default kaRel = 0
 default active_patch = False
 default wells_test_capture_error = None
+default wells_test_replay_debug = None
 
 image wells_test_entry_anchor = Solid("#3b2020")
 image wells_test_anchor = Solid("#243044")
@@ -91,6 +92,7 @@ testcase wells_checkpoint_capture:
 
 testcase wells_checkpoint_rebuild:
     python:
+        store.wells_test_replay_debug = None
         store.wells_tracker_choices = []
         store.evRel = -1
         store.kaRel = -1
@@ -111,8 +113,8 @@ testcase wells_checkpoint_rebuild:
     pause until eval (wells_tracker_replay is None) timeout 30.0
     python:
         wells_test_expect(wells_tracker_replay is None, "Replay did not finish: {!r}".format(wells_tracker_replay))
-        wells_test_expect(store.evRel == wells_test_payload["variables"].get("evRel"), "evRel was not restored from JSON: {!r}".format(store.evRel))
-        wells_test_expect(store.kaRel == wells_test_payload["variables"].get("kaRel"), "kaRel was not restored from JSON: {!r}".format(store.kaRel))
+        wells_test_expect(store.evRel == wells_test_payload["variables"].get("evRel"), "evRel was not restored from JSON: {!r}; replay={!r}".format(store.evRel, store.wells_test_replay_debug))
+        wells_test_expect(store.kaRel == wells_test_payload["variables"].get("kaRel"), "kaRel was not restored from JSON: {!r}; replay={!r}".format(store.kaRel, store.wells_test_replay_debug))
         wells_test_expect(store.active_patch is wells_test_payload["variables"].get("active_patch"), "active_patch was not restored from JSON: {!r}".format(store.active_patch))
         wells_test_expect(renpy.game.preferences.skip_unseen == wells_test_original_skip_unseen, "skip-unseen preference was not restored")
         wells_test_expect(renpy.game.preferences.skip_after_choices == wells_test_original_skip_after_choices, "skip-after-choices preference was not restored")
