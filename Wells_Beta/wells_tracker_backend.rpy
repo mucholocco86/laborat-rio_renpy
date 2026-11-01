@@ -586,8 +586,9 @@ init -100 python:
                         try:
                             record = _wells_tracker_choice_record(items, result)
                             store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
-                        except Exception:
-                            pass
+                        except Exception as error:
+                            if hasattr(store, "wells_test_capture_error"):
+                                store.wells_test_capture_error = _wells_tracker_text(error)
                         return result
                     _wells_tracker_finish_replay("A rota mudou nesta versão. A escolha atual ficou para você.")
                 else:
@@ -600,8 +601,11 @@ init -100 python:
                 try:
                     record = _wells_tracker_choice_record(items, result)
                     store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
-                except Exception:
-                    pass
+                except Exception as error:
+                    if hasattr(store, "wells_test_capture_error"):
+                        store.wells_test_capture_error = _wells_tracker_text(error)
+            elif hasattr(store, "wells_test_capture_error"):
+                store.wells_test_capture_error = "menu returned None"
             return result
         _wrapper._wells_tracker_hook = True
         _wrapper._wells_tracker_menu_name = menu_name
