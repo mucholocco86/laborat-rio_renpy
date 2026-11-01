@@ -28,6 +28,10 @@ label wells_checkpoint_entry:
 label wells_checkpoint_target:
     show wells_test_anchor
     pause 0.1
+    $ wells_test_anchor_state = _wells_tracker_current_anchor()
+    $ renpy.log("WELLS_TEST_ANCHOR " + repr(wells_test_anchor_state))
+    if wells_test_anchor_state is None:
+        $ renpy.log("WELLS_TEST_ANCHOR_MISSING")
     $ wells_salvar_checkpoint()
     return
 
