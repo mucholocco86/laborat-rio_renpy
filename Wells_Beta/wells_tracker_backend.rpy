@@ -298,6 +298,14 @@ init -100 python:
         node = _wells_tracker_current_node()
         return node.get("file") if isinstance(node, dict) else None
 
+    def _wells_tracker_native_forward():
+        """Read the choice payload Ren'Py attached to its current rollback entry."""
+        try:
+            current = getattr(renpy.game.log, "current", None)
+            return getattr(current, "forward", None)
+        except Exception:
+            return None
+
     def _wells_tracker_choice_record(items, result):
         options = _wells_tracker_option_data(items)
         selected = _wells_tracker_json_value(result)
@@ -316,6 +324,7 @@ init -100 python:
             "selected_label": selected_label,
             "options": options,
             "source_file": _wells_tracker_source_file(),
+            "rollback_forward": _wells_tracker_json_value(_wells_tracker_native_forward()),
         }
 
     def _wells_tracker_options_match(saved, current):
