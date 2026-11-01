@@ -91,10 +91,10 @@ testcase wells_checkpoint_capture:
 
 testcase wells_checkpoint_rebuild:
     python:
-        wells_tracker_choices = []
-        evRel = -1
-        kaRel = -1
-        active_patch = False
+        store.wells_tracker_choices = []
+        store.evRel = -1
+        store.kaRel = -1
+        store.active_patch = False
         wells_test_records = wells_tracker_list_records()
         wells_test_expect(wells_test_records, "Capture fixture must write a checkpoint before rebuild")
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
@@ -118,11 +118,11 @@ testcase wells_checkpoint_rebuild:
     pause until eval (wells_tracker_replay is None) timeout 30.0
     python:
         wells_test_expect(wells_tracker_replay is None, "Replay did not finish: {!r}".format(wells_tracker_replay))
-        wells_test_expect(evRel == 56, "evRel was not restored: {!r}".format(evRel))
-        wells_test_expect(kaRel == 12, "kaRel was not restored: {!r}".format(kaRel))
-        wells_test_expect(active_patch is True, "active_patch was not restored: {!r}".format(active_patch))
+        wells_test_expect(store.evRel == wells_test_payload["variables"].get("evRel"), "evRel was not restored from JSON: {!r}".format(store.evRel))
+        wells_test_expect(store.kaRel == wells_test_payload["variables"].get("kaRel"), "kaRel was not restored from JSON: {!r}".format(store.kaRel))
+        wells_test_expect(store.active_patch is wells_test_payload["variables"].get("active_patch"), "active_patch was not restored from JSON: {!r}".format(store.active_patch))
         wells_test_expect(renpy.game.preferences.skip_unseen == wells_test_original_skip_unseen, "skip-unseen preference was not restored")
         wells_test_expect(renpy.game.preferences.skip_after_choices == wells_test_original_skip_after_choices, "skip-after-choices preference was not restored")
         wells_test_expect(renpy.config.skipping is None, "Skip mode was not restored")
-        wells_test_expect(len(wells_tracker_choices) == 1, "Replay choice count is wrong: {!r}".format(wells_tracker_choices))
+        wells_test_expect(len(store.wells_tracker_choices) == 1, "Replay choice count is wrong: {!r}".format(store.wells_tracker_choices))
         wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Replay selected wrong choice: {!r}".format(wells_tracker_choices))
