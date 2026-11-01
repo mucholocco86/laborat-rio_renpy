@@ -145,7 +145,8 @@ screen wells_road_tracker():
             yalign 0.5
             background Frame("wells/gui/frame_menu.png", 10, 10)
             xsize wells_ui(620)
-            padding (wells_ui(30), wells_ui(24), wells_ui(30), wells_ui(24))
+            xpadding wells_ui(30)
+            ypadding wells_ui(24)
 
             vbox:
                 spacing wells_ui(24)
