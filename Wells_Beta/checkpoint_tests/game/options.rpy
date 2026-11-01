@@ -14,3 +14,5 @@ init -2000 python:
         config.renpy_base = os.path.dirname(renpy.__file__)
     if not hasattr(config, "mode_callbacks"):
         config.mode_callbacks = []
+    if not hasattr(config, "interact_callbacks"):
+        config.interact_callbacks = []
