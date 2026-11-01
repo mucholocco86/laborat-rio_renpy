@@ -21,3 +21,5 @@ init -2000 python:
 
     if not hasattr(config, "start_interact_callbacks"):
         config.start_interact_callbacks = []
+    if not hasattr(config, "say_sustain_callbacks"):
+        config.say_sustain_callbacks = []
