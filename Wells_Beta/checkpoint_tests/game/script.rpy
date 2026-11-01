@@ -27,6 +27,7 @@ label wells_checkpoint_entry:
 
 label wells_checkpoint_target:
     show wells_test_anchor
+    pause 0.1
     $ wells_salvar_checkpoint()
     return
 
