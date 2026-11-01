@@ -407,7 +407,16 @@ init -100 python:
         replay = getattr(store, "wells_tracker_replay", None)
         store.wells_tracker_replay = None
         try:
-            renpy.config.skipping = None
+            renpy.config.skipping = replay.get("previous_skipping") if isinstance(replay, dict) else None
+        except Exception:
+            pass
+        try:
+            preferences = renpy.game.preferences
+            if isinstance(replay, dict):
+                if "previous_skip_unseen" in replay:
+                    preferences.skip_unseen = replay.get("previous_skip_unseen")
+                if "previous_skip_after_choices" in replay:
+                    preferences.skip_after_choices = replay.get("previous_skip_after_choices")
         except Exception:
             pass
         try:
@@ -570,6 +579,7 @@ init -100 python:
             if payload.get("version") != WELLS_TRACKER_VERSION:
                 raise ValueError("Formato de checkpoint incompatível")
             store.wells_tracker_choices = []
+            preferences = renpy.game.preferences
             store.wells_tracker_replay = {
                 "filename": filename,
                 "choices": payload.get("choices", []),
@@ -580,7 +590,13 @@ init -100 python:
                     "script_node": payload.get("script_node"),
                 },
                 "variables": payload.get("variables", {}),
+                "previous_skipping": getattr(renpy.config, "skipping", None),
+                "previous_skip_unseen": getattr(preferences, "skip_unseen", False),
+                "previous_skip_after_choices": getattr(preferences, "skip_after_choices", False),
             }
+            preferences.skip_unseen = True
+            if hasattr(preferences, "skip_after_choices"):
+                preferences.skip_after_choices = True
             renpy.config.skipping = "fast"
             return True
         except Exception as error:
