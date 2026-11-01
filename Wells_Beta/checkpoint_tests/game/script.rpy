@@ -12,6 +12,10 @@ init -100 python:
     def wells_ui_signed(value):
         return value
 
+    def wells_test_expect(condition, message):
+        if not condition:
+            raise Exception(message)
+
 label wells_checkpoint_entry:
     menu:
         "Escolha A":
@@ -38,7 +42,7 @@ label wells_checkpoint_target:
                 (getattr(_wells_entry, "tag", None), getattr(_wells_entry, "name", None))
                 for _wells_entry in _wells_entries
             ]
-        assert wells_test_anchor_state is not None, "No active image anchor; scene layers={!r}".format(_wells_scene_names)
+        wells_test_expect(wells_test_anchor_state is not None, "No active image anchor; scene layers={!r}".format(_wells_scene_names))
     $ wells_salvar_checkpoint()
     return
 
@@ -51,17 +55,17 @@ testcase wells_checkpoint_capture:
     run Call("wells_checkpoint_entry")
     click pos (640, 340)
     python:
-        assert len(wells_tracker_choices) == 1
-        assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
-        assert wells_tracker_choices[0]["choice_value"] == 0
+        wells_test_expect(len(wells_tracker_choices) == 1, "Expected one captured choice; got {!r}".format(wells_tracker_choices))
+        wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Wrong selected label: {!r}".format(wells_tracker_choices[0]))
+        wells_test_expect(wells_tracker_choices[0]["choice_value"] == 0, "Wrong choice return value: {!r}".format(wells_tracker_choices[0]))
         wells_test_records = wells_tracker_list_records()
-        assert wells_test_records, "No checkpoint JSON; anchor={!r}, directory={!r}, files={!r}".format(wells_test_anchor_state, WELLS_TRACKER_DIR, os.listdir(WELLS_TRACKER_DIR) if os.path.isdir(WELLS_TRACKER_DIR) else None)
+        wells_test_expect(wells_test_records, "No checkpoint JSON; anchor={!r}, directory={!r}, files={!r}".format(wells_test_anchor_state, WELLS_TRACKER_DIR, os.listdir(WELLS_TRACKER_DIR) if os.path.isdir(WELLS_TRACKER_DIR) else None))
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
-        assert wells_test_payload["version"] == 3
-        assert wells_test_payload["choices"][0]["selected_label"] == "Escolha A"
-        assert wells_test_payload["variables"]["evRel"] == 10
-        assert wells_test_payload["variables"]["kaRel"] == 3
-        assert wells_test_payload["variables"]["active_patch"] is True
+        wells_test_expect(wells_test_payload["version"] == 3, "Unexpected payload version: {!r}".format(wells_test_payload))
+        wells_test_expect(wells_test_payload["choices"][0]["selected_label"] == "Escolha A", "Choice missing from payload: {!r}".format(wells_test_payload))
+        wells_test_expect(wells_test_payload["variables"].get("evRel") == 10, "evRel not captured: {!r}".format(wells_test_payload.get("variables")))
+        wells_test_expect(wells_test_payload["variables"].get("kaRel") == 3, "kaRel not captured: {!r}".format(wells_test_payload.get("variables")))
+        wells_test_expect(wells_test_payload["variables"].get("active_patch") is True, "active_patch not captured: {!r}".format(wells_test_payload.get("variables")))
 
 testcase wells_checkpoint_rebuild:
     $ wells_tracker_choices = []
@@ -87,9 +91,9 @@ testcase wells_checkpoint_rebuild:
     $ renpy.config.skipping = "fast"
     run Call("wells_checkpoint_entry")
     python:
-        assert wells_tracker_replay is None
-        assert evRel == 56
-        assert kaRel == 12
-        assert active_patch is True
-        assert len(wells_tracker_choices) == 1
-        assert wells_tracker_choices[0]["selected_label"] == "Escolha A"
+        wells_test_expect(wells_tracker_replay is None, "Replay did not finish: {!r}".format(wells_tracker_replay))
+        wells_test_expect(evRel == 56, "evRel was not restored: {!r}".format(evRel))
+        wells_test_expect(kaRel == 12, "kaRel was not restored: {!r}".format(kaRel))
+        wells_test_expect(active_patch is True, "active_patch was not restored: {!r}".format(active_patch))
+        wells_test_expect(len(wells_tracker_choices) == 1, "Replay choice count is wrong: {!r}".format(wells_tracker_choices))
+        wells_test_expect(wells_tracker_choices[0]["selected_label"] == "Escolha A", "Replay selected wrong choice: {!r}".format(wells_tracker_choices))
