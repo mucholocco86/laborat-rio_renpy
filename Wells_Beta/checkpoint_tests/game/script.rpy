@@ -64,7 +64,6 @@ label start:
 
 testcase wells_checkpoint_capture:
     run Jump("wells_checkpoint_entry")
-    advance until screen "choice"
     click pos (400, 135)
     python:
         wells_test_expect(len(wells_tracker_choices) == 1, "Expected one captured choice; got {!r}; capture_error={!r}".format(wells_tracker_choices, wells_test_capture_error))
