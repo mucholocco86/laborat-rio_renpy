@@ -585,8 +585,7 @@ init -100 python:
                         store.wells_tracker_replay = new_replay
                         try:
                             record = _wells_tracker_choice_record(items, result)
-                            if record.get("selected_index") is not None:
-                                store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
+                            store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
                         except Exception:
                             pass
                         return result
@@ -600,8 +599,7 @@ init -100 python:
             if result is not None:
                 try:
                     record = _wells_tracker_choice_record(items, result)
-                    if record.get("selected_index") is not None:
-                        store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
+                    store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
                 except Exception:
                     pass
             return result
