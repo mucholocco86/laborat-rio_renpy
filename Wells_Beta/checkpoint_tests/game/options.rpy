@@ -9,3 +9,6 @@ init -2000 python:
         config.overlay_functions = []
     if not hasattr(config, "predict_callbacks"):
         config.predict_callbacks = []
+    if not hasattr(config, "renpy_base"):
+        import os
+        config.renpy_base = os.path.dirname(renpy.__file__)
