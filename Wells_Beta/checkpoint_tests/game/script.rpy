@@ -77,6 +77,8 @@ testcase wells_checkpoint_capture:
         wells_test_expect(wells_test_payload["variables"].get("evRel") == 10, "evRel not captured: {!r}".format(wells_test_payload.get("variables")))
         wells_test_expect(wells_test_payload["variables"].get("kaRel") == 3, "kaRel not captured: {!r}".format(wells_test_payload.get("variables")))
         wells_test_expect(wells_test_payload["variables"].get("active_patch") is True, "active_patch not captured: {!r}".format(wells_test_payload.get("variables")))
+        renpy.save("wells_normal_save_probe")
+        wells_test_expect(renpy.can_load("wells_normal_save_probe"), "Normal Ren'Py save could not be loaded")
 
 testcase wells_checkpoint_rebuild:
     $ wells_tracker_choices = []
