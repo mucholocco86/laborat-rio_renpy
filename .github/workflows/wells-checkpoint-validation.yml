@@ -12,6 +12,7 @@ on:
       - "Wells_Beta/wells_tracker_backend.rpy"
       - "Wells_Beta/wells_road_tracker.rpy"
       - "Wells_Beta/checkpoint_tests/**"
+      - "Wells_Beta/checkpoint_tests/game/options.rpy"
       - ".github/workflows/wells-checkpoint-validation.yml"
   workflow_dispatch:
 
