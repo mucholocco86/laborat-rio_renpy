@@ -1,5 +1,9 @@
 name: Wells checkpoint runtime and game compatibility
 
+concurrency:
+  group: wells-checkpoint-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
