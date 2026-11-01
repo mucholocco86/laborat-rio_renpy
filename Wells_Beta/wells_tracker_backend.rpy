@@ -186,6 +186,11 @@ init -100 python:
         for node in candidates:
             if node is None:
                 continue
+            if not getattr(node, "filename", None):
+                try:
+                    node = renpy.game.script.lookup(node)
+                except Exception:
+                    continue
             filename = getattr(node, "filename", None)
             linenumber = getattr(node, "linenumber", None)
             if filename and _wells_tracker_is_valid_game_script(filename):
