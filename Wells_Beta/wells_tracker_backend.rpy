@@ -385,6 +385,13 @@ init -100 python:
     def _wells_tracker_auto_choice(items, saved):
         current = _wells_tracker_option_data(items)
         if not _wells_tracker_options_match(saved, current):
+            if hasattr(store, "wells_test_replay_debug"):
+                store.wells_test_replay_debug = {
+                    "stage": "options_mismatch",
+                    "saved": saved,
+                    "current": current,
+                    "current_source_file": _wells_tracker_source_file(),
+                }
             return (False, None)
         wanted = saved.get("choice_value")
         for item in items:
@@ -398,13 +405,23 @@ init -100 python:
                 else:
                     result = value
                 _wells_tracker_checkpoint_value(result)
+                if hasattr(store, "wells_test_replay_debug"):
+                    store.wells_test_replay_debug = {"stage": "choice_selected", "value": _wells_tracker_json_value(result)}
                 return (True, result)
-            except Exception:
+            except Exception as error:
+                if hasattr(store, "wells_test_replay_debug"):
+                    store.wells_test_replay_debug = {"stage": "choice_action_error", "error": _wells_tracker_text(error)}
                 return (False, None)
         return (False, None)
 
     def _wells_tracker_finish_replay(message):
         replay = getattr(store, "wells_tracker_replay", None)
+        if hasattr(store, "wells_test_replay_debug"):
+            store.wells_test_replay_debug = {
+                "finished_with": message,
+                "cursor": replay.get("cursor") if isinstance(replay, dict) else None,
+                "choice_count": len(replay.get("choices", [])) if isinstance(replay, dict) else None,
+            }
         store.wells_tracker_replay = None
         try:
             renpy.config.skipping = replay.get("previous_skipping") if isinstance(replay, dict) else None
