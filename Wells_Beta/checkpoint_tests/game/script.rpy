@@ -86,26 +86,25 @@ testcase wells_checkpoint_capture:
         wells_test_expect(renpy.can_load("wells_normal_save_probe"), "Normal Ren'Py save could not be loaded")
 
 testcase wells_checkpoint_rebuild:
-    $ wells_tracker_choices = []
-    $ evRel = -1
-    $ kaRel = -1
-    $ active_patch = False
-    $ wells_tracker_replay = {
-        "filename": "test.json",
-        "choices": [{
-            "choice_value": 0,
-            "selected_index": 0,
-            "selected_label": "Escolha A",
-            "source_file": None,
-            "options": [
-                {"label": "Escolha A", "value": 0},
-                {"label": "Escolha B", "value": 1},
-            ],
-        }],
-        "cursor": 0,
-        "anchor": {"image_name": "wells_test_anchor", "asset_file": None, "script_node": None},
-        "variables": {"evRel": 56, "kaRel": 12, "active_patch": True},
-    }
+    python:
+        wells_tracker_choices = []
+        evRel = -1
+        kaRel = -1
+        active_patch = False
+        wells_test_records = wells_tracker_list_records()
+        wells_test_expect(wells_test_records, "Capture fixture must write a checkpoint before rebuild")
+        wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
+        wells_tracker_replay = {
+            "filename": wells_test_records[0]["filename"],
+            "choices": wells_test_payload["choices"],
+            "cursor": 0,
+            "anchor": {
+                "image_name": wells_test_payload["checkpoint_image"],
+                "asset_file": wells_test_payload["checkpoint_asset"],
+                "script_node": wells_test_payload["script_node"],
+            },
+            "variables": {"evRel": 56, "kaRel": 12, "active_patch": True},
+        }
     $ renpy.config.skipping = "fast"
     run Jump("wells_checkpoint_entry")
     python:
