@@ -364,16 +364,26 @@ init -100 python:
     def _wells_tracker_options_match(saved, current):
         old = saved.get("options", []) if isinstance(saved, dict) else []
         if len(old) != len(current):
+            if hasattr(store, "wells_test_replay_debug"):
+                store.wells_test_replay_debug = {"stage": "options_length", "saved": old, "current": current}
             return False
-        for old_item, new_item in zip(old, current):
+        for index, (old_item, new_item) in enumerate(zip(old, current)):
             if old_item.get("label") != new_item.get("label"):
+                if hasattr(store, "wells_test_replay_debug"):
+                    store.wells_test_replay_debug = {"stage": "option_label", "index": index, "saved": repr(old_item.get("label")), "current": repr(new_item.get("label"))}
                 return False
             if old_item.get("value") != new_item.get("value"):
+                if hasattr(store, "wells_test_replay_debug"):
+                    store.wells_test_replay_debug = {"stage": "option_value", "index": index, "saved": repr(old_item.get("value")), "current": repr(new_item.get("value")), "saved_type": type(old_item.get("value")).__name__, "current_type": type(new_item.get("value")).__name__}
                 return False
         saved_file = saved.get("source_file")
         current_file = _wells_tracker_source_file()
         if saved_file and current_file and saved_file.replace("\\", "/").lower() != current_file.replace("\\", "/").lower():
+            if hasattr(store, "wells_test_replay_debug"):
+                store.wells_test_replay_debug = {"stage": "source_file", "saved": repr(saved_file), "current": repr(current_file)}
             return False
+        if hasattr(store, "wells_test_replay_debug"):
+            store.wells_test_replay_debug = {"stage": "options_match", "saved": old, "current": current}
         return True
 
     def _wells_tracker_checkpoint_value(result):
@@ -391,6 +401,7 @@ init -100 python:
                     "saved": saved,
                     "current": current,
                     "current_source_file": _wells_tracker_source_file(),
+                    "reason": getattr(store, "wells_test_replay_debug", None),
                 }
             return (False, None)
         wanted = saved.get("choice_value")
