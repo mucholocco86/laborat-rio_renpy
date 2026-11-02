@@ -3,6 +3,9 @@ default kaRel = 0
 default active_patch = False
 default wells_test_capture_error = None
 default wells_test_replay_debug = None
+default wells_test_auto_restart = False
+default wells_test_force_mismatch = False
+default wells_test_checkpoint_file = None
 
 image wells_test_entry_anchor = Solid("#3b2020")
 image wells_test_anchor = Solid("#243044")
@@ -50,6 +53,10 @@ label wells_checkpoint_entry:
 label wells_checkpoint_target:
     if wells_tracker_replay is not None:
         "Intervening unseen dialogue."
+    if wells_test_force_mismatch:
+        $ evRel = -1
+        $ kaRel = -1
+        $ active_patch = False
     show wells_test_anchor
     $ wells_test_anchor_state = _wells_tracker_current_anchor()
     python:
@@ -62,11 +69,38 @@ label wells_checkpoint_target:
                 for _wells_entry in _wells_entries
             ]
         wells_test_expect(wells_test_anchor_state is not None, "No active image anchor; scene layers={!r}".format(_wells_scene_names))
-    $ wells_salvar_checkpoint()
-    pause 0.1
+    if wells_test_auto_restart:
+        python:
+            wells_test_payload = _wells_tracker_read_json(wells_test_checkpoint_file)
+            wells_test_expect(wells_tracker_replay is None, "Full restart replay did not finish at the saved image: {!r}".format(wells_tracker_replay))
+            wells_test_expect(evRel == wells_test_payload["variables"].get("evRel"), "Full restart did not restore evRel from JSON: {!r}".format(evRel))
+            wells_test_expect(kaRel == wells_test_payload["variables"].get("kaRel"), "Full restart did not restore kaRel from JSON: {!r}".format(kaRel))
+            wells_test_expect(active_patch is wells_test_payload["variables"].get("active_patch"), "Full restart did not restore active_patch from JSON: {!r}".format(active_patch))
+            with io.open(os.path.join(WELLS_TRACKER_DIR, "runtime_restart_passed.txt"), "w", encoding="utf-8") as wells_test_result_file:
+                wells_test_result_file.write("passed")
+        $ renpy.quit()
+    else:
+        $ wells_salvar_checkpoint()
+        pause 0.1
+    return
+
+label main_menu:
     return
 
 label start:
+    if wells_test_auto_restart:
+        if wells_tracker_replay is not None:
+            $ wells_test_checkpoint_file = wells_tracker_replay.get("filename")
+            $ wells_test_force_mismatch = True
+            jump wells_checkpoint_entry
+        $ wells_test_records = wells_tracker_list_records()
+        $ wells_test_expect(wells_test_records, "Full restart fixture has no captured JSON checkpoint.")
+        $ wells_test_checkpoint_file = wells_test_records[0]["filename"]
+        $ evRel = -1
+        $ kaRel = -1
+        $ active_patch = False
+        $ wells_tracker_request_load(wells_test_checkpoint_file)
+        "Checkpoint load returned without restarting."
     # Keep the test game in a stable interaction instead of bouncing back to
     # the main menu while Ren'Py's test runner drives the fixture.
     pause 3600
@@ -102,17 +136,7 @@ testcase wells_checkpoint_rebuild:
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
         wells_test_original_skip_unseen = renpy.game.preferences.skip_unseen
         wells_test_original_skip_after_choices = renpy.game.preferences.skip_after_choices
-        wells_test_restart_args = None
-        try:
-            wells_tracker_request_load(wells_test_records[0]["filename"])
-        except renpy.game.FullRestartException as wells_test_restart:
-            wells_test_restart_args = wells_test_restart.args[0]
-        wells_test_expect(
-            wells_test_restart_args is not None
-            and wells_test_restart_args[1] == "_wells_tracker_bootstrap"
-            and wells_test_restart_args[2] == "_main_menu",
-            "Checkpoint load did not request the bootstrap restart: {!r}".format(wells_test_restart_args),
-        )
+        _wells_tracker_write_pending(wells_test_records[0]["filename"])
         wells_test_expect(os.path.isfile(WELLS_TRACKER_PENDING), "Checkpoint request did not leave a pending-load marker")
         with io.open(WELLS_TRACKER_PENDING, "r", encoding="utf-8") as wells_test_pending_stream:
             wells_test_expect(wells_test_pending_stream.read().strip() == wells_test_records[0]["filename"], "Pending-load marker has the wrong checkpoint")
