@@ -670,8 +670,27 @@ init -100 python:
             WELLS_TRACKER_ORIGINAL_MENUS[menu_name] = current
             setattr(store, menu_name, _wells_tracker_make_menu_wrapper(current, menu_name))
 
+    def _wells_tracker_restart_label_callback(label, abnormal):
+        # Newer Ren'Py releases may restart through the main-menu labels even
+        # when full_restart is given a custom destination. Resume a pending
+        # checkpoint before the main menu can become visible.
+        if label not in ("_invoke_main_menu", "_main_menu"):
+            return
+        try:
+            pending = os.path.isfile(WELLS_TRACKER_PENDING)
+        except Exception:
+            pending = False
+        if pending:
+            renpy.jump("_wells_tracker_bootstrap")
+
     try:
         config.statement_callbacks.append(_wells_tracker_statement_callback)
+    except Exception:
+        pass
+    try:
+        label_callbacks = getattr(config, "label_callbacks", None)
+        if label_callbacks is not None:
+            label_callbacks.append(_wells_tracker_restart_label_callback)
     except Exception:
         pass
     _wells_tracker_install_menu_hooks()
