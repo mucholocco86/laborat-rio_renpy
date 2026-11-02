@@ -364,26 +364,18 @@ init -100 python:
     def _wells_tracker_options_match(saved, current):
         old = saved.get("options", []) if hasattr(saved, "get") else []
         if len(old) != len(current):
-            if hasattr(store, "wells_test_replay_debug"):
-                store.wells_test_replay_debug = {"stage": "options_length", "saved": old, "current": current, "saved_type": type(saved).__name__}
             return False
-        for index, (old_item, new_item) in enumerate(zip(old, current)):
+        for old_item, new_item in zip(old, current):
+            if not hasattr(old_item, "get"):
+                return False
             if old_item.get("label") != new_item.get("label"):
-                if hasattr(store, "wells_test_replay_debug"):
-                    store.wells_test_replay_debug = {"stage": "option_label", "index": index, "saved": repr(old_item.get("label")), "current": repr(new_item.get("label"))}
                 return False
             if old_item.get("value") != new_item.get("value"):
-                if hasattr(store, "wells_test_replay_debug"):
-                    store.wells_test_replay_debug = {"stage": "option_value", "index": index, "saved": repr(old_item.get("value")), "current": repr(new_item.get("value")), "saved_type": type(old_item.get("value")).__name__, "current_type": type(new_item.get("value")).__name__}
                 return False
         saved_file = saved.get("source_file")
         current_file = _wells_tracker_source_file()
         if saved_file and current_file and saved_file.replace("\\", "/").lower() != current_file.replace("\\", "/").lower():
-            if hasattr(store, "wells_test_replay_debug"):
-                store.wells_test_replay_debug = {"stage": "source_file", "saved": repr(saved_file), "current": repr(current_file)}
             return False
-        if hasattr(store, "wells_test_replay_debug"):
-            store.wells_test_replay_debug = {"stage": "options_match", "saved": old, "current": current}
         return True
 
     def _wells_tracker_checkpoint_value(result):
@@ -395,14 +387,6 @@ init -100 python:
     def _wells_tracker_auto_choice(items, saved):
         current = _wells_tracker_option_data(items)
         if not _wells_tracker_options_match(saved, current):
-            if hasattr(store, "wells_test_replay_debug"):
-                store.wells_test_replay_debug = {
-                    "stage": "options_mismatch",
-                    "saved": saved,
-                    "current": current,
-                    "current_source_file": _wells_tracker_source_file(),
-                    "reason": getattr(store, "wells_test_replay_debug", None),
-                }
             return (False, None)
         wanted = saved.get("choice_value")
         for item in items:
@@ -411,29 +395,15 @@ init -100 python:
                 value = _wells_tracker_value(action)
                 if _wells_tracker_json_value(value) != wanted:
                     continue
-                if callable(action):
-                    result = action()
-                else:
-                    result = value
+                result = action() if callable(action) else value
                 _wells_tracker_checkpoint_value(result)
-                if hasattr(store, "wells_test_replay_debug"):
-                    store.wells_test_replay_debug = {"stage": "choice_selected", "value": _wells_tracker_json_value(result)}
                 return (True, result)
-            except Exception as error:
-                if hasattr(store, "wells_test_replay_debug"):
-                    store.wells_test_replay_debug = {"stage": "choice_action_error", "error": _wells_tracker_text(error)}
+            except Exception:
                 return (False, None)
         return (False, None)
 
     def _wells_tracker_finish_replay(message):
         replay = getattr(store, "wells_tracker_replay", None)
-        if hasattr(store, "wells_test_replay_debug"):
-            store.wells_test_replay_debug = {
-                "previous": getattr(store, "wells_test_replay_debug", None),
-                "finished_with": message,
-                "cursor": replay.get("cursor") if isinstance(replay, dict) else None,
-                "choice_count": len(replay.get("choices", [])) if isinstance(replay, dict) else None,
-            }
         store.wells_tracker_replay = None
         try:
             renpy.config.skipping = replay.get("previous_skipping") if isinstance(replay, dict) else None
@@ -532,8 +502,6 @@ init -100 python:
             renpy.notify("Checkpoint registrado.")
             renpy.restart_interaction()
         except Exception as error:
-            if hasattr(store, "wells_test_capture_error"):
-                store.wells_test_capture_error = _wells_tracker_text(error)
             renpy.notify("Wells: erro ao gravar checkpoint: " + _wells_tracker_text(error))
 
     def wells_tracker_preview(image_name, asset_file=None):
@@ -674,8 +642,6 @@ init -100 python:
                             record = _wells_tracker_choice_record(items, result)
                             store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
                         except Exception as error:
-                            if hasattr(store, "wells_test_capture_error"):
-                                store.wells_test_capture_error = _wells_tracker_text(error)
                         return result
                     _wells_tracker_finish_replay("A rota mudou nesta versão. A escolha atual ficou para você.")
                 else:
@@ -689,10 +655,6 @@ init -100 python:
                     record = _wells_tracker_choice_record(items, result)
                     store.wells_tracker_choices = list(getattr(store, "wells_tracker_choices", [])) + [record]
                 except Exception as error:
-                    if hasattr(store, "wells_test_capture_error"):
-                        store.wells_test_capture_error = _wells_tracker_text(error)
-            elif hasattr(store, "wells_test_capture_error"):
-                store.wells_test_capture_error = "menu returned None"
             return result
         _wrapper._wells_tracker_hook = True
         _wrapper._wells_tracker_menu_name = menu_name
