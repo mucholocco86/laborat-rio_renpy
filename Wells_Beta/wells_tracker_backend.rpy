@@ -557,7 +557,15 @@ init -100 python:
         if not payload.get("checkpoint_image"):
             renpy.notify("Este checkpoint não tem uma imagem de referência válida.")
             return
-        if not isinstance(payload.get("choices"), list) or not isinstance(payload.get("variables"), dict):
+        saved_choices = payload.get("choices")
+        saved_variables = payload.get("variables")
+        if (
+            not hasattr(saved_choices, "__len__")
+            or not hasattr(saved_choices, "__getitem__")
+            or isinstance(saved_choices, WELLS_TRACKER_STRING_TYPES)
+            or hasattr(saved_choices, "keys")
+            or not hasattr(saved_variables, "items")
+        ):
             renpy.notify("O arquivo de checkpoint está incompleto.")
             return
         try:
