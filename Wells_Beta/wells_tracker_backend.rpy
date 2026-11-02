@@ -362,10 +362,10 @@ init -100 python:
         }
 
     def _wells_tracker_options_match(saved, current):
-        old = saved.get("options", []) if isinstance(saved, dict) else []
+        old = saved.get("options", []) if hasattr(saved, "get") else []
         if len(old) != len(current):
             if hasattr(store, "wells_test_replay_debug"):
-                store.wells_test_replay_debug = {"stage": "options_length", "saved": old, "current": current}
+                store.wells_test_replay_debug = {"stage": "options_length", "saved": old, "current": current, "saved_type": type(saved).__name__}
             return False
         for index, (old_item, new_item) in enumerate(zip(old, current)):
             if old_item.get("label") != new_item.get("label"):
