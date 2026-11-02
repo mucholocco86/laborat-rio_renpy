@@ -96,6 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           sed -i 's/default wells_test_auto_restart = False/default wells_test_auto_restart = True/' "$FIXTURE/game/script.rpy"
+          find "$FIXTURE/game" -name '*.rpyc' -delete
           timeout --signal=TERM --kill-after=10s 90s xvfb-run -a sh "${{ matrix.sdk_dir }}/renpy.sh" "$FIXTURE" run
           test -f "$FIXTURE/game/saves/wells_tracker/runtime_restart_passed.txt"
 
