@@ -3,7 +3,6 @@ screen JK_ChoicesTimeline(playthrough):
     style_prefix "JK"
     modal True
 
-    default show_thumbnails = False
     default search = ""
 
     default view_model = JK.ChoicesTimelineViewModel(playthrough)
@@ -14,5 +13,5 @@ screen JK_ChoicesTimeline(playthrough):
         elif view_model.error:
             use JK_ChoicesTimelineError(view_model)
         else:
-            use JK_ChoicesTimelineList(view_model, show_thumbnails, search)
+            use JK_ChoicesTimelineList(view_model, search)
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

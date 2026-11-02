@@ -1,4 +1,4 @@
-screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
+screen JK_ChoicesTimelineList(view_model, search):
     default search_input = JK.TextInput("search")
 
     python:
@@ -45,10 +45,6 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
             hbox:
                 xfill True
 
-
-                use JK_Checkbox(checked=show_thumbnails, text="Exibir miniaturas\n{size=-5}(Pode causar lentidão ou até travar o jogo){/size}", action=SetScreenVariable("show_thumbnails", not show_thumbnails))
-
-
                 hbox yalign 0.0 xpos 1.0 xanchor 1.0:
                     frame style "JK_frame":
                         xysize JK.scaled((300, 50))
@@ -71,7 +67,7 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
             use JK_YSpacer(offset=3)
 
             vbox:
-                spacing (3 if show_thumbnails else 0)
+                spacing 3
 
                 for entry in timeline:
                     $ page, slot = JK.Utils.split_slotname(entry[2])
@@ -80,21 +76,20 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
                         action [FileLoad(slot, confirm=True, page=page), Hide("JK_ChoicesTimeline")]
 
                         has hbox
-                        if show_thumbnails:
-                            add renpy.slot_screenshot(entry[2]) size JK.Utils.resize_dimensions_to_limits((renpy.config.thumbnail_width, renpy.config.thumbnail_height), (100, 100))
+                        add renpy.slot_screenshot(entry[2]) size JK.Utils.resize_dimensions_to_limits((renpy.config.thumbnail_width, renpy.config.thumbnail_height), (200, 200))
 
-                            use JK_XSpacer(offset=3)
+                        use JK_XSpacer(offset=3)
 
                         hbox yalign 0.5:
                             $ n = entry[0] + 1
-                            text "[n]." hover_color JK.Colors.hover:
+                            text "[n]." size JK.scaled(23) hover_color JK.Colors.hover:
                                 if entry[1] is None:
                                     color JK.Colors.na
 
                             if entry[1] is None:
-                                text "??????" color JK.Colors.na hover_color JK.Colors.hover
+                                text "??????" size JK.scaled(23) color JK.Colors.na hover_color JK.Colors.hover
                             else:
-                                text JK.Utils.escape_renpy_reserved_characters(entry[1]) hover_color JK.Colors.hover
+                                text JK.Utils.escape_renpy_reserved_characters(entry[1]) size JK.scaled(23) hover_color JK.Colors.hover
 
                             use JK_XSpacer(offset=3)
 
