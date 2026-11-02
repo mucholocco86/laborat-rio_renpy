@@ -11,7 +11,7 @@ screen JK_ConfirmSizeAdjustment():
                 renpy.store.persistent.JK_SizeAdjustmentRollbackValue = None
                 renpy.save_persistent()
                 renpy.store.gui.rebuild()
-                renpy.notify("Previous size applied.")
+                renpy.notify("O tamanho anterior foi aplicado.")
 
         class ConfirmSizeAdjustment(renpy.ui.Action):
             def __call__(self):
@@ -36,20 +36,20 @@ screen JK_ConfirmSizeAdjustment():
             padding (10, 10, 10, 10)
 
             has vbox
-            text "Adjustment confirmation" color JK.Colors.theme xalign 0.5
+            text "Confirmação do ajuste" color JK.Colors.theme xalign 0.5
 
             use JK_YSpacer(4)
 
-            text "{size=-10}After 60 seconds, the previous size will be applied.{/size}" xalign 0.5
+            text "{size=-10}Após 60 segundos, o tamanho anterior será aplicado.{/size}" xalign 0.5
 
             vbox ysize 20
 
             text "[time]s" xalign 0.5 color (JK.Colors.error if time < 5 else "#fff")
 
             hbox xalign 0.5:
-                textbutton "Revert" action [RevertSizeAdjustmentValue(), Hide('JK_ConfirmSizeAdjustment')] text_color JK.Colors.error text_hover_color JK.Colors.hover
+                textbutton "Reverter" action [RevertSizeAdjustmentValue(), Hide('JK_ConfirmSizeAdjustment')] text_color JK.Colors.error text_hover_color JK.Colors.hover
 
                 hbox xsize 100
 
-                textbutton "Confirm" action [ConfirmSizeAdjustment(), Hide('JK_ConfirmSizeAdjustment')] text_color JK.Colors.success text_hover_color JK.Colors.hover
+                textbutton "Confirmar" action [ConfirmSizeAdjustment(), Hide('JK_ConfirmSizeAdjustment')] text_color JK.Colors.success text_hover_color JK.Colors.hover
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

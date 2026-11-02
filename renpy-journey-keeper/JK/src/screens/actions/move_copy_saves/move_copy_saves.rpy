@@ -11,7 +11,7 @@ screen JK_MoveCopySaves(playthrough):
 
     default view_model = None
 
-    use JK_Dialog(title="Move/Copy saves" if destination_playthrough else "Select other playthrough", message=None if destination_playthrough else "Select the playthrough you want to move/copy saves into.", close_action=Hide("JK_MoveCopySaves")):
+    use JK_Dialog(title="Mover/copiar salvamentos" if destination_playthrough else "Selecionar outra jornada", message=None if destination_playthrough else "Selecione a jornada de destino para mover ou copiar os salvamentos.", close_action=Hide("JK_MoveCopySaves")):
         style_prefix "JK"
 
         if source_playthrough and destination_playthrough:

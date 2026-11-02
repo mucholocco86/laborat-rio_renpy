@@ -23,7 +23,7 @@ screen JK_ChoicesTimelineLoading(view_model):
             xmaximum 0.85
 
             hbox xalign 0.5:
-                use JK_Title("Reading saves...")
+                use JK_Title("Lendo salvamentos...")
 
             use JK_YSpacer()
 
@@ -43,5 +43,5 @@ screen JK_ChoicesTimelineLoading(view_model):
 
 
             hbox:
-                use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_ChoicesTimeline"))
+                use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_ChoicesTimeline"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

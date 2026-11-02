@@ -8,7 +8,7 @@ screen JK_SavesListNoSaves():
         ymaximum 0.85
 
         vbox align (0.5, 0.5):
-            use JK_Title("No saves", color=JK.Colors.error)
+            use JK_Title("Nenhum salvamento", color=JK.Colors.error)
 
 
     hbox:

@@ -46,7 +46,7 @@ screen JK_MoveCopySavesOverwriteConfirm(save, view_model):
     key 'K_RETURN' action cancelAction
     key 'K_KP_ENTER' action overwriteAction
 
-    use JK_Dialog(title="Saves conflict!", message="Save " + save + " already exist in the target directory.\nPlease, select which action to perform.", close_action=cancelAction):
+    use JK_Dialog(title="Conflito entre salvamentos!", message="O salvamento " + save + " já existe na pasta de destino.\nSelecione a ação que deseja executar.", close_action=cancelAction):
         vbox:
             xfill True
 
@@ -76,14 +76,14 @@ screen JK_MoveCopySavesOverwriteConfirm(save, view_model):
             style_prefix "JK_dialog_action_buttons"
 
             vbox:
-                use JK_Checkbox(checked=apply_to_all, text="Perform for all remaining conflicts", action=ToggleScreenVariable("apply_to_all", True, False))
+                use JK_Checkbox(checked=apply_to_all, text="Aplicar aos conflitos restantes", action=ToggleScreenVariable("apply_to_all", True, False))
 
                 hbox:
-                    use JK_IconButton(icon="\ue89c", text="Overwrite", action=overwriteAction, color=JK.Colors.danger)
+                    use JK_IconButton(icon="\ue89c", text="Sobrescrever", action=overwriteAction, color=JK.Colors.danger)
 
                 hbox:
-                    use JK_IconButton(icon="\ue044", text="Skip", action=skipAction)
+                    use JK_IconButton(icon="\ue044", text="Pular", action=skipAction)
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Abort", action=cancelAction)
+                    use JK_IconButton(icon="\ue5cd", text="Cancelar operação", action=cancelAction)
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

@@ -5,7 +5,7 @@ screen JK_MovePlaythroughDirectoryError(playthrough, errors=[]):
 
     $ errorsLen = len(errors)
 
-    use JK_Dialog(title="Failed to rename directories", close_action=Hide("JK_MovePlaythroughDirectoryError")):
+    use JK_Dialog(title="Falha ao renomear as pastas", close_action=Hide("JK_MovePlaythroughDirectoryError")):
         viewport:
             mousewheel True
             draggable True
@@ -15,7 +15,7 @@ screen JK_MovePlaythroughDirectoryError(playthrough, errors=[]):
             ymaximum 0.85
 
             has vbox
-            text "{b}{color=[JK.Colors.theme]}[errorsLen]{/c}{/b} directory(s) failed to move:"
+            text "Não foi possível mover {b}{color=[JK.Colors.theme]}[errorsLen]{/c}{/b} pasta(s):"
 
             use JK_YSpacer(offset=3)
 
@@ -24,7 +24,7 @@ screen JK_MovePlaythroughDirectoryError(playthrough, errors=[]):
                     errorText = ""
 
                     if error[1] == "LOCATION_EXISTS":
-                        errorText = "Directory already exists"
+                        errorText = "A pasta já existe"
                     else:
                         errorText = error[1]
 
@@ -50,9 +50,9 @@ screen JK_MovePlaythroughDirectoryError(playthrough, errors=[]):
             vbox:
 
                 hbox:
-                    use JK_IconButton(icon="\ue15a", text="Overwrite", action=JK.ShowConfirmAction(title="Overwrite conflicting directories", message="Are you sure? This will delete any data stored in those directories.\n\nThis action {u}{color=[JK.Colors.error]}is irreversible{/c}{/u}.", yes=[Hide("JK_MovePlaythroughDirectoryError"), JK.Playthroughs.ForceRenamePlaythroughAction(playthrough)], yes_color=JK.Colors.danger), color=JK.Colors.danger, spacing=JK.scaled(5))
+                    use JK_IconButton(icon="\ue15a", text="Sobrescrever", action=JK.ShowConfirmAction(title="Sobrescrever pastas em conflito", message="Tem certeza? Isso excluirá todos os dados armazenados nessas pastas.\n\nEsta ação {u}{color=[JK.Colors.error]}é irreversível{/c}{/u}.", yes=[Hide("JK_MovePlaythroughDirectoryError"), JK.Playthroughs.ForceRenamePlaythroughAction(playthrough)], yes_color=JK.Colors.danger), color=JK.Colors.danger, spacing=JK.scaled(5))
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_MovePlaythroughDirectoryError"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_MovePlaythroughDirectoryError"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

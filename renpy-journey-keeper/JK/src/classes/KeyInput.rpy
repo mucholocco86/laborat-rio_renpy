@@ -145,7 +145,7 @@ init python in JK:
         "K_BACKSPACE": "Backspace",
         "K_TAB": "Tab",
         "K_CLEAR": "Clear",
-        "K_RETURN": "Return",
+        "K_RETURN": "Retornar",
         "K_PAUSE": "Pause",
         "K_ESCAPE": "Escape",
         "K_SPACE": "Space",
@@ -237,8 +237,8 @@ init python in JK:
         "K_INSERT": "Insert",
         "K_HOME": "Home",
         "K_END": "End",
-        "K_PAGEUP": "Page up",
-        "K_PAGEDOWN": "Page down",
+        "K_PAGEUP": "Page Up",
+        "K_PAGEDOWN": "Page Down",
         "K_F1": "F1",
         "K_F2": "F2",
         "K_F3": "F3",
@@ -275,7 +275,7 @@ init python in JK:
         "K_MENU": "Menu",
         "K_POWER": "Power",
         "K_EURO": "Euro",
-        "K_AC_BACK": "Back button (Android)",
+        "K_AC_BACK": "Botão Voltar (Android)",
     }
 
     class KeyInputButton(renpy.display.behavior.Button):
@@ -297,7 +297,7 @@ init python in JK:
             text = assignment
             text_style = "keyinput_disabled_text" if self.disabled else "keyinput_text"
             if assignment == None:
-                text = "[[unassigned]"
+                text = "[[não atribuído]"
                 text_style = "keyinput_disabled_text_placeholder" if self.disabled else "keyinput_text_placeholder"
             else:
                 text = key_name[re.sub(r"(alt_)|(ctrl_)|(shift_)", "", assignment)]
@@ -310,7 +310,7 @@ init python in JK:
         def set_detecting(self):
             self.detecting = True
             self.text.style = renpy.style.Style("keyinput_text_placeholder")
-            self.text.set_text("[Waiting for input...]")
+            self.text.set_text("[Aguardando uma tecla...]")
         
         def event(self, ev, x, y, st):
             if self.detecting:
@@ -346,14 +346,14 @@ screen JK_KeyInput(assignment=None, action=NullAction, disabled=False, supress_c
 
             use JK_XSpacer(offset=2)
 
-            use JK_IconButton(icon="\ue5c9", action=action(None), disabled=disabled or assignment == None, color=JK.Colors.reset, tt="Unassign")
+            use JK_IconButton(icon="\ue5c9", action=action(None), disabled=disabled or assignment == None, color=JK.Colors.reset, tt="Desvincular")
 
         use JK_KeyAssignmentCheck(assignment)
 
         if assignment:
             if not supress_ctrl_warning and "ctrl_" in assignment:
-                text "Please note that while CTRL is allowed, it may conflict with the skip action during gameplay." color (JK.Colors.disabled if disabled else JK.Colors.warning)
+                text "O atalho CTRL pode entrar em conflito com a ação de pular durante o jogo." color (JK.Colors.disabled if disabled else JK.Colors.warning)
 
             if not supress_no_mod_warning and len(assignment.split("_")) == 2:
-                text "Be aware, simple key shortcuts may trigger accidentally while renaming a page." color (JK.Colors.disabled if disabled else JK.Colors.warning)
+                text "Atalhos simples podem ser acionados sem querer enquanto você renomeia uma página." color (JK.Colors.disabled if disabled else JK.Colors.warning)
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

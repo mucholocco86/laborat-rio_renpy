@@ -43,13 +43,13 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
 
         title = ""
         if editing_template:
-            title = "Edit default template"
+            title = "Editar modelo padrão"
         elif isEdit:
-            title = "Edit playthrough"
+            title = "Editar jornada"
         elif duplicating:
-            title = "Duplicate \"" + playthrough.name + "\""
+            title = "Duplicar \"" + playthrough.name + "\""
         else:
-            title = "New playthrough"
+            title = "Nova jornada"
 
     key 'ctrl_K_DELETE' action Show("JK_RemovePlaythroughConfirm", playthrough=playthrough)
 
@@ -73,11 +73,11 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
                 key_events True
 
                 has vbox
-                use JK_Title("Name")
-                add name_input.displayable(placeholder="Click here to start writing")
+                use JK_Title("Nome")
+                add name_input.displayable(placeholder="Clique aqui para começar a escrever")
                 frame style "JK_default" background "#ffffff22" hover_background JK.Colors.hover ysize 2 offset JK.scaled((0, 2))
 
-            text "{size=-5}This name already exists.{/size}" color (JK.Colors.error if name_conflicting else "#00000000") offset JK.scaled((10, 2))
+            text "{size=-5}Este nome já existe.{/size}" color (JK.Colors.error if name_conflicting else "#00000000") offset JK.scaled((10, 2))
 
             use JK_YSpacer(2)
 
@@ -90,7 +90,7 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
                     python:
                         computedDirectory = playthrough.directory if playthrough.directory and not moveSaveDirectory else (JK.Utils.name_to_directory_name(name) if name else None) or ""
 
-                    use JK_Title("Directory", 2)
+                    use JK_Title("Pasta", 2)
                     hbox:
                         offset JK.scaled((15, 0))
 
@@ -99,17 +99,17 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
 
                         hbox yalign 0.5 xoffset JK.scaled(5):
                             if isEdit:
-                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=computedDirectory, cwd=renpy.config.savedir), size=20, tt="Open playthrough directory", tt_side="right")
+                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=computedDirectory, cwd=renpy.config.savedir), size=20, tt="Abrir pasta da jornada", tt_side="right")
                             else:
-                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=renpy.config.savedir), size=20, tt="Open a directory where this playthrough will be created", tt_side="right")
+                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=renpy.config.savedir), size=20, tt="Abrir a pasta onde esta jornada será criada", tt_side="right")
 
                     if isEdit and playthrough.id > 1 and name != originalname and not name_invalid:
-                        use JK_Checkbox(checked=moveSaveDirectory, text="Rename the directory as well", action=ToggleScreenVariable('moveSaveDirectory', True, False))
+                        use JK_Checkbox(checked=moveSaveDirectory, text="Renomear a pasta também", action=ToggleScreenVariable('moveSaveDirectory', True, False))
 
                 if len(allSaveLocations) > 1:
                     hbox:
-                        use JK_Checkbox(checked=enabledSaveLocations != False, text="Manage save locations", action=ToggleScreenVariable('enabledSaveLocations', allSaveLocations, False))
-                        use JK_Helper("Here, you can configure where your saves for this playthrough are stored.\nBy default, Ren'Py saves are kept in two {color=[JK.Colors.warning]}(varies by platform){/color} locations: the game directory and the user directory. If you want to disable one of these locations, for example, to save storage space, you can do that here.")
+                        use JK_Checkbox(checked=enabledSaveLocations != False, text="Gerenciar locais de salvamento", action=ToggleScreenVariable('enabledSaveLocations', allSaveLocations, False))
+                        use JK_Helper("Aqui você define onde os salvamentos desta jornada serão armazenados.\nPor padrão, o Ren’Py mantém os salvamentos em dois locais {color=[JK.Colors.warning]}(isso varia conforme a plataforma){/color}: na pasta do jogo e na pasta do usuário. Se quiser desativar um desses locais para economizar espaço, faça isso aqui.")
 
                     if enabledSaveLocations != False:
                         hbox:
@@ -129,7 +129,7 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
                                             path = renpy.config.savedir
 
                                         elif location == "GAME":
-                                            locationType = "Game files"
+                                            locationType = "Arquivos do jogo"
                                             path = os.path.join(renpy.config.gamedir, "saves")
 
                                         fullPath = os.path.join(path, computedDirectory)
@@ -144,19 +144,19 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
                                             yanchor 0.5
 
                                             if isEdit:
-                                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=fullPath), size=15, color="#818181", tt="Open directory", hover_color=JK.Colors.hover)
+                                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=fullPath), size=15, color="#818181", tt="Abrir pasta", hover_color=JK.Colors.hover)
                                             else:
-                                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=path), size=15, color="#818181", tt="Open directory", hover_color=JK.Colors.hover)
+                                                use JK_IconButton(icon="\ue2c8", action=JK.OpenDirectoryAction(path=path), size=15, color="#818181", tt="Abrir pasta", hover_color=JK.Colors.hover)
 
                                 if len(enabledSaveLocations) == 0:
                                     use JK_YSpacer(3)
 
-                                    text "At least one location must be enabled!" color JK.Colors.error xoffset JK.scaled(10)
+                                    text "Pelo menos um local precisa estar ativado!" color JK.Colors.error xoffset JK.scaled(10)
 
                                 if "USER" not in enabledSaveLocations and len(enabledSaveLocations) == 1:
                                     use JK_YSpacer(3)
 
-                                    text "Warning: If you don't use [platform_specific_library_name], your save files are going to be stored only with the game. Uninstalling the game will {u}delete your progress{/u} as well." color JK.Colors.warning xoffset JK.scaled(10)
+                                    text "Atenção: sem [platform_specific_library_name], seus salvamentos ficarão armazenados somente na pasta do jogo. Se desinstalar o jogo, você também {u}perderá seu progresso{/u}." color JK.Colors.warning xoffset JK.scaled(10)
 
             use JK_YSpacer()
 
@@ -165,33 +165,33 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
                 key_events True
 
                 has vbox
-                use JK_Title("Description")
-                add description_input.displayable(placeholder="Click here to start writing")
+                use JK_Title("Descrição")
+                add description_input.displayable(placeholder="Clique aqui para começar a escrever")
                 frame style "JK_default" background "#ffffff22" hover_background JK.Colors.hover ysize 2 offset JK.scaled((0, 2))
 
             use JK_YSpacer()
 
-            use JK_Title("Options")
+            use JK_Title("Opções")
             hbox:
                 xfill True
 
                 vbox:
                     hbox:
-                        use JK_Checkbox(checked=autosaveOnChoices, text="Autosave on choice", action=ToggleScreenVariable('autosaveOnChoices', True, False), disabled=not JK.Utils.has_cols_and_rows_configuration())
-                        use JK_Helper("This system automatically saves your progress right before you make a choice in the game, making it easier to back up and track your progress.\n\n{color=[JK.Colors.warning]}Not to be confused with the native Ren'Py \"Autosave\" feature.{/color}")
+                        use JK_Checkbox(checked=autosaveOnChoices, text="Salvar automaticamente ao escolher", action=ToggleScreenVariable('autosaveOnChoices', True, False), disabled=not JK.Utils.has_cols_and_rows_configuration())
+                        use JK_Helper("Este sistema salva automaticamente seu progresso antes de cada escolha, facilitando a criação de cópias e o acompanhamento da jornada.\n\n{color=[JK.Colors.warning]}Não confunda com o recurso “Salvamento automático” nativo do Ren’Py.{/color}")
 
                     if not JK.Utils.has_cols_and_rows_configuration():
-                        text "{size=-7}{color=[JK.Colors.error]}This game uses an unconventional save configuration, so autosave won't work out of the box.{/color}\n{color=[JK.Colors.text_primary]}To enable this option, follow these steps:\n  1) count the columns and rows in your save grid\n  2) go to settings, locate {color=[JK.Colors.theme]}\"Custom slots grid\"{/color} and enable it. (When enabled, this message will disappear)\n  3) Set the values accordingly.\nIf this option is enabled and the autosave still won't work, visit {a=[JK.DISCORD_URL]}Discord{/a} or {a=https://github.com/[JK.MOD_GITHUB_OWNER]/[JK.MOD_GITHUB_REPO]/issues}https://github.com/[JK.MOD_GITHUB_OWNER]/[JK.MOD_GITHUB_REPO]/issues{/a} for troubleshooting or an assistance.\n\n{color=[JK.Colors.info]}To quickly access the relevant settings page {a=JK_Run:JK.Settings.ShowSaveLoadAction()}click here{/a}.{/color}{/color}{/size}" offset JK.scaled((35, -5))
+                        text "{size=-7}{color=[JK.Colors.error]}Este jogo usa uma configuração de salvamento incomum, então o salvamento automático não funcionará sem ajustes.{/color}\n{color=[JK.Colors.text_primary]}Para ativar esta opção, siga estas etapas:\n  1) conte as colunas e linhas da grade de salvamentos;\n  2) abra as configurações, localize {color=[JK.Colors.theme]}\"Grade personalizada de slots\"{/color} e ative a opção. Esta mensagem desaparecerá;\n  3) informe os valores correspondentes.\nSe o salvamento automático continuar sem funcionar, procure ajuda no {a=[JK.DISCORD_URL]}Discord{/a} ou no {a=https://github.com/[JK.MOD_GITHUB_OWNER]/[JK.MOD_GITHUB_REPO]/issues}GitHub{/a}.\n\n{color=[JK.Colors.info]}Para abrir rapidamente as configurações correspondentes, {a=JK_Run:JK.Settings.ShowSaveLoadAction()}clique aqui{/a}.{/color}{/color}{/size}" offset JK.scaled((35, -5))
 
                     hbox:
                         offset JK.scaled((15, 0))
 
-                        use JK_Checkbox(checked=useChoiceLabelAsSaveName, text="Use the choice text as the save name\n{size=-7}(Only applies to saves created by this mod's autosave system){/size}", action=ToggleScreenVariable('useChoiceLabelAsSaveName', True, False), disabled=not JK.Utils.has_cols_and_rows_configuration() or not autosaveOnChoices)
+                        use JK_Checkbox(checked=useChoiceLabelAsSaveName, text="Usar o texto da escolha como nome do salvamento\n{size=-7}(Válido somente para salvamentos automáticos criados por este mod){/size}", action=ToggleScreenVariable('useChoiceLabelAsSaveName', True, False), disabled=not JK.Utils.has_cols_and_rows_configuration() or not autosaveOnChoices)
 
             use JK_YSpacer()
 
             if isEdit or duplicating:
-                use JK_Title("Thumbnail")
+                use JK_Title("Miniatura")
                 hbox:
                     frame style "JK_default":
                         xysize JK.scaled((350, 250))
@@ -211,11 +211,11 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
 
                     vbox:
 
-                        use JK_IconButton(icon="\ue3f4", text="Set the current scene as the thumbnail", action=JK.Playthroughs.SetThumbnail(playthrough=playthrough))
+                        use JK_IconButton(icon="\ue3f4", text="Usar a cena atual como miniatura", action=JK.Playthroughs.SetThumbnail(playthrough=playthrough))
 
 
                         if playthrough.hasThumbnail():
-                            use JK_IconButton(icon="\ue92b", text="Remove thumbnail", action=Function(playthrough.removeThumbnail, _update_screens=True), color=JK.Colors.danger)
+                            use JK_IconButton(icon="\ue92b", text="Remover miniatura", action=Function(playthrough.removeThumbnail, _update_screens=True), color=JK.Colors.danger)
 
         hbox:
             xfill True
@@ -226,26 +226,26 @@ screen JK_EditPlaythrough(playthrough, isEdit=False, editing_template=False, dup
             if not isEdit and not editing_template and not duplicating:
                 vbox xalign 0.0:
                     hbox:
-                        use JK_IconButton(icon="\uead3", text="Edit default values", action=Show("JK_EditPlaythrough", playthrough=None, editing_template=True), tt="Click here to edit the default values for new playthroughs")
+                        use JK_IconButton(icon="\uead3", text="Editar valores padrão", action=Show("JK_EditPlaythrough", playthrough=None, editing_template=True), tt="Clique aqui para editar os valores padrão de novas jornadas")
 
             vbox:
                 if isEdit and playthrough.id != 1:
 
                     hbox:
-                        use JK_IconButton(icon="\ue92b", text="Remove", action=Show("JK_RemovePlaythroughConfirm", playthrough=playthrough), color=JK.Colors.danger, key="alt_K_r")
+                        use JK_IconButton(icon="\ue92b", text="Remover", action=Show("JK_RemovePlaythroughConfirm", playthrough=playthrough), color=JK.Colors.danger, key="alt_K_r")
 
 
                 hbox:
                     if editing_template:
-                        use JK_IconButton(icon="\ue161", text="Save template", action=submitAction, key="alt_K_s", disabled=is_save_disabled)
+                        use JK_IconButton(icon="\ue161", text="Salvar modelo", action=submitAction, key="alt_K_s", disabled=is_save_disabled)
                     else:
-                        use JK_IconButton(icon="\ue161", text="Save", action=submitAction, disabled=is_save_disabled, key="alt_K_s")
+                        use JK_IconButton(icon="\ue161", text="Salvar", action=submitAction, disabled=is_save_disabled, key="alt_K_s")
 
                 if not isEdit and not editing_template and not duplicating:
                     hbox:
-                        use JK_IconButton(icon="\uebbd", text="Create from existing directory", action=Show("JK_SelectExistingDirectoryForNewPlaythrough"), tt="You can use already existing directory to create a playthrough. It will fill out the name and set the directory for you.", tt_side="left")
+                        use JK_IconButton(icon="\uebbd", text="Criar a partir de uma pasta existente", action=Show("JK_SelectExistingDirectoryForNewPlaythrough"), tt="Você pode usar uma pasta existente para criar uma jornada. O nome e o local serão preenchidos automaticamente.", tt_side="left")
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_EditPlaythrough"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_EditPlaythrough"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

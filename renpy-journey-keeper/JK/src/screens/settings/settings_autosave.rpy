@@ -1,16 +1,16 @@
 screen JK_Settings_Autosave():
     vbox:
         hbox:
-            use JK_Checkbox(checked=JK.Settings.autosaveNotificationEnabled, text="Show notification when autosave is performed", action=JK.Settings.ToggleEnabledAction("autosaveNotificationEnabled"))
+            use JK_Checkbox(checked=JK.Settings.autosaveNotificationEnabled, text="Exibir notificação ao salvar automaticamente", action=JK.Settings.ToggleEnabledAction("autosaveNotificationEnabled"))
             use JK_ToggleSettingGlobalizationButton("autosaveNotificationEnabled")
 
         hbox:
-            use JK_Checkbox(checked=JK.Settings.pageFollowsAutoSave, text="Change page based on the auto-saved slot", action=JK.Settings.ToggleEnabledAction("pageFollowsAutoSave"))
+            use JK_Checkbox(checked=JK.Settings.pageFollowsAutoSave, text="Mudar de página conforme o slot do salvamento automático", action=JK.Settings.ToggleEnabledAction("pageFollowsAutoSave"))
             use JK_ToggleSettingGlobalizationButton("pageFollowsAutoSave")
 
         hbox:
-            use JK_Checkbox(checked=JK.Settings.autosaveOnSingletonChoice, text="Perform autosave even when only one choice is available", action=JK.Settings.ToggleEnabledAction("autosaveOnSingletonChoice"))
-            use JK_Helper("When enabled, an autosave will be created even when there is only one choice is displayed.")
+            use JK_Checkbox(checked=JK.Settings.autosaveOnSingletonChoice, text="Salvar automaticamente mesmo quando houver apenas uma escolha", action=JK.Settings.ToggleEnabledAction("autosaveOnSingletonChoice"))
+            use JK_Helper("Quando ativado, o mod criará um salvamento automático mesmo quando houver apenas uma escolha.")
             use JK_ToggleSettingGlobalizationButton("autosaveOnSingletonChoice")
 
 
@@ -20,38 +20,38 @@ screen JK_Settings_Autosave():
 
 
         hbox:
-            use JK_Checkbox(checked=JK.Settings.showConfirmOnLargePageJump, text="Show confirmation on unexpected large page jump", action=JK.Settings.ToggleEnabledAction("showConfirmOnLargePageJump"))
-            use JK_Helper("When enabled, a confirmation prompt will appear if the page number jumps unexpectedly far during gameplay (by more than one page)")
+            use JK_Checkbox(checked=JK.Settings.showConfirmOnLargePageJump, text="Pedir confirmação quando houver um salto inesperado de página", action=JK.Settings.ToggleEnabledAction("showConfirmOnLargePageJump"))
+            use JK_Helper("Quando ativado, uma confirmação aparecerá se a página avançar mais de uma página durante o jogo.")
             use JK_ToggleSettingGlobalizationButton("showConfirmOnLargePageJump")
 
         use JK_YSpacer(2)
 
         hbox:
-            text "Prevent autosave modifier key" yalign 0.5
-            use JK_Helper("While holding this key, autosave won't be performed when you make a choice")
+            text "Tecla modificadora para impedir o salvamento automático" yalign 0.5
+            use JK_Helper("Enquanto esta tecla estiver pressionada, escolhas não gerarão salvamentos automáticos.")
             use JK_ToggleSettingGlobalizationButton("preventAutosaveModifierKey")
 
-        use JK_Radio(checked=not JK.Settings.preventAutosaveModifierKey, text="None", action=JK.Settings.SetAction("preventAutosaveModifierKey", None))
+        use JK_Radio(checked=not JK.Settings.preventAutosaveModifierKey, text="Nenhum", action=JK.Settings.SetAction("preventAutosaveModifierKey", None))
         use JK_Radio(checked="ALT" == JK.Settings.preventAutosaveModifierKey, text="Alt", action=JK.Settings.SetAction("preventAutosaveModifierKey", "ALT"))
         use JK_Radio(checked="SHIFT" == JK.Settings.preventAutosaveModifierKey, text="Shift", action=JK.Settings.SetAction("preventAutosaveModifierKey", "SHIFT"))
 
         use JK_YSpacer(2)
 
         hbox:
-            text "Toggle autosave key" yalign 0.5
+            text "Atalho para alternar o salvamento automático" yalign 0.5
             use JK_ToggleSettingGlobalizationButton("autosaveKey")
 
         use JK_KeyInput(assignment=JK.Settings.autosaveKey, action=JK.Settings.get_set_key_action("autosaveKey"))
 
         use JK_YSpacer()
 
-        use JK_Title("Advanced", color=JK.Colors.warning)
+        use JK_Title("Avançado", color=JK.Colors.warning)
 
         hbox:
-            use JK_Checkbox(checked=JK.Settings.preventAutosavingWhileNotInGame, text="Restict autosave to in-game only", action=JK.Settings.TogglePreventAutosavingWhileNotInGameEnabledAction())
-            use JK_Helper("Some games might not properly indicate when the game starts, which could prevent autosave on choices from working. Disabling this setting {b}may{/b} allow autosave to function as intended.\n\n{color=[JK.Colors.warning]}Warning! Disabling this might cause save(s) loss. For example, an 18+ age check might overwrite the 1-1 save slot, if it shows up before the main menu.{/color}\n\n{color=[JK.Colors.text_light]}For users familiar with Ren'Py internals: This mod waits for the {u}start{/u} label before allowing any kind of autosave functionality.{/color}")
+            use JK_Checkbox(checked=JK.Settings.preventAutosavingWhileNotInGame, text="Restringir o salvamento automático durante o jogo", action=JK.Settings.TogglePreventAutosavingWhileNotInGameEnabledAction())
+            use JK_Helper("Alguns jogos não indicam corretamente quando a partida começa, o que pode impedir o salvamento automático nas escolhas. Desativar esta opção {b}pode{/b} resolver o problema.\n\n{color=[JK.Colors.warning]}Atenção: desativá-la pode causar perda de salvamentos. Por exemplo, uma verificação de idade 18+ pode sobrescrever o slot 1-1 se aparecer antes do menu principal.{/color}\n\n{color=[JK.Colors.text_light]}Para quem conhece o funcionamento interno do Ren’Py: este mod aguarda o rótulo {u}start{/u} antes de permitir qualquer salvamento automático.{/color}")
 
         hbox:
-            use JK_Checkbox(checked=JK.Settings.autosaveOnNormalButtonsWithJump, text="Perform autosave on normal buttons", action=JK.Settings.ToggleEnabledAction("autosaveOnNormalButtonsWithJump"))
-            use JK_Helper("{color=[JK.Colors.info]}If choices aren't triggering autosaves as expected, enabling this option may help.{/color}\n\nWhen enabled, every Button behaves as a choice button, triggering an autosave when clicked. However, only specific buttons qualify—those that logically represent choices in the game.\n{color=[JK.Colors.warning]}Be aware that some non-choice buttons, like free-roam navigation buttons, may still trigger autosaves.{/color}\n\n{b}For the curious advanced users:{/b}\nAutosaves are only performed on Buttons with a Jump action, ensuring that only navigation-relevant interactions are considered. Unfortunately, this filtering cannot be refined any further.", side="right")
+            use JK_Checkbox(checked=JK.Settings.autosaveOnNormalButtonsWithJump, text="Salvar automaticamente ao clicar em botões comuns", action=JK.Settings.ToggleEnabledAction("autosaveOnNormalButtonsWithJump"))
+            use JK_Helper("{color=[JK.Colors.info]}Se as escolhas não estiverem acionando os salvamentos automáticos como esperado, ativar esta opção pode ajudar.{/color}\n\nQuando ativada, cada botão se comporta como uma escolha e aciona um salvamento automático ao ser clicado. Porém, somente os botões que representam escolhas no jogo se qualificam.\n{color=[JK.Colors.warning]}Alguns botões que não são escolhas, como os de navegação livre, também podem acionar salvamentos automáticos.{/color}\n\n{b}Para usuários avançados:{/b}\nO salvamento automático ocorre somente em botões com uma ação Jump, considerando apenas interações relacionadas à navegação. Não é possível refinar mais esse filtro.", side="right")
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

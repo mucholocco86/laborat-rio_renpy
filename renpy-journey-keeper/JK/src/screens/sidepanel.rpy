@@ -62,26 +62,26 @@ screen JK_Sidepanel():
         background "#000000{:02X}".format(int(JK.Settings.sidepanelOpacity * 255))
 
         use JK_AnyDirectionBox(horizontal):
-            use JK_IconButton('\ueb73', tt="Select playthrough", tt_side=tooltip_side, action=Show("JK_PlaythroughsPicker")):
+            use JK_IconButton('\ueb73', tt="Selecionar jornada", tt_side=tooltip_side, action=Show("JK_PlaythroughsPicker")):
                 frame xysize (0, 0) offset JK.scaled((-10, -5)) style "JK_default":
                     if amount_of_custom_playthroughs > 0:
                         text "{b}[amount_of_playthroughs]{/b}" size JK.scaled(15) outlines [(JK.scaled(5), "#000000", 0, 0)] color JK.Colors.theme
 
-            use JK_IconButton('\uea20', tt="New playthrough", tt_side=tooltip_side, action=Show("JK_EditPlaythrough", playthrough=None))
+            use JK_IconButton('\uea20', tt="Nova jornada", tt_side=tooltip_side, action=Show("JK_EditPlaythrough", playthrough=None))
 
             if "MEMORIES" in structure:
-                use JK_IconButton('\ue02c', tt="Open memories", tt_side=tooltip_side, action=Show("JK_MemoriesLibrary"))
+                use JK_IconButton('\ue02c', tt="Abrir memórias", tt_side=tooltip_side, action=Show("JK_MemoriesLibrary"))
 
             use JK_Divider(sizeX=(2 if horizontal else 40), sizeY=(40 if horizontal else 2))
 
-            use JK_IconButton('\ue3c9', tt="Edit playthrough", tt_side=tooltip_side, action=Show("JK_EditPlaythrough", playthrough=playthrough.copy(), isEdit=True), disabled=noPlaythrough)
-            use JK_IconButton('\ue4f9', toggled=autosave_on_choices_enabled, toggled_icon='\ue167', tt=("Disable autosave on choices" if autosave_on_choices_enabled else "Enable autosave on choices"), tt_side=tooltip_side, action=JK.Playthroughs.ToggleAutosaveOnChoicesForActiveAction(), disabled=noPlaythrough or not JK.Utils.has_cols_and_rows_configuration(), toggled_color=JK.Colors.selected)
-            use JK_IconButton('\ue2e6', tt="Playthrough actions", tt_side=tooltip_side, action=Show("JK_PlaythroughActions", playthrough=playthrough))
+            use JK_IconButton('\ue3c9', tt="Editar jornada", tt_side=tooltip_side, action=Show("JK_EditPlaythrough", playthrough=playthrough.copy(), isEdit=True), disabled=noPlaythrough)
+            use JK_IconButton('\ue4f9', toggled=autosave_on_choices_enabled, toggled_icon='\ue167', tt=("Desativar salvamento automático nas escolhas" if autosave_on_choices_enabled else "Ativar salvamento automático nas escolhas"), tt_side=tooltip_side, action=JK.Playthroughs.ToggleAutosaveOnChoicesForActiveAction(), disabled=noPlaythrough or not JK.Utils.has_cols_and_rows_configuration(), toggled_color=JK.Colors.selected)
+            use JK_IconButton('\ue2e6', tt="Ações da jornada", tt_side=tooltip_side, action=Show("JK_PlaythroughActions", playthrough=playthrough))
 
             use JK_Divider(sizeX=(2 if horizontal else 40), sizeY=(40 if horizontal else 2))
 
-            use JK_IconButton('\uf045', tt=("Hide custom pagination" if custom_pagination_enabled else "Show custom pagination"), tt_side=tooltip_side, action=JK.Pagination.TogglePaginationAction(), toggled=custom_pagination_enabled, toggled_color=JK.Colors.selected)
-            use JK_IconButton('\ue8b8', tt="Open settings", tt_side=tooltip_side, action=Show("JK_Settings"))
+            use JK_IconButton('\uf045', tt=("Ocultar paginação personalizada" if custom_pagination_enabled else "Exibir paginação personalizada"), tt_side=tooltip_side, action=JK.Pagination.TogglePaginationAction(), toggled=custom_pagination_enabled, toggled_color=JK.Colors.selected)
+            use JK_IconButton('\ue8b8', tt="Abrir configurações", tt_side=tooltip_side, action=Show("JK_Settings"))
 
 screen JK_SidepanelHolder():
     layer "JK_Sidepanel"
@@ -139,13 +139,13 @@ init python in JK:
             renpy.config.JK_sidepanelVisibilityMode = self.visibility
             
             if renpy.config.JK_sidepanelVisibilityMode == True:
-                renpy.notify("Sidepanel is now visible at all times")
+                renpy.notify("O painel lateral ficará sempre visível")
             elif renpy.config.JK_sidepanelVisibilityMode == False:
-                renpy.notify("Sidepanel is now hidden at all times")
+                renpy.notify("O painel lateral ficará sempre oculto")
             elif renpy.config.JK_sidepanelVisibilityMode == None:
-                renpy.notify("Sidepanel is now visible only on the save/load screen")
+                renpy.notify("O painel lateral aparecerá somente nas telas de salvar e carregar")
             else:
-                renpy.notify("Sidepanel is now visible at all times")
+                renpy.notify("O painel lateral ficará sempre visível")
             
             renpy.restart_interaction()
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

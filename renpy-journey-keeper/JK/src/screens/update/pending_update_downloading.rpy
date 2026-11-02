@@ -8,7 +8,7 @@ screen JK_PendingUpdateDownloading():
         ymaximum 0.85
 
         vbox align (0.5, 0.5):
-            use JK_Title("Downloading...")
+            use JK_Title("Baixando...")
 
 
     hbox:
@@ -20,5 +20,5 @@ screen JK_PendingUpdateDownloading():
         vbox:
 
             hbox:
-                use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_PendingUpdate"))
+                use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_PendingUpdate"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

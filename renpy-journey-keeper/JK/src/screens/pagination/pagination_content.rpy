@@ -16,7 +16,7 @@ screen JK_PaginationContent(content):
 
         if "GO_TO" in content:
             hbox yalign 0.5:
-                use JK_IconButton('\ue8a0', tt="Go to page", action=JK.Pagination.ToggleGoToPageAction(), size=30)
+                use JK_IconButton('\ue8a0', tt="Ir para a página", action=JK.Pagination.ToggleGoToPageAction(), size=30)
 
             use JK_XSpacer()
 
@@ -25,11 +25,11 @@ screen JK_PaginationContent(content):
             hbox yalign 0.5:
 
                 if "AUTOSAVES" in content:
-                    use JK_IconButton(text="A", action=FilePage("auto"), toggled=persistent._file_page == "auto", toggled_color=JK.Colors.selected, tt="Native automatic saves", size=25)
+                    use JK_IconButton(text="A", action=FilePage("auto"), toggled=persistent._file_page == "auto", toggled_color=JK.Colors.selected, tt="Salvamentos automáticos nativos", size=25)
 
 
                 if "QUICK_SAVES" in content:
-                    use JK_IconButton(text="Q", action=FilePage("quick"), toggled=persistent._file_page == "quick", toggled_color=JK.Colors.selected, tt="Native quick saves", size=25)
+                    use JK_IconButton(text="Q", action=FilePage("quick"), toggled=persistent._file_page == "quick", toggled_color=JK.Colors.selected, tt="Salvamentos rápidos nativos", size=25)
 
             use JK_XSpacer()
 
@@ -37,7 +37,7 @@ screen JK_PaginationContent(content):
         hbox yalign 0.5:
 
             if "FIRST_PAGE" in content:
-                use JK_IconButton(icon="\ue045", action=FilePage(1), tt="First page", disabled=currentPage == 1)
+                use JK_IconButton(icon="\ue045", action=FilePage(1), tt="Primeira página", disabled=currentPage == 1)
 
 
             if "BIG_JUMP" in content:
@@ -70,5 +70,5 @@ screen JK_PaginationContent(content):
 
             if "LAST_PAGE" in content:
                 $ last_page = JK.SaveSystem.get_last_page()
-                use JK_IconButton(icon="\ue044", action=FilePage(last_page), tt="Last page ({})".format(last_page), disabled=last_page == None or currentPage == last_page)
+                use JK_IconButton(icon="\ue044", action=FilePage(last_page), tt="Última página ({})".format(last_page), disabled=last_page == None or currentPage == last_page)
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

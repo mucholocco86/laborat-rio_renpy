@@ -23,7 +23,7 @@ screen JK_SavesListProcessing(view_model):
             xmaximum 0.85
 
             hbox xalign 0.5:
-                use JK_Title("Removing saves...")
+                use JK_Title("Removendo salvamentos...")
 
             use JK_YSpacer()
 
@@ -39,9 +39,9 @@ screen JK_SavesListProcessing(view_model):
 
         vbox:
             hbox:
-                use JK_IconButton(icon="\ue99a", text="Stop", action=StopAction(view_model), color=JK.Colors.danger)
+                use JK_IconButton(icon="\ue99a", text="Parar", action=StopAction(view_model), color=JK.Colors.danger)
 
 
             hbox:
-                use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_SavesList"))
+                use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_SavesList"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

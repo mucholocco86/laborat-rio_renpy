@@ -40,9 +40,9 @@ init python in JK:
                             if os.path.exists(json_path):
                                 self.games.append((game_name, json_path))
                 else:
-                    self.error_message = "User directory does not exist"
+                    self.error_message = "A pasta do usuário não existe"
             except Exception as e:
-                self.error_message = "Failed to load games"
+                self.error_message = "Falha ao carregar os jogos"
                 print(e)
             
             self.loading = False
@@ -65,7 +65,7 @@ init python in JK:
                     if playthrough_data.get("directory") not in ["_memories"]:
                         self.playthroughs.append(PlaythroughClass.from_dict(playthrough_data))
             else:
-                self.error_message = "Failed to load playthroughs"
+                self.error_message = "Falha ao carregar as jornadas"
             
             self.loading = False
             renpy.restart_interaction()

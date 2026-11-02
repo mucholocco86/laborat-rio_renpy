@@ -60,17 +60,17 @@ screen JK_PlaythroughsTablePicker(playthroughs, reorder_source):
 
                     if len(playthroughs) > 1:
                         if reorder_source == playthrough.id:
-                            use JK_IconButton(icon="\ue5c9", action=SetScreenVariable("reorder_source", None), tt="Cancel", hover_color=JK.Colors.error)
+                            use JK_IconButton(icon="\ue5c9", action=SetScreenVariable("reorder_source", None), tt="Cancelar", hover_color=JK.Colors.error)
                         elif reorder_source:
-                            use JK_IconButton(icon="\ue39e", action=[JK.Playthroughs.ReorderPlaythroughsAction(source=reorder_source, target=playthrough.id), SetScreenVariable("reorder_source", None)], tt="Move here")
+                            use JK_IconButton(icon="\ue39e", action=[JK.Playthroughs.ReorderPlaythroughsAction(source=reorder_source, target=playthrough.id), SetScreenVariable("reorder_source", None)], tt="Mover para cá")
                         else:
-                            use JK_IconButton(icon="\ue074", action=SetScreenVariable("reorder_source", playthrough.id), tt="Change order")
+                            use JK_IconButton(icon="\ue074", action=SetScreenVariable("reorder_source", playthrough.id), tt="Alterar ordem")
 
 
-                    use JK_IconButton(icon="\ue3c9", tt="Edit", action=edit_action)
+                    use JK_IconButton(icon="\ue3c9", tt="Editar", action=edit_action)
 
 
-                    use JK_IconButton(icon="\ue872", tt="Delete", action=delete_action, disabled=playthrough.id == 1, disabled_color="#00000000")
+                    use JK_IconButton(icon="\ue872", tt="Excluir", action=delete_action, disabled=playthrough.id == 1, disabled_color="#00000000")
 
         $ i += 1
         button:
@@ -94,5 +94,5 @@ screen JK_PlaythroughsTablePicker(playthroughs, reorder_source):
 
                 use JK_XSpacer()
 
-                text "New playthrough" yalign 0.5
+                text "Nova jornada" yalign 0.5
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

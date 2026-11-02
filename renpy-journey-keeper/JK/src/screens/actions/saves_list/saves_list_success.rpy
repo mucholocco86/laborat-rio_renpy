@@ -8,7 +8,7 @@ screen JK_SavesListSuccess(view_model):
         ymaximum 0.85
 
         vbox align (0.5, 0.5):
-            use JK_Title("Done", color=JK.Colors.success)
+            use JK_Title("Concluído", color=JK.Colors.success)
 
 
     hbox:

@@ -57,5 +57,5 @@ screen JK_MoveCopySavesSelectOtherPlaythrough(source_playthrough, destination_pl
         vbox:
 
             hbox:
-                use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_MoveCopySaves"))
+                use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_MoveCopySaves"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

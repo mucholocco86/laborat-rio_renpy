@@ -5,7 +5,7 @@ screen JK_SelectExistingDirectoryForNewPlaythrough():
 
     default directories = JK.Playthroughs.list_available_directories_to_create_playthrough_from()
 
-    use JK_Dialog(title="Select directory", close_action=Hide("JK_SelectExistingDirectoryForNewPlaythrough")):
+    use JK_Dialog(title="Selecionar pasta", close_action=Hide("JK_SelectExistingDirectoryForNewPlaythrough")):
         style_prefix "JK"
 
         if len(directories) > 0:
@@ -35,7 +35,7 @@ screen JK_SelectExistingDirectoryForNewPlaythrough():
                 yfill True
 
                 hbox xalign 0.5 yalign 0.5:
-                    use JK_Title("No directories found.", color=JK.Colors.error)
+                    use JK_Title("Nenhuma pasta encontrada.", color=JK.Colors.error)
 
         hbox:
             xfill True
@@ -46,5 +46,5 @@ screen JK_SelectExistingDirectoryForNewPlaythrough():
             vbox:
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_SelectExistingDirectoryForNewPlaythrough"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_SelectExistingDirectoryForNewPlaythrough"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

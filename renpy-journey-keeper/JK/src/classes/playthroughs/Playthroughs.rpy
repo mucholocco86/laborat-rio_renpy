@@ -190,7 +190,7 @@ init python in JK:
             
             self.save()
             
-            renpy.notify("Autosave on choice is " + ("enabled" if self.active_playthrough.autosaveOnChoices else "disabled"))
+            renpy.notify("O salvamento automático ao escolher está " + ("ativado" if self.active_playthrough.autosaveOnChoices else "desativado"))
         
         def activate_by_name(self, playthroughName):
             self.activate_by_instance(self.get(playthroughName))
@@ -389,8 +389,8 @@ init python in JK:
                 playthrough = self.playthrough if not callable(self.playthrough) else self.playthrough()
                 
                 showConfirm(
-                    title="Sequentialize playthrough",
-                    message="Sequentialization of a playthrough will rename all your saves, so they start from 1-1 and continue in a sequence without a gap.\nIt may take some time based on the amount of saves and your device.\nThis action {u}{color=[JK.Colors.error]}is irreversible{/c}{/u}. Do you wish to proceed?",
+                    title="Organizar jornada em sequência",
+                    message="A organização em sequência renomeará todos os salvamentos desta jornada, começando em 1-1 e sem deixar lacunas.\nO processo pode levar algum tempo, dependendo da quantidade de salvamentos e do desempenho do dispositivo.\nEsta ação {u}{color=[JK.Colors.error]}é irreversível{/c}{/u}. Deseja continuar?",
                     yes=renpy.store.Function(playthrough.sequentializeSaves),
                     yes_icon="\ue089",
                     yes_color=Colors.error
@@ -412,8 +412,8 @@ init python in JK:
                 name = self.playthrough.name
                 
                 showConfirm(
-                    title="Remove all saves",
-                    message="This action will remove {b}{u}all{/u}{/b} your save files for the \"" + name + "\" playthrough.\nThis action {u}{color=[JK.Colors.error]}is irreversible{/c}{/u}. Do you wish to proceed?",
+                    title="Remover todos os salvamentos",
+                    message="Esta ação removerá {b}{u}todos{/u}{/b} os arquivos de salvamento da jornada “" + name + "”.\nEsta ação {u}{color=[JK.Colors.error]}é irreversível{/c}{/u}. Deseja continuar?",
                     yes=Playthroughs.DeleteAllSavesAction(self.playthrough),
                     yes_icon="\ue92b",
                     yes_color=Colors.error
@@ -440,15 +440,15 @@ init python in JK:
                 
                 original_instance = SaveSystem.get_playthrough_save_instance(original_playthrough.id)
                 if not original_instance:
-                    raise Exception("Can't find old save instance")
+                    raise Exception("Não foi possível encontrar a instância de salvamento anterior")
                 
                 new_instance = SaveSystem.get_playthrough_save_instance(new_playthrough.id)
                 if not new_instance:
-                    raise Exception("Can't find new save instance")
+                    raise Exception("Não foi possível encontrar a nova instância de salvamento")
                 
                 original_instance.location.scan()
                 if not original_instance.location.copy_all_saves_into_other_multilocation(new_instance.location):
-                    raise Exception("Playthrough created but failed to transfer saves. Check the logs for more information.")
+                    raise Exception("A jornada foi criada, mas não foi possível transferir os salvamentos. Consulte os registros para mais informações.")
                 
                 renpy.restart_interaction()
         

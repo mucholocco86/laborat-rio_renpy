@@ -109,20 +109,20 @@ init python in JK:
                 try:
                     bad = renpy.loadsave.find_bad_reduction(roots, log)
                 except:
-                    print("Memory save failure:\n", t, e, tb)
-                    renpy.notify("Memory save failed. Check log.txt for more info.")
+                    print("Falha ao salvar a memória:\n", t, e, tb)
+                    renpy.notify("Falha ao salvar a memória. Consulte log.txt para mais informações.")
                     return
                 
                 if bad is None:
-                    print("Memory save failure:\n", t, e, tb)
-                    renpy.notify("Memory save failed. Check log.txt for more info.")
+                    print("Falha ao salvar a memória:\n", t, e, tb)
+                    renpy.notify("Falha ao salvar a memória. Consulte log.txt para mais informações.")
                     return
                 
                 if e.args:
                     e.args = (e.args[0] + ' (perhaps {})'.format(bad),) + e.args[1:]
                 
-                print("Memory save failure:\n", t, e, tb)
-                renpy.notify("Memory save failed. Check log.txt for more info.")
+                print("Falha ao salvar a memória:\n", t, e, tb)
+                renpy.notify("Falha ao salvar a memória. Consulte log.txt para mais informações.")
                 return
             
             json = { "_save_name" : extra_info, "_renpy_version" : list(renpy.version_tuple), "_version" : renpy.config.version }
@@ -169,8 +169,8 @@ init python in JK:
                     Memories.callCustomReplay(self.slotname)
                 else:
                     showConfirm(
-                        title="Load memory",
-                        message="Viewing a memory will quit your current session and your current progress will be lost.\nProceed?",
+                        title="Carregar memória",
+                        message="Abrir uma memória encerrará a sessão atual e você perderá o progresso não salvo.\nDeseja continuar?",
                         yes=Memories.LoadMemory(self.slotname),
                     )
                 
@@ -219,8 +219,8 @@ init python in JK:
                 name = Memories.saveInstance.location.save_name(self.slotname) or self.slotname
                 
                 showConfirm(
-                    title="Delete memory \"{}\"".format(name),
-                    message="This action {u}{color=[JK.Colors.error]}is irreversible{/c}{/u}. Do you wish to proceed?",
+                    title="Excluir memória \"{}\"".format(name),
+                    message="Esta ação {u}{color=[JK.Colors.error]}é irreversível{/c}{/u}. Deseja continuar?",
                     yes=Memories.DeleteMemory(self.slotname),
                     yes_icon="\ue92b",
                     yes_color=Colors.error

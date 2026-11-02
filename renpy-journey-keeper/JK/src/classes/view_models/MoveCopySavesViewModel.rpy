@@ -32,14 +32,14 @@ init python in JK:
             
             self.source_instance = SaveSystem.get_or_create_playthrough_save_instance(self.source_playthrough)
             if not self.source_instance:
-                self.error = "Couldn't find the source location."
+                self.error = "Não foi possível encontrar o local de origem."
                 self.processing = False
                 renpy.restart_interaction()
                 return
             
             self.destination_instance = SaveSystem.get_or_create_playthrough_save_instance(self.destination_playthrough)
             if not self.destination_instance:
-                self.error = "Couldn't find the destination location."
+                self.error = "Não foi possível encontrar o local de destino."
                 self.processing = False
                 renpy.restart_interaction()
                 return
@@ -109,7 +109,7 @@ init python in JK:
                 self.process_continue()
             except Exception as e:
                 print(e)
-                self.error = "An error occurred while copying save \"" + save + "\":\n{color=[JK.Colors.error]}" + str(e) + "{/color}"
+                self.error = "Ocorreu um erro ao copiar o salvamento “" + save + "\":\n{color=[JK.Colors.error]}" + str(e) + "{/color}"
                 renpy.restart_interaction()
                 self.process_stop()
         
@@ -193,7 +193,7 @@ init python in JK:
                 self.process_done()
             except Exception as e:
                 print(e)
-                self.error = "An error occurred while cleaning up save \"" + save + "\":\n{color=[JK.Colors.error]}" + str(e) + "{/color}"
+                self.error = "Ocorreu um erro ao limpar o salvamento “" + save + "\":\n{color=[JK.Colors.error]}" + str(e) + "{/color}"
                 self.process_stop()
         
         def process_done(self):

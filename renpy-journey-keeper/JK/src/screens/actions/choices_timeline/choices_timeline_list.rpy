@@ -8,7 +8,7 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
         if view_model.playthrough.autosaveOnChoices:
             current_state_text = "{color=" + JK.Colors.status_enabled + "}enabled{/color}"
 
-        choices_text = "Choices are saved into save files {u}only{/u} when this mod is active and \"Autosave on choice\" is enabled (currently [current_state_text]) in the playthrough settings.\n{color=[JK.Colors.warning]}Warning - Manual and quick saves are unable to store choices.{/c}"
+        choices_text = "As escolhas são registradas nos arquivos de salvamento {u}somente{/u} quando este mod está ativo e a opção “Salvar automaticamente ao escolher” está habilitada nas configurações da jornada (atualmente [current_state_text]).\n{color=[JK.Colors.warning]}Atenção: salvamentos manuais e rápidos não registram escolhas.{/c}"
 
         has_timeline_entry = False
         for entry in view_model.timeline:
@@ -38,7 +38,7 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
             hbox:
                 xalign 0.5
 
-                use JK_IconButton('\uf0fb', text="Export to file", action=export_action, key="alt_K_e")
+                use JK_IconButton('\uf0fb', text="Exportar para arquivo", action=export_action, key="alt_K_e")
 
             use JK_YSpacer(offset=3)
 
@@ -46,7 +46,7 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
                 xfill True
 
 
-                use JK_Checkbox(checked=show_thumbnails, text="Show thumbnails\n{size=-5}(Might be laggy or outright crash){/size}", action=SetScreenVariable("show_thumbnails", not show_thumbnails))
+                use JK_Checkbox(checked=show_thumbnails, text="Exibir miniaturas\n{size=-5}(Pode causar lentidão ou até travar o jogo){/size}", action=SetScreenVariable("show_thumbnails", not show_thumbnails))
 
 
                 hbox yalign 0.0 xpos 1.0 xanchor 1.0:
@@ -62,7 +62,7 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
                                 hbox yalign 0.5:
                                     use JK_Icon(icon="\ue8b6", size=20, hover_color=JK.Colors.hover)
 
-                                add search_input.displayable(placeholder="Search for choice")
+                                add search_input.displayable(placeholder="Pesquisar escolha")
 
                             frame style "JK_default" background "#ffffff22" hover_background JK.Colors.hover ysize 2 offset JK.scaled((0, 2))
 
@@ -111,5 +111,5 @@ screen JK_ChoicesTimelineList(view_model, show_thumbnails, search):
                 yfill True
 
                 hbox xalign 0.5 yalign 0.5:
-                    use JK_Title("No choices found.", color=JK.Colors.error)
+                    use JK_Title("Nenhuma escolha encontrada.", color=JK.Colors.error)
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

@@ -18,7 +18,7 @@ screen JK_MoveCopySavesError(view_model):
 
         vbox align (0.5, 0.5):
             hbox xalign 0.5:
-                use JK_Title("Error", color=JK.Colors.danger)
+                use JK_Title("Erro", color=JK.Colors.danger)
 
             use JK_YSpacer(offset=2)
 
@@ -43,5 +43,5 @@ screen JK_MoveCopySavesError(view_model):
 
 
             hbox:
-                use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_MoveCopySaves"))
+                use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_MoveCopySaves"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

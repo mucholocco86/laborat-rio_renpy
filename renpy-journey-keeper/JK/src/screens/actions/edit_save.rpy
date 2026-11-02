@@ -18,7 +18,7 @@ screen JK_EditSave(slotname, location=None):
 
     key "ctrl_K_s" action save_action
 
-    use JK_Dialog(title="Edit save", close_action=Hide("JK_EditSave")):
+    use JK_Dialog(title="Editar salvamento", close_action=Hide("JK_EditSave")):
         if view_model.save_json:
             viewport:
                 mousewheel True
@@ -34,8 +34,8 @@ screen JK_EditSave(slotname, location=None):
                     key_events True
 
                     has vbox
-                    text "Name"
-                    add name_input.displayable(placeholder="Click here to start writing")
+                    text "Nome"
+                    add name_input.displayable(placeholder="Clique aqui para começar a escrever")
                     frame style "JK_default" background "#ffffff22" hover_background JK.Colors.hover ysize 2 offset JK.scaled((0, 2))
 
                     hbox:
@@ -43,7 +43,7 @@ screen JK_EditSave(slotname, location=None):
 
                         text str(len(name))
 
-                use JK_InfoBox("For a standard save slot size, you can fit 2-3 lines, each containing approximately 30 characters.")
+                use JK_InfoBox("Em um slot de tamanho padrão, cabem de duas a três linhas com aproximadamente 30 caracteres cada.")
 
                 use JK_YSpacer()
 
@@ -52,8 +52,8 @@ screen JK_EditSave(slotname, location=None):
                     key_events True
 
                     has vbox
-                    text "Choice"
-                    add choice_input.displayable(placeholder="Click here to start writing")
+                    text "Escolha"
+                    add choice_input.displayable(placeholder="Clique aqui para começar a escrever")
                     frame style "JK_default" background "#ffffff22" hover_background JK.Colors.hover ysize 2 offset JK.scaled((0, 2))
 
         else:
@@ -61,7 +61,7 @@ screen JK_EditSave(slotname, location=None):
                 xfill True
                 yfill True
 
-                use JK_Title("Save couldn't be loaded", color=JK.Colors.error)
+                use JK_Title("Não foi possível carregar o salvamento", color=JK.Colors.error)
 
 
         hbox:
@@ -72,9 +72,9 @@ screen JK_EditSave(slotname, location=None):
             vbox xalign 1.0:
 
                 hbox:
-                    use JK_IconButton(icon="\ue161", text="Save", action=save_action, color=JK.Colors.success, key="alt_K_s")
+                    use JK_IconButton(icon="\ue161", text="Salvar", action=save_action, color=JK.Colors.success, key="alt_K_s")
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_EditSave"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_EditSave"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

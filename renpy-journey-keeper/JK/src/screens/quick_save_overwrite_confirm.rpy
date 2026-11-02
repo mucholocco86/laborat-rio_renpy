@@ -2,7 +2,7 @@ screen JK_QuickSaveOverwriteConfirm():
     layer "JK_Overlay"
     style_prefix 'JK'
 
-    default title = "Are you sure you want to overwrite your save?"
+    default title = "Tem certeza de que deseja sobrescrever este salvamento?"
 
     python:
         close_action = Hide("JK_QuickSaveOverwriteConfirm")
@@ -29,13 +29,13 @@ screen JK_QuickSaveOverwriteConfirm():
             vbox:
 
                 hbox:
-                    use JK_IconButton(icon="\ue161", text="Overwrite", action=overwrite_action, color=JK.Colors.danger)
+                    use JK_IconButton(icon="\ue161", text="Sobrescrever", action=overwrite_action, color=JK.Colors.danger)
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue3cd", text="Save one over", action=skip_one_action)
+                    use JK_IconButton(icon="\ue3cd", text="Salvar no próximo slot", action=skip_one_action)
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="No", action=close_action)
+                    use JK_IconButton(icon="\ue5cd", text="Não", action=close_action)
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

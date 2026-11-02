@@ -1,9 +1,9 @@
 screen JK_Settings_Customization():
     vbox:
-        use JK_Title("Opacity")
+        use JK_Title("Opacidade")
 
         hbox:
-            text "Dialog" yalign 0.5
+            text "Diálogo" yalign 0.5
             use JK_ToggleSettingGlobalizationButton("dialogOpacity")
 
         hbox:
@@ -13,7 +13,7 @@ screen JK_Settings_Customization():
         use JK_YSpacer(2)
 
         hbox:
-            text "Sidepanel" yalign 0.5
+            text "Painel lateral" yalign 0.5
             use JK_ToggleSettingGlobalizationButton("sidepanelOpacity")
 
         hbox:
@@ -23,7 +23,7 @@ screen JK_Settings_Customization():
         use JK_YSpacer(2)
 
         hbox:
-            text "Pagination" yalign 0.5
+            text "Paginação" yalign 0.5
             use JK_ToggleSettingGlobalizationButton("paginationOpacity")
 
         hbox:

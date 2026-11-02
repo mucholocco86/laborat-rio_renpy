@@ -166,7 +166,7 @@ init -1 python in JK:
                 if hasattr(self, setting_name):
                     settings[setting_name] = getattr(self, setting_name)
                 else:
-                    print("Setting not found {}".format(setting_name))
+                    print("Configuração não encontrada: {}".format(setting_name))
             
             return json.dumps(settings)
         

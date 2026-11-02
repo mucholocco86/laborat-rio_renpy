@@ -64,11 +64,11 @@ screen JK_PlaythroughsGridPicker(playthroughs, reorder_source):
                     if len(playthroughs) > 1:
                         hbox xalign 0.0 yalign 0.0:
                             if reorder_source == playthrough.id:
-                                use JK_IconButton(icon="\ue5c9", action=SetScreenVariable("reorder_source", None), tt="Cancel", tt_side="bottom", hover_color=JK.Colors.error, outlines=outlines)
+                                use JK_IconButton(icon="\ue5c9", action=SetScreenVariable("reorder_source", None), tt="Cancelar", tt_side="bottom", hover_color=JK.Colors.error, outlines=outlines)
                             elif reorder_source:
-                                use JK_IconButton(icon="\ue39e", action=[JK.Playthroughs.ReorderPlaythroughsAction(source=reorder_source, target=playthrough.id), SetScreenVariable("reorder_source", None)], tt="Move here", tt_side="bottom", outlines=outlines)
+                                use JK_IconButton(icon="\ue39e", action=[JK.Playthroughs.ReorderPlaythroughsAction(source=reorder_source, target=playthrough.id), SetScreenVariable("reorder_source", None)], tt="Mover para cá", tt_side="bottom", outlines=outlines)
                             else:
-                                use JK_IconButton(icon="\ue074", action=SetScreenVariable("reorder_source", playthrough.id), tt="Change order", tt_side="bottom", color=JK.Colors.text_light, hover_color=JK.Colors.hover, outlines=outlines)
+                                use JK_IconButton(icon="\ue074", action=SetScreenVariable("reorder_source", playthrough.id), tt="Alterar ordem", tt_side="bottom", color=JK.Colors.text_light, hover_color=JK.Colors.hover, outlines=outlines)
 
                 use JK_YSpacer(4)
 
@@ -83,10 +83,10 @@ screen JK_PlaythroughsGridPicker(playthroughs, reorder_source):
                         xfill True
 
                         hbox xpos 0.0 xanchor 0.0 ypos 1.0 yanchor 1.0:
-                            use JK_IconButton('\ue872', text="Remove", action=delete_action, disabled=playthrough.id == 1, color=JK.Colors.danger)
+                            use JK_IconButton('\ue872', text="Remover", action=delete_action, disabled=playthrough.id == 1, color=JK.Colors.danger)
 
                         hbox xpos 1.0 xanchor 1.0 ypos 1.0 yanchor 1.0:
-                            use JK_IconButton('\ue3c9', text="Edit", action=edit_action)
+                            use JK_IconButton('\ue3c9', text="Editar", action=edit_action)
 
 
         button style "JK_playthrough_button":
@@ -112,7 +112,7 @@ screen JK_PlaythroughsGridPicker(playthroughs, reorder_source):
             vbox:
                 xsize thumbnailSize[0]
 
-                text "New playthrough" xalign 0.5
+                text "Nova jornada" xalign 0.5
 
                 use JK_IconButton('smrdgy', text="")
 

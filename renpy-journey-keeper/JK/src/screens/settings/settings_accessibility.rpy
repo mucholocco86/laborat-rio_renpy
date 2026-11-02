@@ -1,6 +1,6 @@
 screen JK_Settings_Accessibility(original_size_adjustment, reset_size_adjustment_hint):
     vbox:
-        use JK_Title("Size adjustment")
+        use JK_Title("Ajuste de tamanho")
 
         hbox:
             hbox:
@@ -24,7 +24,7 @@ screen JK_Settings_Accessibility(original_size_adjustment, reset_size_adjustment
 
                 text "T" size JK.scaled(20) yalign 1.0
 
-        text "The first 'T' represents the default text size, while the second 'T' reflects the applied scaling and any additional size adjustment"
+        text "O primeiro “T” representa o tamanho padrão do texto; o segundo mostra a escala aplicada e os ajustes adicionais de tamanho."
 
         use JK_YSpacer(2)
 
@@ -33,5 +33,5 @@ screen JK_Settings_Accessibility(original_size_adjustment, reset_size_adjustment
         use JK_YSpacer(2)
 
         if original_size_adjustment != JK.Settings.sizeAdjustment:
-            use JK_IconButton(icon="\ue86c", text="Click here to apply the new size\n{size=-7}{color=[JK.Colors.warning]}This will rebuild all the styles of the game, so don't be scared if it takes a few seconds.{/color}{/size}", action=[JK.Settings.ApplySizeAdjustmentAction(), SetScreenVariable("original_size_adjustment", JK.Settings.sizeAdjustment)])
+            use JK_IconButton(icon="\ue86c", text="Clique aqui para aplicar o novo tamanho\n{size=-7}{color=[JK.Colors.warning]}Os estilos do jogo serão recriados. Não se assuste se isso levar alguns segundos.{/color}{/size}", action=[JK.Settings.ApplySizeAdjustmentAction(), SetScreenVariable("original_size_adjustment", JK.Settings.sizeAdjustment)])
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

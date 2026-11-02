@@ -35,10 +35,10 @@ init -9999 python in JK:
         
         def name(self):
             if renpy.config.savedir in self.directory:
-                return "User data"
+                return "Dados do usuário"
             
             if renpy.config.gamedir in self.directory:
-                return "Game"
+                return "Jogo"
             
             return self.directory
         

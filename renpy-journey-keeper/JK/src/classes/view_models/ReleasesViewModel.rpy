@@ -14,7 +14,7 @@ init python in JK:
             self.error = None
             renpy.restart_interaction()
             
-            print("Fetching releases from: ", self.url)
+            print("Buscando versões em: ", self.url)
             
             try:
                 request = _urllib_request.Request(self.url)
@@ -29,18 +29,18 @@ init python in JK:
             
             
             except _urllib_error.HTTPError as e:
-                print("HTTP error occurred while downloading releases: ", e)
-                self.error = "A HTTP error occurred while downloading releases: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro HTTP ao baixar as versões: ", e)
+                self.error = "Ocorreu um erro HTTP ao baixar as versões: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             
             except _urllib_error.URLError as e:
-                print("URL error occurred while downloading releases: ", e)
-                self.error = "A URL error occurred while downloading releases: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro de URL ao baixar as versões: ", e)
+                self.error = "Ocorreu um erro de URL ao baixar as versões: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             
             except Exception as e:
-                print("An error occurred while downloading releases: ", e)
-                self.error = "An unexpected error occurred while downloading releases: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro ao baixar as versões: ", e)
+                self.error = "Ocorreu um erro inesperado ao baixar as versões: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             finally:
                 self.loading = False

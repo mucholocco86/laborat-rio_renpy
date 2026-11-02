@@ -20,5 +20,5 @@ screen JK_SettingsLoadSaveScreensStandalone():
             has vbox
             use JK_SettingsLoadSaveScreens(update_at_runtime=True)
 
-            use JK_IconButton("\ue5c4", text="Return to the settings", action=[Hide("JK_SettingsLoadSaveScreensStandalone"), Show("JK_Settings", section="SAVE_LOAD")])
+            use JK_IconButton("\ue5c4", text="Voltar às configurações", action=[Hide("JK_SettingsLoadSaveScreensStandalone"), Show("JK_Settings", section="SAVE_LOAD")])
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

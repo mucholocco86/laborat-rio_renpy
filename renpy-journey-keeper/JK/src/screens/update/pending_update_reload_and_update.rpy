@@ -18,12 +18,12 @@ screen JK_PendingUpdateReloadAndUpdate():
             hbox:
                 xalign 0.5
 
-                use JK_Title("Reloading...")
+                use JK_Title("Recarregando...")
 
             use JK_YSpacer(2)
 
             if JK.Updater.rpa_locked_exception:
-                text "This might take a minute. The game will need to reload twice—once to release the mod file and again for the update to take effect." xalign 0.5 text_align 0.5
+                text "Isso pode levar um minuto. O jogo será recarregado duas vezes: primeiro para liberar o arquivo do mod e depois para aplicar a atualização." xalign 0.5 text_align 0.5
 
 
     timer 0.1 action Reload()

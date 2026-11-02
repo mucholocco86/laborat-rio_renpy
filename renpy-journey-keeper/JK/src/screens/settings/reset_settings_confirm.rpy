@@ -5,19 +5,19 @@ screen JK_ResetSettingsConfirm():
 
     default include_global = False
 
-    use JK_Dialog(title="Reset settings", close_action=Hide("JK_ResetSettingsConfirm")):
+    use JK_Dialog(title="Redefinir configurações", close_action=Hide("JK_ResetSettingsConfirm")):
         style_prefix "JK"
 
         vbox xalign 0.5 yalign 0.5:
             if include_global:
-                text "Do you really wish to reset all settings, including global, into their default configuration?"
+                text "Deseja mesmo restaurar todas as configurações, inclusive as globais, para os valores padrão?"
             else:
-                text "Do you really wish to reset all local settings into their default configuration?"
+                text "Deseja mesmo restaurar todas as configurações locais para os valores padrão?"
 
             use JK_YSpacer(offset=2)
 
             hbox xalign 0.5:
-                use JK_Checkbox(checked=include_global, text="Include global settings", action=ToggleScreenVariable('include_global', True, False))
+                use JK_Checkbox(checked=include_global, text="Incluir configurações globais", action=ToggleScreenVariable('include_global', True, False))
 
         hbox:
             xfill True
@@ -28,9 +28,9 @@ screen JK_ResetSettingsConfirm():
             vbox:
 
                 hbox:
-                    use JK_IconButton(icon="\ue8ba", text="Reset all" if include_global else "Perform reset", action=[JK.Settings.ResetAction(include_global), Hide("JK_ResetSettingsConfirm")], color=JK.Colors.danger)
+                    use JK_IconButton(icon="\ue8ba", text="Redefinir tudo" if include_global else "Redefinir", action=[JK.Settings.ResetAction(include_global), Hide("JK_ResetSettingsConfirm")], color=JK.Colors.danger)
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_ResetSettingsConfirm"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_ResetSettingsConfirm"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

@@ -40,10 +40,10 @@ init python in JK:
                     
                     if Settings.showConfirmOnLargePageJump and not Utils.is_save_load_screen() and (prev_page > page + 1 or prev_page < page - 1):
                         showConfirm(
-                            title="Page number jumped unexpectedly too far",
-                            message="The page jumped from {} to {}.\nIs this correct?".format(prev_page, page),
-                            yes_text="Yes, keep the change",
-                            no_text="No, revert it",
+                            title="A página avançou mais do que o esperado",
+                            message="A página mudou de {} para {}.\nEstá correto?".format(prev_page, page),
+                            yes_text="Sim, manter a alteração",
+                            no_text="Não, reverter",
                             no=Autosaver.RevertActiveSlotAction(self.prev_active_slot)
                         )
         
@@ -157,7 +157,7 @@ init python in JK:
                     i += 1
                     
                     if i > 1000:
-                        raise Exception("Autosaver.__is_choice_question() infinite loop prevented. Or just reeeeeally long code stack...")
+                        raise Exception("Loop infinito interrompido ao verificar uma escolha.")
             except Exception as e:
                 print(e)
                 
@@ -310,7 +310,7 @@ init python in JK:
                 new_slot = self.prev_slot
                 
                 Autosaver.set_active_slot(new_slot)
-                renpy.notify("Active slot reverted back to {}".format(new_slot))
+                renpy.notify("O slot ativo voltou para {}".format(new_slot))
         
         class PendingSaveClass(x52NonPicklable):
             temp_save_slotname = "JK-temp"
@@ -338,7 +338,7 @@ init python in JK:
                 renpy.rename_save(self.temp_save_slotname, slotname)
                 
                 if Settings.autosaveNotificationEnabled:
-                    renpy.notify("Autosave created at {}".format(slotname))
+                    renpy.notify("Salvamento automático criado em {}".format(slotname))
                 
                 Autosaver.pending_save = None
                 Autosaver.loaded_manual_save_without_choices = False

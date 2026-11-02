@@ -5,7 +5,7 @@ screen JK_ExitMemoryConfirm():
 
     $ returnAction = [JK.Memories.ExitMemory(), MainMenu(confirm=False)]
 
-    use JK_Dialog(title="Exit memory", close_action=Return()):
+    use JK_Dialog(title="Sair da memória", close_action=Return()):
         key 'K_RETURN' action returnAction
         key 'K_KP_ENTER' action returnAction
 
@@ -13,7 +13,7 @@ screen JK_ExitMemoryConfirm():
             hbox:
                 xfill True
 
-                text "Do you wish to exit the memory?" xalign 0.5 text_align 0.5
+                text "Deseja sair desta memória?" xalign 0.5 text_align 0.5
 
             hbox:
                 xfill True
@@ -24,9 +24,9 @@ screen JK_ExitMemoryConfirm():
                 vbox:
 
                     hbox:
-                        use JK_IconButton(icon="\ue9ba", text="Exit memory", action=returnAction, key="alt_K_e")
+                        use JK_IconButton(icon="\ue9ba", text="Sair da memória", action=returnAction, key="alt_K_e")
 
 
                     hbox:
-                        use JK_IconButton(icon="\ue5c4", text="Return", action=Return())
+                        use JK_IconButton(icon="\ue5c4", text="Retornar", action=Return())
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

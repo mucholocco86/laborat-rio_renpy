@@ -20,13 +20,13 @@ screen JK_SettingsLoadSaveScreens(update_at_runtime=False):
         default relevant_load_screens = remove_duplicates(["load"] + JK.Settings.loadScreenName + active_screens)
 
     vbox:
-        use JK_Title("Save page", 3)
+        use JK_Title("Salvar página", 3)
         for screen in relevant_save_screens:
             use JK_Checkbox(checked=screen in JK.Settings.saveScreenName, text=("\"save\" (default)" if screen == "save" else "\"" + screen + "\""), action=JK.Settings.SetSaveScreenNameAction(screen), disabled=screen == "save")
 
         use JK_YSpacer(2)
 
-        use JK_Title("Load page", 3)
+        use JK_Title("Carregar página", 3)
         for screen in relevant_load_screens:
             use JK_Checkbox(checked=screen in JK.Settings.loadScreenName, text=("\"load\" (default)" if screen == "load" else "\"" + screen + "\""), action=JK.Settings.SetLoadScreenNameAction(screen), disabled=screen == "load")
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

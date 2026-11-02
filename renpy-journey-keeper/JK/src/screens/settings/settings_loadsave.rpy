@@ -3,10 +3,10 @@ screen JK_Settings_LoadSave():
         hbox:
             $ sub_text = ""
             if hasattr(renpy.store.gui, "file_slot_cols") and hasattr(renpy.store.gui, "file_slot_rows"):
-                $ sub_text = "\n{color=[JK.Colors.text_light]}{size=-5}Config values: [renpy.store.gui.file_slot_cols], [renpy.store.gui.file_slot_rows]{/size}{/color}"
+                $ sub_text = "\n{color=[JK.Colors.text_light]}{size=-5}Valores de configuração: [renpy.store.gui.file_slot_cols], [renpy.store.gui.file_slot_rows]{/size}{/color}"
 
-            use JK_Checkbox(checked=JK.Settings.customGridEnabled, text="Custom slots grid" + sub_text, action=JK.Settings.ToggleEnabledAction("customGridEnabled"))
-            use JK_Helper("When enabled, two new options will appear where you can enter the number of columns and rows for the save slots in the game's save/load menu. This is needed because some games use custom save systems that the mod's autosave/quicksave system can't handle automatically.")
+            use JK_Checkbox(checked=JK.Settings.customGridEnabled, text="Grade personalizada de slots" + sub_text, action=JK.Settings.ToggleEnabledAction("customGridEnabled"))
+            use JK_Helper("Quando ativado, serão exibidas opções para informar o número de colunas e linhas da grade de slots nas telas de salvamento do jogo. Isso é necessário porque alguns jogos usam sistemas personalizados que o salvamento automático e o salvamento rápido do mod não conseguem detectar.")
 
         if JK.Settings.customGridEnabled:
             use JK_YSpacer(2)
@@ -16,7 +16,7 @@ screen JK_Settings_LoadSave():
 
                 hbox:
                     vbox:
-                        text "Columns" xalign 0.5
+                        text "Colunas" xalign 0.5
                         hbox:
                             use JK_IconButton(icon="\ue15b", action=JK.Settings.DecrementAction("customGridX", min=1))
 
@@ -27,7 +27,7 @@ screen JK_Settings_LoadSave():
                     use JK_XSpacer(2)
 
                     vbox:
-                        text "Rows" xalign 0.5
+                        text "Linhas" xalign 0.5
                         hbox:
                             use JK_IconButton(icon="\ue15b", action=JK.Settings.DecrementAction("customGridY", min=1))
 
@@ -43,22 +43,22 @@ screen JK_Settings_LoadSave():
             use JK_YSpacer(2)
 
         hbox:
-            use JK_Checkbox(checked=JK.Settings.offsetSlotAfterManualSaveIsLoaded, text="Always offset the slot after loading a manual save", action=JK.Settings.ToggleEnabledAction("offsetSlotAfterManualSaveIsLoaded"))
-            use JK_Helper("If enabled, loading a save will shift the save slot by 1, ensuring the next autosave or quicksave does not overwrite the manual save.")
+            use JK_Checkbox(checked=JK.Settings.offsetSlotAfterManualSaveIsLoaded, text="Sempre avançar um slot após carregar um salvamento manual", action=JK.Settings.ToggleEnabledAction("offsetSlotAfterManualSaveIsLoaded"))
+            use JK_Helper("Quando ativado, carregar um salvamento avança um slot e impede que o próximo salvamento automático ou rápido sobrescreva o salvamento manual.")
             use JK_ToggleSettingGlobalizationButton("offsetSlotAfterManualSaveIsLoaded")
 
         hbox:
-            use JK_Checkbox(checked=JK.Settings.offsetSlotAfterManualSave, text="Offset the slot after a manual save is performed", action=JK.Settings.ToggleEnabledAction("offsetSlotAfterManualSave"))
-            use JK_Helper("If enabled, creating a manual save will shift the save slot by 1, preventing the next autosave or quicksave from overwriting it.")
+            use JK_Checkbox(checked=JK.Settings.offsetSlotAfterManualSave, text="Avançar um slot após fazer um salvamento manual", action=JK.Settings.ToggleEnabledAction("offsetSlotAfterManualSave"))
+            use JK_Helper("Quando ativado, um salvamento manual avança um slot e impede que o próximo salvamento automático ou rápido o sobrescreva.")
             use JK_ToggleSettingGlobalizationButton("offsetSlotAfterManualSave")
 
         use JK_YSpacer()
 
-        use JK_Title("Search")
+        use JK_Title("Pesquisar")
 
         vbox:
             hbox:
-                text "Search playthrough key" yalign 0.5
+                text "Atalho para pesquisar jornadas" yalign 0.5
                 use JK_ToggleSettingGlobalizationButton("searchPlaythroughKey")
 
             use JK_KeyInput(assignment=JK.Settings.searchPlaythroughKey, action=JK.Settings.get_set_key_action("searchPlaythroughKey"), supress_ctrl_warning=True)
@@ -67,7 +67,7 @@ screen JK_Settings_LoadSave():
 
         vbox:
             hbox:
-                text "Search all playthroughs key" yalign 0.5
+                text "Atalho para pesquisar em todas as jornadas" yalign 0.5
                 use JK_ToggleSettingGlobalizationButton("searchPlaythrougshKey")
 
             use JK_KeyInput(assignment=JK.Settings.searchPlaythroughsKey, action=JK.Settings.get_set_key_action("searchPlaythroughsKey"), supress_ctrl_warning=True)
@@ -76,12 +76,12 @@ screen JK_Settings_LoadSave():
 
         vbox:
             hbox:
-                use JK_Title("Screens")
+                use JK_Title("Telas")
 
                 hbox:
                     yalign 0.5
 
-                    use JK_Helper("Here you can select screens that represent save/load screens. On the selected screens, the sidepanel will be visible.")
+                    use JK_Helper("Aqui você pode selecionar quais telas correspondem às telas de salvar e carregar. O painel lateral aparecerá nas telas selecionadas.")
 
             use JK_YSpacer(3)
 
@@ -94,61 +94,61 @@ screen JK_Settings_LoadSave():
                     use JK_YSpacer(2)
 
                     hbox:
-                        use JK_IconButton("\ue8fb", text="Click here to detach from settings", action=[Show("JK_SettingsLoadSaveScreensStandalone"), JK.SetSidepanelVisibilityAction(None), Hide("JK_Settings")])
-                        use JK_Helper("Click to isolate the {color=[JK.Colors.theme]}{b}Screens{/b}{/color} section, hiding other settings for a focused view.\nIn this mode, you can monitor real-time updates on currently displayed screens to easily choose the correct screen names, with immediate visual feedback on changes.")
+                        use JK_IconButton("\ue8fb", text="Clique aqui para abrir esta seção separadamente", action=[Show("JK_SettingsLoadSaveScreensStandalone"), JK.SetSidepanelVisibilityAction(None), Hide("JK_Settings")])
+                        use JK_Helper("Clique para isolar a seção {color=[JK.Colors.theme]}{b}Telas{/b}{/color} e ocultar as demais configurações.\nNesse modo, você acompanha em tempo real as telas exibidas e escolhe os nomes corretos com retorno visual imediato.")
 
             use JK_YSpacer()
 
-            use JK_Title("Pagination")
+            use JK_Title("Paginação")
 
             hbox:
                 use JK_XSpacer()
 
                 vbox:
                     hbox:
-                        use JK_Checkbox(checked=JK.Settings.seamlessPagination, text="Use seamless pagination", action=JK.Settings.ToggleEnabledAction("seamlessPagination"))
-                        use JK_Helper("When enabled, the active page number stays centered, making it easier to navigate through many pages. However, the page numbers may shift, which could feel a bit disorienting at first.\n\n{b}{color=[JK.Colors.theme]}Example{/color}{/b}\n\n{b}Normal:{/b}\nCurrent page = 7\nPages = {b}1 2 3 4 5 6 {color=[JK.Colors.selected]}7{/color} 8 9{/b}\n\n{b}Seamless:{/b}\nCurrent page = 7\nPages = {b}3 4 5 6 {color=[JK.Colors.selected]}7{/color} 8 9 10 11{/b}")
+                        use JK_Checkbox(checked=JK.Settings.seamlessPagination, text="Usar paginação contínua", action=JK.Settings.ToggleEnabledAction("seamlessPagination"))
+                        use JK_Helper("Quando ativada, a página atual permanece centralizada, facilitando a navegação entre muitas páginas. A numeração pode mudar de posição, o que talvez cause estranheza no início.\n\n{b}{color=[JK.Colors.theme]}Exemplo{/color}{/b}\n\n{b}Normal:{/b}\nPágina atual = 7\nPáginas = {b}1 2 3 4 5 6 {color=[JK.Colors.selected]}7{/color} 8 9{/b}\n\n{b}Contínua:{/b}\nPágina atual = 7\nPáginas = {b}3 4 5 6 {color=[JK.Colors.selected]}7{/color} 8 9 10 11{/b}")
                         use JK_ToggleSettingGlobalizationButton("seamlessPagination")
 
                     use JK_YSpacer(2)
 
-                    use JK_Title("Customization", 2)
+                    use JK_Title("Personalização", 2)
 
                     hbox:
                         use JK_XSpacer()
 
                         vbox:
                             hbox:
-                                use JK_Checkbox(checked=JK.Settings.paginationGoTo, text="Show go-to button", action=JK.Settings.ToggleEnabledAction("paginationGoTo"))
+                                use JK_Checkbox(checked=JK.Settings.paginationGoTo, text="Exibir botão “Ir para”", action=JK.Settings.ToggleEnabledAction("paginationGoTo"))
                                 use JK_ToggleSettingGlobalizationButton("paginationGoTo")
 
                             hbox:
-                                use JK_Checkbox(checked=JK.Settings.paginationAutoSaves, text="Show Autosaves button", action=JK.Settings.ToggleEnabledAction("paginationAutoSaves"))
+                                use JK_Checkbox(checked=JK.Settings.paginationAutoSaves, text="Exibir botão de salvamentos automáticos", action=JK.Settings.ToggleEnabledAction("paginationAutoSaves"))
                                 use JK_ToggleSettingGlobalizationButton("paginationAutoSaves")
 
                             hbox:
-                                use JK_Checkbox(checked=JK.Settings.paginationQuickSaves, text="Show Quick Saves button", action=JK.Settings.ToggleEnabledAction("paginationQuickSaves"))
+                                use JK_Checkbox(checked=JK.Settings.paginationQuickSaves, text="Exibir botão de salvamentos rápidos", action=JK.Settings.ToggleEnabledAction("paginationQuickSaves"))
                                 use JK_ToggleSettingGlobalizationButton("paginationQuickSaves")
 
                             hbox:
-                                use JK_Checkbox(checked=JK.Settings.paginationFirstPage, text="Show \"Jump to the first page\" button", action=JK.Settings.ToggleEnabledAction("paginationFirstPage"))
+                                use JK_Checkbox(checked=JK.Settings.paginationFirstPage, text="Exibir o botão “Ir para a primeira página”", action=JK.Settings.ToggleEnabledAction("paginationFirstPage"))
                                 use JK_ToggleSettingGlobalizationButton("paginationFirstPage")
 
                             hbox:
-                                use JK_Checkbox(checked=JK.Settings.paginationBigJump, text="Show << and >> buttons", action=JK.Settings.ToggleEnabledAction("paginationBigJump"))
+                                use JK_Checkbox(checked=JK.Settings.paginationBigJump, text="Exibir botões << e >>", action=JK.Settings.ToggleEnabledAction("paginationBigJump"))
                                 use JK_ToggleSettingGlobalizationButton("paginationBigJump")
 
                             hbox:
-                                use JK_Checkbox(checked=JK.Settings.paginationNumbers, text="Show page numbers", action=JK.Settings.ToggleEnabledAction("paginationNumbers"))
+                                use JK_Checkbox(checked=JK.Settings.paginationNumbers, text="Exibir números das páginas", action=JK.Settings.ToggleEnabledAction("paginationNumbers"))
                                 use JK_ToggleSettingGlobalizationButton("paginationNumbers")
 
                             hbox:
-                                use JK_Checkbox(checked=JK.Settings.paginationLastPage, text="Show \"Jump to the last page\" button", action=JK.Settings.ToggleEnabledAction("paginationLastPage"))
+                                use JK_Checkbox(checked=JK.Settings.paginationLastPage, text="Exibir o botão “Ir para a última página”", action=JK.Settings.ToggleEnabledAction("paginationLastPage"))
                                 use JK_ToggleSettingGlobalizationButton("paginationLastPage")
 
                     use JK_YSpacer(2)
 
-                    use JK_Title("Preview", 3)
+                    use JK_Title("Pré-visualização", 3)
 
                     use JK_YSpacer(3)
 

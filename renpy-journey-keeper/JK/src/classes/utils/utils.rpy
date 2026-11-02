@@ -372,11 +372,11 @@ init -9999 python in JK:
             directory_path = os.path.normpath(directory_path)
             
             if not os.path.exists(directory_path):
-                print "Directory not found: {}".format(directory_path)
+                print "Pasta não encontrada: {}".format(directory_path)
                 return
             
             if not os.path.isdir(directory_path):
-                print "The path is not a directory: {}".format(directory_path)
+                print "O caminho não corresponde a uma pasta: {}".format(directory_path)
                 return
             
             system = platform.system()
@@ -395,9 +395,9 @@ init -9999 python in JK:
                     
                     subprocess.Popen(["am", "start", "-a", "android.intent.action.VIEW", "-d", "file://{}".format(directory_path)])
                 else:
-                    print "Unsupported OS: {}".format(system)
+                    print "Sistema operacional não compatível: {}".format(system)
             except Exception as e:
-                print "An error occurred: {}".format(e)
+                print "Ocorreu um erro: {}".format(e)
 
 
 

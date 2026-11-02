@@ -7,28 +7,28 @@ screen JK_Settings(section="ACCESSIBILITY"):
     default active_section = section
 
     python:
-        reset_size_adjustment_hint = "If anything goes wrong, you can revert the value via:\n  a) confirm dialog\n  b) waiting 60 seconds\n  c) manually, by simultaneously pressing {b}CTRL + SHIFT + ALT + P{/b}."
+        reset_size_adjustment_hint = "Se algo der errado, você pode reverter o valor de uma destas formas:\n  a) pela caixa de confirmação;\n  b) aguardando 60 segundos;\n  c) pressionando {b}CTRL + SHIFT + ALT + P{/b} ao mesmo tempo."
 
         default_close_action = Hide("JK_Settings")
         close_action = default_close_action
         if original_size_adjustment != JK.Settings.sizeAdjustment and JK.Settings.sizeAdjustment != 0:
-            close_action = [JK.ShowConfirmAction(title="You have unapplied size adjustment, would you like to apply it now?", message=reset_size_adjustment_hint, yes=[JK.Settings.ApplySizeAdjustmentAction(), default_close_action], yes_text="Apply now", yes_color=JK.Colors.success, no_text="Back")]
+            close_action = [JK.ShowConfirmAction(title="Há um ajuste de tamanho ainda não aplicado. Deseja aplicá-lo agora?", message=reset_size_adjustment_hint, yes=[JK.Settings.ApplySizeAdjustmentAction(), default_close_action], yes_text="Aplicar agora", yes_color=JK.Colors.success, no_text="Voltar")]
 
         sections = [
-            ("ACCESSIBILITY", "\ue84e", "Accessibility"),
-            ("AUTOSAVE", "\ue167", "Autosave"),
-            ("QUICKSAVE", "\ue161", "Quick save"),
-            ("SIDEPANEL", "\ue8aa", "Sidepanel"),
+            ("ACCESSIBILITY", "\ue84e", "Acessibilidade"),
+            ("AUTOSAVE", "\ue167", "Salvamento automático"),
+            ("QUICKSAVE", "\ue161", "Salvamento rápido"),
+            ("SIDEPANEL", "\ue8aa", "Painel lateral"),
             
-            ("SAVE_LOAD", "\ue0e0", "Save/Load"),
-            ("CUSTOMIZATION", "\ue40a", "Customize"),
-            ("UPDATES", "\ue8d7", "Updates"),
+            ("SAVE_LOAD", "\ue0e0", "Salvar/Carregar"),
+            ("CUSTOMIZATION", "\ue40a", "Personalização"),
+            ("UPDATES", "\ue8d7", "Atualizações"),
         ]
 
         if renpy.config.developer:
-            sections.append(("DEBUG", "\ue868", "Debug"))
+            sections.append(("DEBUG", "\ue868", "Depuração"))
 
-    use JK_Dialog(title="Settings", close_action=close_action):
+    use JK_Dialog(title="Configurações", close_action=close_action):
         style_prefix "JK"
 
         grid len(sections) 1:
@@ -100,8 +100,8 @@ screen JK_Settings(section="ACCESSIBILITY"):
 
                 use JK_YSpacer(2)
 
-                use JK_Title("Encountered an issue?", size=3, color=JK.Colors.error)
-                text "Visit our {a=[JK.DISCORD_URL]}Discord{/a} or {a=https://github.com/[JK.MOD_GITHUB_OWNER]/[JK.MOD_GITHUB_REPO]}GitHub{/a}."
+                use JK_Title("Encontrou algum problema?", size=3, color=JK.Colors.error)
+                text "Acesse nosso {a=[JK.DISCORD_URL]}Discord{/a} ou o {a=https://github.com/[JK.MOD_GITHUB_OWNER]/[JK.MOD_GITHUB_REPO]}GitHub{/a}."
 
             hbox:
                 style_prefix "JK_dialog_action_buttons"
@@ -109,9 +109,9 @@ screen JK_Settings(section="ACCESSIBILITY"):
                 vbox:
 
                     hbox:
-                        use JK_IconButton(icon="\ue8ba", text="Reset", action=Show("JK_ResetSettingsConfirm"), color=JK.Colors.danger)
+                        use JK_IconButton(icon="\ue8ba", text="Redefinir", action=Show("JK_ResetSettingsConfirm"), color=JK.Colors.danger)
 
 
                     hbox:
-                        use JK_IconButton(icon="\ue5cd", text="Close", action=close_action)
+                        use JK_IconButton(icon="\ue5cd", text="Fechar", action=close_action)
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

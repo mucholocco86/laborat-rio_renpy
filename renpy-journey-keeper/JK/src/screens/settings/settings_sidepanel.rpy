@@ -1,6 +1,6 @@
 screen JK_Settings_Sidepanel():
     vbox:
-        use JK_IconButton("\ue8ba", text="Reset position", action=JK.Settings.ResetSidepanelPositionAction())
+        use JK_IconButton("\ue8ba", text="Redefinir posição", action=JK.Settings.ResetSidepanelPositionAction())
 
         use JK_YSpacer(2)
 
@@ -9,7 +9,7 @@ screen JK_Settings_Sidepanel():
         use JK_YSpacer(2)
 
         hbox:
-            text "Change visibility mode key" yalign 0.5
+            text "Alterar atalho do modo de visibilidade" yalign 0.5
             use JK_ToggleSettingGlobalizationButton("changeSidepanelVisibilityKey")
 
         use JK_KeyInput(assignment=JK.Settings.changeSidepanelVisibilityKey, action=JK.Settings.SetChangeSidepanelVisibilityKeyAction)

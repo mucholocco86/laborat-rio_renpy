@@ -8,7 +8,7 @@ screen JK_PlaythroughsPicker():
 
     $ playthroughs = [p for p in JK.Playthroughs.playthroughs if p.id != 2]
 
-    use JK_Dialog(title="Select a playthrough", close_action=Hide("JK_PlaythroughsPicker")):
+    use JK_Dialog(title="Selecionar uma jornada", close_action=Hide("JK_PlaythroughsPicker")):
         style_prefix "JK"
 
         hbox:
@@ -19,8 +19,8 @@ screen JK_PlaythroughsPicker():
                 spacing 10
                 xalign 0.5
 
-                use JK_IconButton(icon="\ue5c3", text="Grid", action=JK.Settings.SetAction("playthroughsViewMode", "grid"), toggled=JK.Settings.playthroughsViewMode == "grid", toggled_color=JK.Colors.selected)
-                use JK_IconButton(icon="\ue8e9", text="Rows", action=JK.Settings.SetAction("playthroughsViewMode", "rows"), toggled=JK.Settings.playthroughsViewMode == "rows", toggled_color=JK.Colors.selected)
+                use JK_IconButton(icon="\ue5c3", text="Grade", action=JK.Settings.SetAction("playthroughsViewMode", "grid"), toggled=JK.Settings.playthroughsViewMode == "grid", toggled_color=JK.Colors.selected)
+                use JK_IconButton(icon="\ue8e9", text="Linhas", action=JK.Settings.SetAction("playthroughsViewMode", "rows"), toggled=JK.Settings.playthroughsViewMode == "rows", toggled_color=JK.Colors.selected)
 
         use JK_YSpacer(2)
 
@@ -48,10 +48,10 @@ screen JK_PlaythroughsPicker():
 
                 hbox:
                     if JK.UserDir.is_available:
-                        use JK_IconButton(icon="\ue884", text="Import from another game", action=Show("JK_ImportPlaythroughs"))
+                        use JK_IconButton(icon="\ue884", text="Importar de outro jogo", action=Show("JK_ImportPlaythroughs"))
 
             vbox xalign 1.0:
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_PlaythroughsPicker"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_PlaythroughsPicker"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

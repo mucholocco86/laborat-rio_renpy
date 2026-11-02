@@ -18,15 +18,15 @@ screen JK_SearchPlaythrough(search_all=False):
             t = result[0]
             
             if t == "PLAYTHROUGH_NAME":
-                return "Playthrough name"
+                return "Nome da jornada"
             elif t == "PLAYTHROUGH_DESCRIPTION":
-                return "Playthrough description"
+                return "Descrição da jornada"
             elif t == "FILE_PAGE_NAME":
-                return "Page name"
+                return "Nome da página"
             elif t == "SAVE_NAME":
-                return "Save name"
+                return "Nome do salvamento"
             elif t == "SAVE_CHOICE":
-                return "Choice"
+                return "Escolha"
 
         def result_to_action(result):
             t = result[0]
@@ -51,7 +51,7 @@ screen JK_SearchPlaythrough(search_all=False):
     if JK.Settings.searchPlaythroughsKey:
         key JK.Settings.searchPlaythroughsKey action JK.SearchPlaythroughViewModel.SetSearchAllAction(view_model, True)
 
-    use JK_Dialog(title="Seach playthrough", close_action=Hide("JK_SearchPlaythrough")):
+    use JK_Dialog(title="Pesquisar jornada", close_action=Hide("JK_SearchPlaythrough")):
         style_prefix "JK"
 
         button:
@@ -59,28 +59,28 @@ screen JK_SearchPlaythrough(search_all=False):
             key_events True
 
             has vbox
-            add search_input.displayable(placeholder="Search")
+            add search_input.displayable(placeholder="Pesquisar")
             $ view_model.set_search_text(search)
             frame style "JK_default" background "#ffffff22" hover_background JK.Colors.hover ysize 2 offset JK.scaled((0, 2))
 
         hbox:
             xalign 1.0
 
-            use JK_Checkbox(checked=view_model.search_playthroughs, text="Search playthroughs", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_playthroughs"))
-            use JK_Checkbox(checked=view_model.search_playthrough_names, text="Search playthrough names", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_playthrough_names"), disabled=not view_model.search_playthroughs)
-            use JK_Checkbox(checked=view_model.search_playthrough_descriptions, text="Search playthrough descriptions", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_playthrough_descriptions"), disabled=not view_model.search_playthroughs)
-            use JK_Checkbox(checked=view_model.search_page_names, text="Search page names", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_page_names"))
-            use JK_Checkbox(checked=view_model.search_save_names, text="Search save names", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_save_names"))
-            use JK_Checkbox(checked=view_model.search_choices, text="Search choices", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_choices"))
+            use JK_Checkbox(checked=view_model.search_playthroughs, text="Pesquisar jornadas", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_playthroughs"))
+            use JK_Checkbox(checked=view_model.search_playthrough_names, text="Pesquisar nomes de jornadas", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_playthrough_names"), disabled=not view_model.search_playthroughs)
+            use JK_Checkbox(checked=view_model.search_playthrough_descriptions, text="Pesquisar descrições de jornadas", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_playthrough_descriptions"), disabled=not view_model.search_playthroughs)
+            use JK_Checkbox(checked=view_model.search_page_names, text="Pesquisar nomes de páginas", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_page_names"))
+            use JK_Checkbox(checked=view_model.search_save_names, text="Pesquisar nomes dos salvamentos", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_save_names"))
+            use JK_Checkbox(checked=view_model.search_choices, text="Pesquisar escolhas", size=15, action=JK.SearchPlaythroughViewModel.SetSearchEnabledAction(view_model, "search_choices"))
 
         if view_model.searching or view_model.search_after_cache_is_built:
-            text "Searching..."
+            text "Pesquisando..."
 
         if view_model.searched and len(view_model.search_text) > 0:
             if len(view_model.results) > 0:
-                text "Found {}".format(len(view_model.results))
+                text "Encontrado: {}".format(len(view_model.results))
             else:
-                text "No results"
+                text "Nenhum resultado"
 
             viewport:
                 mousewheel True
@@ -135,11 +135,11 @@ screen JK_SearchPlaythrough(search_all=False):
                                         $ page = result[3]
 
                                     if result_type in ("FILE_PAGE_NAME", "SAVE_NAME", "SAVE_CHOICE"):
-                                        use JK_IconButton(icon="\ue8a0", tt="Show page", action=[JK.Playthroughs.ActivatePlaythroughAction(playthrough), FilePage(page), hide_action])
+                                        use JK_IconButton(icon="\ue8a0", tt="Exibir página", action=[JK.Playthroughs.ActivatePlaythroughAction(playthrough), FilePage(page), hide_action])
 
                                     if result_type in ("SAVE_NAME", "SAVE_CHOICE"):
                                         $ page, slot = JK.Utils.split_slotname(result[3])
-                                        use JK_IconButton(icon="\ue1c4", tt="Load save", action=[JK.Playthroughs.ActivatePlaythroughAction(playthrough), FilePage(page), FileLoad(slot, confirm=True, page=page), hide_action])
+                                        use JK_IconButton(icon="\ue1c4", tt="Carregar salvamento", action=[JK.Playthroughs.ActivatePlaythroughAction(playthrough), FilePage(page), FileLoad(slot, confirm=True, page=page), hide_action])
 
 
         hbox:
@@ -150,5 +150,5 @@ screen JK_SearchPlaythrough(search_all=False):
             vbox xalign 1.0:
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_SearchPlaythrough"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_SearchPlaythrough"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

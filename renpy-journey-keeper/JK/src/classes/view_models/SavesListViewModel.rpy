@@ -95,7 +95,7 @@ init python in JK:
                 self.process_continue()
             except Exception as e:
                 print(e)
-                self.error = "An error occurred while deleting save \"" + save + "\":\n{color=[JK.Colors.error]}" + str(e) + "{/color}"
+                self.error = "Ocorreu um erro ao excluir o salvamento “" + save + "\":\n{color=[JK.Colors.error]}" + str(e) + "{/color}"
                 renpy.restart_interaction()
                 self.process_stop()
         
@@ -232,8 +232,8 @@ init python in JK:
             
             def __call__(self):
                 showConfirm(
-                    title="Delete " + str(len(self.view_model.selection)) + " save(s)",
-                    message="Do you really wish to delete these saves?\nThis action {u}{color=[JK.Colors.error]}is irreversible{/c}{/u}.",
+                    title="Excluir " + str(len(self.view_model.selection)) + " salvamento(s)",
+                    message="Deseja mesmo excluir estes salvamentos?\nEsta ação {u}{color=[JK.Colors.error]}é irreversível{/c}{/u}.",
                     yes=SavesListViewModel.MassDeleteAction(self.view_model),
                     yes_icon="\ue92b",
                     yes_color=Colors.error
@@ -255,8 +255,8 @@ init python in JK:
             
             def __call__(self):
                 showConfirm(
-                    title="Delete save \"" + self.save[0] + "\"",
-                    message="Do you really wish to delete \"" + self.save[0] + "\"" + (" from \"" + self.save[1].directory + "\"" if self.save[1] else "") + "?\nThis action {u}{color=[JK.Colors.error]}is irreversible{/c}{/u}.",
+                    title="Excluir salvamento \"" + self.save[0] + "\"",
+                    message="Deseja mesmo excluir \"" + self.save[0] + "\"" + (" da pasta \"" + self.save[1].directory + "\"" if self.save[1] else "") + "?\nEsta ação {u}{color=[JK.Colors.error]}é irreversível{/c}{/u}.",
                     yes=SavesListViewModel.DeleteSingleAction(self.view_model, self.save),
                     yes_icon="\ue92b",
                     yes_color=Colors.error

@@ -75,12 +75,12 @@ init python in JK:
                         f.write( str(item[0] + 1) + ". " + "    (" + item[2] + ")     " + self._m1_ChoicesTimelineViewModel__replace_tags(item[1] or "-") + "\n")
                 
                 showConfirm(
-                    title="Timeline exported into the game files",
-                    message="You can find the file in " + path,
+                    title="Linha do tempo exportada para os arquivos do jogo",
+                    message="O arquivo está em " + path,
                     yes=OpenDirectoryAction(path=dirPath),
-                    yes_text="Open location",
+                    yes_text="Abrir local",
                     yes_icon='\ue2c8',
-                    no_text="Close",
+                    no_text="Fechar",
                     no_icon=None
                 )
             

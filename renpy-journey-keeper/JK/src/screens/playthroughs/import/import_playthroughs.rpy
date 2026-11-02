@@ -9,7 +9,7 @@ screen JK_ImportPlaythroughs():
     default search = ""
 
     $ game_name = view_model.selected_game[0] if view_model.selected_game else None
-    use JK_Dialog(title="Import playthrough(s)", message="Select playthroughs you want to import from {}.".format(game_name) if view_model.selected_game else "Select a game you want to import from.", close_action=Hide("JK_ImportPlaythroughs")):
+    use JK_Dialog(title="Importar jornada(s)", message="Selecione as jornadas que deseja importar de {}.".format(game_name) if view_model.selected_game else "Selecione de qual jogo deseja importar.", close_action=Hide("JK_ImportPlaythroughs")):
         style_prefix "JK"
 
         if view_model.error_message:
@@ -24,7 +24,7 @@ screen JK_ImportPlaythroughs():
                     hbox:
                         xalign 0.5
 
-                        use JK_Title("Error", color=JK.Colors.error)
+                        use JK_Title("Erro", color=JK.Colors.error)
 
                     hbox:
                         xalign 0.5
@@ -41,7 +41,7 @@ screen JK_ImportPlaythroughs():
                 vbox xalign 1.0:
 
                     hbox:
-                        use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_ImportPlaythroughs"))
+                        use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_ImportPlaythroughs"))
 
         elif view_model.loading:
             vbox:
@@ -52,7 +52,7 @@ screen JK_ImportPlaythroughs():
                 vbox:
                     align (0.5, 0.5)
 
-                    use JK_Title("Loading playthroughs..." if view_model.selected_game else "Loading games...")
+                    use JK_Title("Carregando jornadas..." if view_model.selected_game else "Carregando jogos...")
 
 
             hbox:
@@ -64,7 +64,7 @@ screen JK_ImportPlaythroughs():
                 vbox xalign 1.0:
 
                     hbox:
-                        use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_ImportPlaythroughs"))
+                        use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_ImportPlaythroughs"))
 
         elif len(view_model.conflicts) > 0:
             use JK_ImportPlaythroughsConflict(view_model)
@@ -78,7 +78,7 @@ screen JK_ImportPlaythroughs():
                 vbox:
                     align (0.5, 0.5)
 
-                    use JK_Title("Done", color=JK.Colors.success)
+                    use JK_Title("Concluído", color=JK.Colors.success)
 
 
             hbox:
@@ -90,7 +90,7 @@ screen JK_ImportPlaythroughs():
                 vbox xalign 1.0:
 
                     hbox:
-                        use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_ImportPlaythroughs"))
+                        use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_ImportPlaythroughs"))
 
         elif view_model.selected_game:
             use JK_ImportPlaythroughsSelectPlaythroughs(view_model, last_selected_playthrough, show_thumbnails)

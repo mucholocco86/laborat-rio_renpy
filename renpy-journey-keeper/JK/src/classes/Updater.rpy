@@ -35,9 +35,9 @@ init python in JK:
             
             if os.path.exists(self.download_path):
                 if renpy.store.persistent.JK_TriedUtterRestart:
-                    print("Found temp update file \"{}\" even after attempted reload. This shouldn't happen. Either the file is locked by another program or there is a bug in the update system.".format(self.download_path))
+                    print("O arquivo temporário de atualização \"{}\" continua presente após a tentativa de recarregar. Isso não deveria acontecer. Outro programa pode estar usando o arquivo ou pode haver uma falha no sistema de atualização.".format(self.download_path))
                 else:
-                    print("Found temp update file \"{}\". Attempting to update...".format(self.download_path))
+                    print("Arquivo temporário de atualização encontrado: \"{}\". Tentando atualizar...".format(self.download_path))
                     self.install_update()
                     self.pending_utter_restart = True
         
@@ -70,7 +70,7 @@ init python in JK:
             self.error = None
             renpy.restart_interaction()
             
-            print("Fetching metadata from: ", self.url)
+            print("Buscando metadados em: ", self.url)
             
             try:
                 request = _urllib_request.Request(self.url)
@@ -82,18 +82,18 @@ init python in JK:
             
             
             except _urllib_error.HTTPError as e:
-                print("HTTP error occurred while downloading update metadata: ", e)
-                self.error = "A HTTP error occurred while downloading update information: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro HTTP ao baixar os metadados da atualização: ", e)
+                self.error = "Ocorreu um erro HTTP ao baixar as informações da atualização: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             
             except _urllib_error.URLError as e:
-                print("URL error occurred while downloading update metadata: ", e)
-                self.error = "A URL error occurred while downloading update information: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro de URL ao baixar os metadados da atualização: ", e)
+                self.error = "Ocorreu um erro de URL ao baixar as informações da atualização: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             
             except Exception as e:
-                print("An error occurred while downloading update metadata: ", e)
-                self.error = "An unexpected error occurred while downloading update information: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro ao baixar os metadados da atualização: ", e)
+                self.error = "Ocorreu um erro inesperado ao baixar as informações da atualização: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             finally:
                 self.loading = False
@@ -118,7 +118,7 @@ init python in JK:
                 try:
                     path = os.path.realpath(self.mod_path)
                 except Exception as e:
-                    print("Error resolving symlink: ", e)
+                    print("Erro ao resolver o link simbólico: ", e)
             
             try:
                 shutil.move(self.download_path, path)
@@ -130,18 +130,18 @@ init python in JK:
                 error_message = "{color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
                 
                 if e.args[0] == 13:
-                    print("Unable to replace the .rpa file, Ren'Py or other program is blocking the file.")
+                    print("Não foi possível substituir o arquivo .rpa. O Ren’Py ou outro programa está usando o arquivo.")
                     renpy.store.persistent.JK_TriedUtterRestart = False
                     self.rpa_locked_exception = True
-                    self.error = "Unable to replace the .rpa file, Ren'Py or other program is blocking the file: {}".format(error_message)
+                    self.error = "Não foi possível substituir o arquivo .rpa. O Ren’Py ou outro programa está usando o arquivo: {}".format(error_message)
                 else:
-                    print("Error moving file: ", e)
-                    self.error = "An unexpected error occurred: {}".format(error_message)
+                    print("Erro ao mover o arquivo: ", e)
+                    self.error = "Ocorreu um erro inesperado: {}".format(error_message)
             
             self.installing = False
             renpy.restart_interaction()
             
-            renpy.notify("JK successfully updated to v" + MOD_VERSION)
+            renpy.notify("Journey Keeper atualizado com sucesso para a versão " + MOD_VERSION)
         
         def download_asset(self, release):
             release = release or self.latest
@@ -152,7 +152,7 @@ init python in JK:
             if os.path.exists(self.download_path):
                 os.unlink(self.download_path)
             
-            print("Downloadingn asset from: ", release.download_url)
+            print("Baixando arquivo de: ", release.download_url)
             try:
                 request = _urllib_request.Request(release.download_url)
                 request.add_header("Accept", "application/octet-stream")
@@ -162,24 +162,24 @@ init python in JK:
                 with open(self.download_path, "wb") as output_file:
                     output_file.write(response.read())
                 
-                print("Downloaded asset to: ", self.download_path)
+                print("Arquivo baixado para: ", self.download_path)
                 
                 return True
             
             
             except _urllib_error.HTTPError as e:
-                print("HTTP error occurred downloading/writing the asset: ", e)
-                self.error = "A HTTP error occurred while downloading/writing the asset: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro HTTP ao baixar ou gravar o arquivo: ", e)
+                self.error = "Ocorreu um erro HTTP ao baixar ou gravar o arquivo: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             
             except _urllib_error.URLError as e:
-                print("URL error occurred downloading/writing the asset: ", e)
-                self.error = "A URL error occurred while downloading/writing the asset: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro de URL ao baixar ou gravar o arquivo: ", e)
+                self.error = "Ocorreu um erro de URL ao baixar ou gravar o arquivo: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             
             except Exception as e:
-                print("An error occurred downloading/writing the asset: ", e)
-                self.error = "An unexpected error occurred while downloading/writing the asset: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
+                print("Ocorreu um erro ao baixar ou gravar o arquivo: ", e)
+                self.error = "Ocorreu um erro inesperado ao baixar ou gravar o arquivo: {color=[JK.Colors.error]}" + Utils.escape_renpy_reserved_characters(str(e)) + "{/color}"
             
             finally:
                 self.downloading = False
@@ -269,8 +269,8 @@ init python in JK:
         class DisableUpdatesAction(renpy.ui.Action):
             def __call__(self):
                 showConfirm(
-                    title="Disable updates",
-                    message="Do you really wish to disable automatic checking for the updates?\n{color=[JK.Colors.info]}You can re-enable it in the settings at any time.{/color}",
+                    title="Desativar atualizações",
+                    message="Deseja mesmo desativar a verificação automática de atualizações?\n{color=[JK.Colors.info]}Você pode reativá-la nas configurações quando quiser.{/color}",
                     yes=Settings.ToggleEnabledAction("updater"),
                     yes_icon="\ue888",
                     yes_color=Colors.error
@@ -300,6 +300,6 @@ init python in JK:
             from urllib import error as _urllib_error
         except Exception as e:
             UpdaterClass.unavailable = True
-            print("No urllib present. JK updater disabled")
+            print("urllib não está disponível. O atualizador foi desativado.")
             pass
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

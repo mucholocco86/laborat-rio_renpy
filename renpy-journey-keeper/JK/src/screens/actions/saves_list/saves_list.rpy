@@ -9,7 +9,7 @@ screen JK_SavesList(playthrough):
     default selection_mode = "PER_SAVE"
     default show_thumbnails = False
 
-    use JK_Dialog(title="Saves list", close_action=Hide("JK_SavesList")):
+    use JK_Dialog(title="Lista de salvamentos", close_action=Hide("JK_SavesList")):
         if len(view_model.all_saves) > 0:
             if view_model.processing:
                 use JK_SavesListProcessing(view_model)

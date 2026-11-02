@@ -105,9 +105,9 @@ screen JK_MoveCopySavesSelectSaves(view_model, saves_to_process, show_thumbnails
 
                 hbox
 
-                use JK_IconButton(text=view_model.source_playthrough.name, action=ClearSourcePlaythroughAction(), tt="Change source playthrough", color=JK.Colors.theme, size=30)
-                use JK_IconButton(text="→", action=FlipPlaythroughsAction(view_model.source_playthrough, view_model.destination_playthrough), tt="Swap playthroughs", color=JK.Colors.theme, size=30)
-                use JK_IconButton(text=view_model.destination_playthrough.name, action=ClearDestinationPlaythroughAction(), tt="Change target playthrough", color=JK.Colors.theme, size=30)
+                use JK_IconButton(text=view_model.source_playthrough.name, action=ClearSourcePlaythroughAction(), tt="Alterar jornada de origem", color=JK.Colors.theme, size=30)
+                use JK_IconButton(text="→", action=FlipPlaythroughsAction(view_model.source_playthrough, view_model.destination_playthrough), tt="Trocar jornadas", color=JK.Colors.theme, size=30)
+                use JK_IconButton(text=view_model.destination_playthrough.name, action=ClearDestinationPlaythroughAction(), tt="Alterar jornada de destino", color=JK.Colors.theme, size=30)
 
                 hbox
 
@@ -115,7 +115,7 @@ screen JK_MoveCopySavesSelectSaves(view_model, saves_to_process, show_thumbnails
                 xfill True
 
                 vbox xalign 1.0:
-                    use JK_Checkbox(checked=show_thumbnails, text="Show thumbnails\n{size=-5}(Might be laggy or outright crash){/size}", action=SetScreenVariable("show_thumbnails", not show_thumbnails))
+                    use JK_Checkbox(checked=show_thumbnails, text="Exibir miniaturas\n{size=-5}(Pode causar lentidão ou até travar o jogo){/size}", action=SetScreenVariable("show_thumbnails", not show_thumbnails))
 
             vbox:
                 spacing 2
@@ -172,7 +172,7 @@ screen JK_MoveCopySavesSelectSaves(view_model, saves_to_process, show_thumbnails
                                 add view_model.destination_instance.location.screenshot_including_inactive(save) size JK.Image.get_limited_image_size_with_preserved_aspect_ratio(100, 80)
 
                         hbox yalign 0.5:
-                            text "Conflict!" color (JK.Colors.warning if save in other_saves else "#ffffff00")
+                            text "Conflito!" color (JK.Colors.warning if save in other_saves else "#ffffff00")
 
 
     hbox:
@@ -180,22 +180,22 @@ screen JK_MoveCopySavesSelectSaves(view_model, saves_to_process, show_thumbnails
         yfill True
 
         vbox xalign 0.0:
-            text "{color=#abe9ff}click{/color} to select only one"
-            text "{color=#abe9ff}shift + click{/color} to select multiple"
-            text "{color=#abe9ff}ctrl + click{/color} or {color=#abe9ff}click the checkbox{/color} to select/deselect one"
+            text "{color=#abe9ff}clique{/color} para selecionar somente um item"
+            text "{color=#abe9ff}Shift + clique{/color} para selecionar vários itens"
+            text "{color=#abe9ff}Ctrl + clique{/color} ou {color=#abe9ff}clique na caixa{/color} para selecionar ou desmarcar um item"
 
         vbox:
             style_prefix "JK_dialog_action_buttons"
             vbox xalign 1.0:
 
                 hbox:
-                    use JK_IconButton(icon="\ue675", text="Move", action=JK.MoveCopySavesViewModel.StartProcessAction(view_model, saves_to_process, mode="MOVE"), disabled=len(saves_to_process) == 0)
+                    use JK_IconButton(icon="\ue675", text="Mover", action=JK.MoveCopySavesViewModel.StartProcessAction(view_model, saves_to_process, mode="MOVE"), disabled=len(saves_to_process) == 0)
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue161", text="Copy", action=JK.MoveCopySavesViewModel.StartProcessAction(view_model, saves_to_process), disabled=len(saves_to_process) == 0)
+                    use JK_IconButton(icon="\ue161", text="Copiar", action=JK.MoveCopySavesViewModel.StartProcessAction(view_model, saves_to_process), disabled=len(saves_to_process) == 0)
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="Close", action=Hide("JK_MoveCopySaves"))
+                    use JK_IconButton(icon="\ue5cd", text="Fechar", action=Hide("JK_MoveCopySaves"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

@@ -5,7 +5,7 @@ screen JK_MemoriesLibrary():
 
     default columns = 4
 
-    use JK_Dialog(title="Select a memory to play", close_action=Hide("JK_MemoriesLibrary")):
+    use JK_Dialog(title="Selecione uma memória para visualizar", close_action=Hide("JK_MemoriesLibrary")):
         style_prefix "JK"
 
         viewport:

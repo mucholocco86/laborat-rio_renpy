@@ -22,7 +22,7 @@ screen JK_ImportPlaythroughsSelectGame(view_model, search):
             xalign 0.5
 
             has vbox
-            add search_input.displayable(placeholder="Search")
+            add search_input.displayable(placeholder="Pesquisar")
             frame style "JK_default" background "#ffffff22" hover_background JK.Colors.hover ysize 2 offset JK.scaled((0, 2))
 
     viewport:
@@ -33,7 +33,7 @@ screen JK_ImportPlaythroughsSelectGame(view_model, search):
         pagekeys True
 
         has vbox
-        text "Found {} game(s)".format(len(view_model.games))
+        text "Jogos encontrados: {}".format(len(view_model.games))
 
         $ i = 0
         for game in get_filtered_games(view_model.games, search):

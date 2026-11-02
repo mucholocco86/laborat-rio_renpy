@@ -13,7 +13,7 @@ screen JK_ImportPlaythroughsConflict(view_model):
             $ i += 1
             vbox xalign 0.5:
                 hbox xalign 0.5:
-                    use JK_Title("Existing" if i == 1 else "New")
+                    use JK_Title("Existente" if i == 1 else "Novo")
 
                 use JK_YSpacer()
 
@@ -26,7 +26,7 @@ screen JK_ImportPlaythroughsConflict(view_model):
 
                 use JK_YSpacer(3)
 
-                text (playthrough.description or "(No description)") xalign 0.5 text_align 0.5
+                text (playthrough.description or "(Sem descrição)") xalign 0.5 text_align 0.5
 
                 use JK_YSpacer(3)
 
@@ -43,17 +43,17 @@ screen JK_ImportPlaythroughsConflict(view_model):
         vbox xalign 1.0:
 
             hbox:
-                use JK_IconButton(icon="\ue161", text="Overwrite", action=[Function(view_model.conflict_overwrite)], color=JK.Colors.danger)
+                use JK_IconButton(icon="\ue161", text="Sobrescrever", action=[Function(view_model.conflict_overwrite)], color=JK.Colors.danger)
 
 
             hbox:
-                use JK_IconButton(icon="\ue161", text="Keep both", action=[Function(view_model.conflict_keep_both)])
+                use JK_IconButton(icon="\ue161", text="Manter ambas", action=[Function(view_model.conflict_keep_both)])
 
 
             hbox:
-                use JK_IconButton(icon="\ue044", text="Skip", action=[Function(view_model.conflict_skip)])
+                use JK_IconButton(icon="\ue044", text="Pular", action=[Function(view_model.conflict_skip)])
 
 
             hbox:
-                use JK_IconButton(icon="\ue5cd", text="Abort", action=Hide("JK_ImportPlaythroughs"))
+                use JK_IconButton(icon="\ue5cd", text="Cancelar operação", action=Hide("JK_ImportPlaythroughs"))
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

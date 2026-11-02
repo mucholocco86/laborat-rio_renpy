@@ -1,6 +1,6 @@
 screen JK_AutosaveOverwriteConfirm():
-    default title = "Are you sure you want to overwrite your save?"
-    default message = "By choosing \"No & disable autosave\", the autosave feature will disabled until you re-enable it again."
+    default title = "Tem certeza de que deseja sobrescrever este salvamento?"
+    default message = "Ao escolher “Não e desativar salvamento automático”, o recurso ficará desativado até você ativá-lo novamente."
 
     layer "JK_Overlay"
     style_prefix 'JK'
@@ -25,17 +25,17 @@ screen JK_AutosaveOverwriteConfirm():
             vbox:
 
                 hbox:
-                    use JK_IconButton(icon="\ue161", text="Overwrite", action=[JK.Autosaver.ConfirmDialogSaveAction(), JK.Autosaver.ConfirmDialogCloseAction(), Hide("JK_AutosaveOverwriteConfirm")], color=JK.Colors.danger)
+                    use JK_IconButton(icon="\ue161", text="Sobrescrever", action=[JK.Autosaver.ConfirmDialogSaveAction(), JK.Autosaver.ConfirmDialogCloseAction(), Hide("JK_AutosaveOverwriteConfirm")], color=JK.Colors.danger)
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue3cd", text="Save one over", action=[JK.Autosaver.MoveOneSlotOverAction(), Hide("JK_AutosaveOverwriteConfirm"), JK.Autosaver.TrySavePendingSaveAction()])
+                    use JK_IconButton(icon="\ue3cd", text="Salvar no próximo slot", action=[JK.Autosaver.MoveOneSlotOverAction(), Hide("JK_AutosaveOverwriteConfirm"), JK.Autosaver.TrySavePendingSaveAction()])
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue044", text="Skip this time", action=[JK.Autosaver.ConfirmDialogCloseAction(), Hide("JK_AutosaveOverwriteConfirm")])
+                    use JK_IconButton(icon="\ue044", text="Pular desta vez", action=[JK.Autosaver.ConfirmDialogCloseAction(), Hide("JK_AutosaveOverwriteConfirm")])
 
 
                 hbox:
-                    use JK_IconButton(icon="\ue5cd", text="No & disable autosave", action=[JK.Playthroughs.ToggleAutosaveOnChoicesForActiveAction(), JK.Autosaver.ConfirmDialogCloseAction(), Hide("JK_AutosaveOverwriteConfirm")])
+                    use JK_IconButton(icon="\ue5cd", text="Não e desativar salvamento automático", action=[JK.Playthroughs.ToggleAutosaveOnChoicesForActiveAction(), JK.Autosaver.ConfirmDialogCloseAction(), Hide("JK_AutosaveOverwriteConfirm")])
 # Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc

@@ -120,7 +120,7 @@ init -9999 python in JK:
                 for i in range(0, len(target_locations)):
                     source_location = source_locations[i]
                     if not source_location:
-                        raise Exception("Source location not found")
+                        raise Exception("Local de origem não encontrado")
                     
                     target_location = target_locations[i]
                     if target_location and os.path.exists(target_location.directory):

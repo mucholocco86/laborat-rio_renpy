@@ -8,7 +8,7 @@ screen JK_ChoicesTimeline(playthrough):
 
     default view_model = JK.ChoicesTimelineViewModel(playthrough)
 
-    use JK_Dialog(title="Choices timeline", close_action=Hide("JK_ChoicesTimeline")):
+    use JK_Dialog(title="Linha do tempo de escolhas", close_action=Hide("JK_ChoicesTimeline")):
         if view_model.loading:
             use JK_ChoicesTimelineLoading(view_model)
         elif view_model.error:

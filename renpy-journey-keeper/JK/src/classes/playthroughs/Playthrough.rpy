@@ -173,7 +173,7 @@ init python in JK:
         
         @staticmethod
         def create_native():
-            return PlaythroughClass(id=1, directory="", name="Native", autosaveOnChoices=False, useChoiceLabelAsSaveName=False)
+            return PlaythroughClass(id=1, directory="", name="Nativo", autosaveOnChoices=False, useChoiceLabelAsSaveName=False)
         
         @staticmethod
         def create_memories():

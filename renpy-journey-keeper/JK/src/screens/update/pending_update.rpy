@@ -3,7 +3,7 @@ screen JK_PendingUpdate(release):
     style_prefix 'JK'
     modal True
 
-    use JK_Dialog(title="[JK.MOD_NAME] - Update found", message="{color=[JK.Colors.theme]}{b}v" + release.version + "{/b}{/color}\n{size=-4}{color=[JK.Colors.text_light]}(current: [JK.MOD_VERSION]){/color}{/size}", close_action=Hide("JK_PendingUpdate")):
+    use JK_Dialog(title="[JK.MOD_NAME] - Atualização encontrada", message="{color=[JK.Colors.theme]}{b}v" + release.version + "{/b}{/color}\n{size=-4}{color=[JK.Colors.text_light]}(versão atual: [JK.MOD_VERSION]){/color}{/size}", close_action=Hide("JK_PendingUpdate")):
         if JK.Updater.downloading:
             use JK_PendingUpdateDownloading()
         elif JK.Updater.installing:
