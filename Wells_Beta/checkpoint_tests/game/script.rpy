@@ -99,8 +99,8 @@ label start:
         $ wells_test_payload = _wells_tracker_read_json(wells_test_checkpoint_file)
         $ wells_test_expect(wells_test_payload.get("version") == WELLS_TRACKER_VERSION, "Restart fixture checkpoint version is invalid: {!r}".format(wells_test_payload))
         $ wells_test_expect(wells_test_payload.get("checkpoint_image"), "Restart fixture checkpoint has no image anchor: {!r}".format(wells_test_payload))
-        $ wells_test_expect(isinstance(wells_test_payload.get("choices"), list), "Restart fixture choices are invalid: {!r}".format(wells_test_payload))
-        $ wells_test_expect(isinstance(wells_test_payload.get("variables"), dict), "Restart fixture variables are invalid: {!r}".format(wells_test_payload))
+        $ wells_test_expect(hasattr(wells_test_payload.get("choices"), "__getitem__") and not hasattr(wells_test_payload.get("choices"), "keys"), "Restart fixture choices are invalid: {!r}".format(wells_test_payload))
+        $ wells_test_expect(hasattr(wells_test_payload.get("variables"), "items"), "Restart fixture variables are invalid: {!r}".format(wells_test_payload))
         $ evRel = -1
         $ kaRel = -1
         $ active_patch = False
