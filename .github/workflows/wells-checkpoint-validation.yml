@@ -175,7 +175,19 @@ jobs:
           fi
           if [ "$baseline_status" -eq 0 ] && [ "$injected_status" -eq 0 ]; then
             echo "Lint passed before and after the module injection."
-          else
-            echo "Baseline game lint already failed; this game's comparison is inconclusive."
+          elif [ "$baseline_status" -ne 0 ] && [ "$injected_status" -ne 0 ]; then
+            sed "s|$baseline|GAME_ROOT|g" "$RUNNER_TEMP/baseline-lint.log" > "$RUNNER_TEMP/baseline-normalized.log"
+            sed "s|$injected|GAME_ROOT|g" "$RUNNER_TEMP/injected-lint.log" > "$RUNNER_TEMP/injected-normalized.log"
+            if ! diff -u "$RUNNER_TEMP/baseline-normalized.log" "$RUNNER_TEMP/injected-normalized.log" > "$RUNNER_TEMP/lint-diff.log"; then
+              echo "The injected modules changed the lint diagnostics in a game whose baseline already fails."
+              cat "$RUNNER_TEMP/lint-diff.log"
+              exit 1
+            fi
+            echo "Baseline lint fails, and module injection adds no lint diagnostics."
             tail -n 30 "$RUNNER_TEMP/baseline-lint.log"
+          else
+            echo "The injected modules changed the lint exit status."
+            tail -n 50 "$RUNNER_TEMP/baseline-lint.log"
+            tail -n 50 "$RUNNER_TEMP/injected-lint.log"
+            exit 1
           fi
