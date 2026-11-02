@@ -67,7 +67,7 @@ init python in JK:
         def _paginate_seamlessly(self, selected_page, visible_pages=9):
             half_visible = visible_pages // 2
             
-            start_page = max(1, selected_page - half_visible)
+            start_page = renpy.store.JK.PY_MAXIMUM(1, selected_page - half_visible)
             end_page = start_page + visible_pages - 1
             
             return list(range(start_page, end_page + 1))

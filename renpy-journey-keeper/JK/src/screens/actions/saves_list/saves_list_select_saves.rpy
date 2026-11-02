@@ -157,37 +157,12 @@ screen JK_SavesListSelectSaves(playthrough, view_model, hovered_button, last_sel
         if view_model.saves_per_page:
             hbox xalign 0.5 yalign 0.5:
                 hbox yalign 0.5:
-                    $ prev_jump_page = max(view_model.current_page - 10, 0)
+                    $ prev_jump_page = renpy.store.JK.PY_MAXIMUM(view_model.current_page - 10, 0)
                     use JK_IconButton(icon="\ueac3", action=SetField(view_model, "current_page", prev_jump_page), tt=str(prev_jump_page + 1), disabled=view_model.current_page < 1)
                     use JK_IconButton(icon="\ue5cb", action=SetField(view_model, "current_page", view_model.current_page - 1), disabled=view_model.current_page < 1)
 
                 hbox yalign 0.5:
-                    python:
-                        def paginate(selected_page, total_pages):
-                            visible_pages=10
-                            offset = selected_page // (visible_pages - 1)
-                            
-                            start_page = max(0, offset * (visible_pages - 1))
-                            end_page = min(start_page + visible_pages - 1, total_pages)
-                            
-                            return list(range(start_page, end_page))
-
-                        def paginate_seamlessly(selected_page, total_pages):
-                            visible_pages = 9
-                            half_visible = visible_pages // 2
-                            
-                            
-                            start_page = max(0, selected_page - half_visible)
-                            end_page = start_page + visible_pages - 1
-                            
-                            
-                            if end_page >= total_pages:
-                                end_page = total_pages - 1
-                                start_page = max(0, end_page - visible_pages + 1)
-                            
-                            return list(range(start_page, end_page + 1))
-
-                    for page in (paginate_seamlessly(view_model.current_page, len(view_model.pages)) if JK.Settings.seamlessPagination else paginate(view_model.current_page, len(view_model.pages))):
+                    for page in JK.SavesListViewModel.get_visible_pages(view_model.current_page, len(view_model.pages), JK.Settings.seamlessPagination):
                         button:
                             style_prefix ("JK_PaginationButton_active" if page == view_model.current_page else "JK_PaginationButton")
                             text str(page + 1) yalign 0.5
@@ -196,7 +171,7 @@ screen JK_SavesListSelectSaves(playthrough, view_model, hovered_button, last_sel
                 hbox yalign 0.5:
                     use JK_IconButton(icon="\ue5cc", action=SetField(view_model, "current_page", view_model.current_page + 1), disabled=view_model.current_page == len(view_model.pages) - 1)
 
-                    $ next_jump_page = min(view_model.current_page + (10 if view_model.current_page > 0 else 9), len(view_model.pages) - 1)
+                    $ next_jump_page = renpy.store.JK.PY_MINIMUM(view_model.current_page + (10 if view_model.current_page > 0 else 9), len(view_model.pages) - 1)
                     use JK_IconButton(icon="\ueac9", action=SetField(view_model, "current_page", next_jump_page), tt=str(next_jump_page + 1), disabled=view_model.current_page == len(view_model.pages) - 1)
 
         hbox:

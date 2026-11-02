@@ -30,6 +30,26 @@ init python in JK:
             
             self.load_saves()
         
+        @staticmethod
+        def get_visible_pages(selected_page, total_pages, seamless):
+            if seamless:
+                visible_pages = 9
+                half_visible = visible_pages // 2
+                start_page = renpy.store.JK.PY_MAXIMUM(0, selected_page - half_visible)
+                end_page = start_page + visible_pages - 1
+
+                if end_page >= total_pages:
+                    end_page = total_pages - 1
+                    start_page = renpy.store.JK.PY_MAXIMUM(0, end_page - visible_pages + 1)
+
+                return list(range(start_page, end_page + 1))
+
+            visible_pages = 10
+            offset = selected_page // (visible_pages - 1)
+            start_page = renpy.store.JK.PY_MAXIMUM(0, offset * (visible_pages - 1))
+            end_page = renpy.store.JK.PY_MINIMUM(start_page + visible_pages - 1, total_pages)
+            return list(range(start_page, end_page))
+
         def load_saves(self):
             SaveSystem.multilocation.scan()
             
@@ -164,7 +184,7 @@ init python in JK:
                     
                     if start_index > -1 and end_index > -1:
                         new_saves = []
-                        for save in self.all_saves[min(start_index, end_index):max(start_index, end_index) + 1]:
+                        for save in self.all_saves[renpy.store.JK.PY_MINIMUM(start_index, end_index):renpy.store.JK.PY_MAXIMUM(start_index, end_index) + 1]:
                             if save in new_saves:
                                 new_saves.remove((save, directory))
                             else:

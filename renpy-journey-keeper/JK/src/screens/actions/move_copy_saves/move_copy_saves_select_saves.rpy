@@ -78,7 +78,7 @@ screen JK_MoveCopySavesSelectSaves(view_model, saves_to_process, show_thumbnails
                         if start_index > -1 and end_index > -1:
                             new_saves = []
                             
-                            for self.save in self.view_model.source_saves[min(start_index, end_index):max(start_index, end_index) + 1]:
+                            for self.save in self.view_model.source_saves[renpy.store.JK.PY_MINIMUM(start_index, end_index):renpy.store.JK.PY_MAXIMUM(start_index, end_index) + 1]:
                                 if self.save in new_saves:
                                     new_saves.remove(self.save)
                                 else:

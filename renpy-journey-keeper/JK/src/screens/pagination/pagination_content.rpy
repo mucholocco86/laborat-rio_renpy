@@ -41,10 +41,10 @@ screen JK_PaginationContent(content):
 
 
             if "BIG_JUMP" in content:
-                use JK_IconButton(icon="\ueac3", action=FilePage(max(currentPage - 10, 1)), tt=str(max(currentPage - 10, 1)), disabled=currentPage < 2)
+                use JK_IconButton(icon="\ueac3", action=FilePage(renpy.store.JK.PY_MAXIMUM(currentPage - 10, 1)), tt=str(renpy.store.JK.PY_MAXIMUM(currentPage - 10, 1)), disabled=currentPage < 2)
 
 
-            use JK_IconButton(icon="\ue5cb", action=FilePage(max(currentPage - 1, 1)), disabled=currentPage < 2)
+            use JK_IconButton(icon="\ue5cb", action=FilePage(renpy.store.JK.PY_MAXIMUM(currentPage - 1, 1)), disabled=currentPage < 2)
 
 
         if "PAGE_NUMBERS" in content:

@@ -170,7 +170,7 @@ init python in JK:
                     
                     if start_index > -1 and end_index > -1:
                         new_playthroughs = []
-                        for playthrough in self.view_model.playthroughs[min(start_index, end_index):max(start_index, end_index) + 1]:
+                        for playthrough in self.view_model.playthroughs[renpy.store.JK.PY_MINIMUM(start_index, end_index):renpy.store.JK.PY_MAXIMUM(start_index, end_index) + 1]:
                             if playthrough in new_playthroughs:
                                 new_playthroughs.remove(playthrough)
                             else:

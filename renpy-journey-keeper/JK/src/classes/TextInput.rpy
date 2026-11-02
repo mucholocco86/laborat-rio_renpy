@@ -121,8 +121,8 @@ init python in JK:
             return Action(self)
         
         def get_selection_start_end(self):
-            start = min(self.selection_start, self.caret_pos)
-            end = max(self.selection_start, self.caret_pos)
+            start = renpy.store.JK.PY_MINIMUM(self.selection_start, self.caret_pos)
+            end = renpy.store.JK.PY_MAXIMUM(self.selection_start, self.caret_pos)
             
             return start, end
         
@@ -307,7 +307,7 @@ init python in JK:
                         start, end = item.span()
                         space_pos = end
                         break
-                    self.controller.caret_pos = min(space_pos + self.controller.caret_pos + 1, l)
+                    self.controller.caret_pos = renpy.store.JK.PY_MINIMUM(space_pos + self.controller.caret_pos + 1, l)
                     self.update_text(self.content)
                 
                 renpy.display.render.redraw(self, 0)
@@ -328,7 +328,7 @@ init python in JK:
                 
                 
                 prev_line = lines[current_line_idx - 1]
-                new_column = min(len(prev_line.rstrip()), current_column)  
+                new_column = renpy.store.JK.PY_MINIMUM(len(prev_line.rstrip()), current_column)
                 
                 
                 new_caret_pos = sum(len(line) for line in lines[:current_line_idx - 1]) + new_column
@@ -355,7 +355,7 @@ init python in JK:
                 
                 
                 next_line = lines[current_line_idx + 1]
-                new_column = min(len(next_line.rstrip()), current_column)  
+                new_column = renpy.store.JK.PY_MINIMUM(len(next_line.rstrip()), current_column)
                 
                 
                 new_caret_pos = sum(len(line) for line in lines[:current_line_idx + 1]) + new_column
@@ -678,8 +678,8 @@ init python in JK:
                     if selection_start is None:
                         selection_start = caret_pos
                     
-                    start = min(selection_start, caret_pos)
-                    end = max(selection_start, caret_pos)
+                    start = renpy.store.JK.PY_MINIMUM(selection_start, caret_pos)
+                    end = renpy.store.JK.PY_MAXIMUM(selection_start, caret_pos)
                     
                     selection_start_tag = "{color=#ff0}{u}"
                     selection_end_tag = "{/color}{/u}"

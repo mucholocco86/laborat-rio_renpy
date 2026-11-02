@@ -238,10 +238,10 @@ init -1 python in JK:
                 new_value = current_value + self.amount
                 
                 if self.min:
-                    new_value = max(self.min, new_value)
+                    new_value = renpy.store.JK.PY_MAXIMUM(self.min, new_value)
                 
                 if self.max:
-                    new_value = min(self.max, new_value)
+                    new_value = renpy.store.JK.PY_MINIMUM(self.max, new_value)
                 
                 Settings.SetAction(self.attr_name, new_value)()
         
@@ -278,7 +278,7 @@ init -1 python in JK:
                 if renpy.store.persistent.JK_SizeAdjustmentRollbackValue is None:
                     renpy.store.persistent.JK_SizeAdjustmentRollbackValue = int(Settings.sizeAdjustment)
                 
-                Settings.sizeAdjustment = min(Settings.sizeAdjustment + 1, 100)
+                Settings.sizeAdjustment = renpy.store.JK.PY_MINIMUM(Settings.sizeAdjustment + 1, 100)
                 Settings.save()
                 renpy.restart_interaction()
                 
@@ -290,7 +290,7 @@ init -1 python in JK:
                 if renpy.store.persistent.JK_SizeAdjustmentRollbackValue is None:
                     renpy.store.persistent.JK_SizeAdjustmentRollbackValue = int(Settings.sizeAdjustment)
                 
-                Settings.sizeAdjustment = max(Settings.sizeAdjustment - 1, -100)
+                Settings.sizeAdjustment = renpy.store.JK.PY_MAXIMUM(Settings.sizeAdjustment - 1, -100)
                 Settings.save()
                 renpy.restart_interaction()
                 

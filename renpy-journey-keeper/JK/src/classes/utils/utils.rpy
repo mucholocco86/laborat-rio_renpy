@@ -222,7 +222,7 @@ init -9999 python in JK:
             height_scaling = float(desired_height) / float(original_height)
             
             
-            scaling_factor = min(width_scaling, height_scaling)
+            scaling_factor = renpy.store.JK.PY_MINIMUM(width_scaling, height_scaling)
             
             
             new_width = original_width * scaling_factor
@@ -530,10 +530,10 @@ init -9999 python in JK:
                 )
             
             if not self.allow_offscreen:
-                new_x = max(draggable_pos[0], 0)
-                new_x = min(new_x, int(renpy.config.screen_width - window_size[0]))
-                new_y = max(draggable_pos[1], 0)
-                new_y = min(new_y, int(renpy.config.screen_height - window_size[1]))
+                new_x = renpy.store.JK.PY_MAXIMUM(draggable_pos[0], 0)
+                new_x = renpy.store.JK.PY_MINIMUM(new_x, int(renpy.config.screen_width - window_size[0]))
+                new_y = renpy.store.JK.PY_MAXIMUM(draggable_pos[1], 0)
+                new_y = renpy.store.JK.PY_MINIMUM(new_y, int(renpy.config.screen_height - window_size[1]))
             
             drag.snap(int(new_x), int(new_y))
 
@@ -547,7 +547,7 @@ init -9999 python in JK:
             rv = int(value * (renpy.config.screen_height / 1080.0)) + Settings.sizeAdjustment
             
             if min_value:
-                return max(min_value, rv)
+                return renpy.store.JK.PY_MAXIMUM(min_value, rv)
             
             return rv
         
