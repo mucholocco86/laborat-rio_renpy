@@ -418,6 +418,7 @@ init -100 python:
         replay = getattr(store, "wells_tracker_replay", None)
         if hasattr(store, "wells_test_replay_debug"):
             store.wells_test_replay_debug = {
+                "previous": getattr(store, "wells_test_replay_debug", None),
                 "finished_with": message,
                 "cursor": replay.get("cursor") if isinstance(replay, dict) else None,
                 "choice_count": len(replay.get("choices", [])) if isinstance(replay, dict) else None,
