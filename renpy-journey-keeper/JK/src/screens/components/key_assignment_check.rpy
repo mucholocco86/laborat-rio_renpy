@@ -1,0 +1,22 @@
+screen JK_KeyAssignmentCheck(assignment):
+    python:
+        conflicts = []
+
+        for key in renpy.config.keymap:
+            item = renpy.config.keymap[key]
+            
+            if item and assignment in item:
+                
+                conflicts.append(key)
+
+    if len(conflicts) > 0:
+        vbox:
+            text "Conflicting mapping(s):" color JK.Colors.warning
+
+            hbox:
+                hbox xsize 20
+
+                vbox:
+                    for conflict in conflicts:
+                        text conflict
+# Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc
