@@ -102,7 +102,17 @@ testcase wells_checkpoint_rebuild:
         wells_test_payload = _wells_tracker_read_json(wells_test_records[0]["filename"])
         wells_test_original_skip_unseen = renpy.game.preferences.skip_unseen
         wells_test_original_skip_after_choices = renpy.game.preferences.skip_after_choices
-        _wells_tracker_write_pending(wells_test_records[0]["filename"])
+        wells_test_restart_args = None
+        try:
+            wells_tracker_request_load(wells_test_records[0]["filename"])
+        except renpy.game.FullRestartException as wells_test_restart:
+            wells_test_restart_args = wells_test_restart.args[0]
+        wells_test_expect(
+            wells_test_restart_args is not None
+            and wells_test_restart_args[1] == "_wells_tracker_bootstrap"
+            and wells_test_restart_args[2] == "_main_menu",
+            "Checkpoint load did not request the bootstrap restart: {!r}".format(wells_test_restart_args),
+        )
         wells_test_expect(os.path.isfile(WELLS_TRACKER_PENDING), "Checkpoint request did not leave a pending-load marker")
         with io.open(WELLS_TRACKER_PENDING, "r", encoding="utf-8") as wells_test_pending_stream:
             wells_test_expect(wells_test_pending_stream.read().strip() == wells_test_records[0]["filename"], "Pending-load marker has the wrong checkpoint")
