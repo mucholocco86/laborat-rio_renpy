@@ -8,7 +8,6 @@ init -1 python in JK:
 init python in JK:
     _constant = True
 
-    Updater = UpdaterClass()
     SaveSystem = SaveSystemClass()
     Playthroughs = PlaythroughsClass()
     Autosaver = AutosaverClass()

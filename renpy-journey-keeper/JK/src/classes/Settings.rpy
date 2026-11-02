@@ -58,9 +58,8 @@ init -1 python in JK:
             self.debugEnabled = data.get("debugEnabled", False)
             self.pageFollowsQuickSave = data.get("pageFollowsQuickSave", True)
             self.pageFollowsAutoSave = data.get("pageFollowsAutoSave", True)
-            self.updaterEnabled = data.get("updaterEnabled", True)
-            self.autoUpdateWithoutPrompt = data.get("autoUpdateWithoutPrompt", False)
-            self.globalizedSettings = data.get("globalizedSettings", [])
+            removed_update_settings = {"updaterEnabled", "autoUpdateWithoutPrompt", "noUpdatePrompt"}
+            self.globalizedSettings = [setting for setting in data.get("globalizedSettings", []) if setting not in removed_update_settings]
             self.autosaveOnSingletonChoice = data.get("autosaveOnSingletonChoice", False)
             self.playthroughTemplate = data.get("playthroughTemplate", None)
             self.preventAutosavingWhileNotInGame = data.get("preventAutosavingWhileNotInGame", True)
@@ -74,7 +73,6 @@ init -1 python in JK:
             self.sidepanelOpacity = data.get("sidepanelOpacity", 0.8)
             self.paginationOpacity = data.get("paginationOpacity", 0.9)
             self.preventAutosaveModifierKey = data.get("preventAutosaveModifierKey", "ALT")
-            self.noUpdatePrompt = data.get("noUpdatePrompt", False)
             self.autosaveOnNormalButtonsWithJump = data.get("autosaveOnNormalButtonsWithJump", False)
             self.playthroughsViewMode = data.get("playthroughsViewMode", "grid")
             self.paginationQuickSaves = data.get("paginationQuickSaves", True)
@@ -127,7 +125,6 @@ init -1 python in JK:
                 'sidepanelOpacity': self.sidepanelOpacity,
                 'paginationOpacity': self.paginationOpacity,
                 'preventAutosaveModifierKey': self.preventAutosaveModifierKey,
-                'noUpdatePrompt': self.noUpdatePrompt,
                 'autosaveOnNormalButtonsWithJump': self.autosaveOnNormalButtonsWithJump,
                 'playthroughsViewMode': self.playthroughsViewMode,
                 'paginationQuickSaves': self.paginationQuickSaves,
@@ -144,8 +141,6 @@ init -1 python in JK:
                 return {}
             
             new_settings = {
-                'updaterEnabled': self.updaterEnabled,
-                'autoUpdateWithoutPrompt': self.autoUpdateWithoutPrompt,
                 'globalizedSettings': self.globalizedSettings,
             }
             
@@ -157,8 +152,6 @@ init -1 python in JK:
         
         def get_global_settings_as_json(self):
             settings = {
-                'updaterEnabled': self.updaterEnabled,
-                'autoUpdateWithoutPrompt': self.autoUpdateWithoutPrompt,
                 'globalizedSettings': self.globalizedSettings,
             }
             

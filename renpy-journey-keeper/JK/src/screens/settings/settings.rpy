@@ -22,7 +22,6 @@ screen JK_Settings(section="ACCESSIBILITY"):
             
             ("SAVE_LOAD", "\ue0e0", "Salvar/Carregar"),
             ("CUSTOMIZATION", "\ue40a", "Personalização"),
-            ("UPDATES", "\ue8d7", "Atualizações"),
         ]
 
         if renpy.config.developer:
@@ -84,8 +83,6 @@ screen JK_Settings(section="ACCESSIBILITY"):
                 use JK_Settings_Memories()
             elif active_section == "SAVE_LOAD":
                 use JK_Settings_LoadSave()
-            elif active_section == "UPDATES":
-                use JK_Settings_Updates()
             elif active_section == "CUSTOMIZATION":
                 use JK_Settings_Customization()
 
