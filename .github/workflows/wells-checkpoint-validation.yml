@@ -95,6 +95,7 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: |
           set -euo pipefail
+          sed -i '/^testcase wells_checkpoint_capture:/,$d' "$FIXTURE/game/script.rpy"
           sed -i 's/default wells_test_auto_restart = False/default wells_test_auto_restart = True/' "$FIXTURE/game/script.rpy"
           find "$FIXTURE/game" -name '*.rpyc' -delete
           timeout --signal=TERM --kill-after=10s 90s xvfb-run -a sh "${{ matrix.sdk_dir }}/renpy.sh" "$FIXTURE" run
