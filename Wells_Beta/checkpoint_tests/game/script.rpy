@@ -100,7 +100,7 @@ label start:
         $ kaRel = -1
         $ active_patch = False
         $ wells_tracker_request_load(wells_test_checkpoint_file)
-        "Checkpoint load returned without restarting."
+        $ renpy.quit()
     # Keep the test game in a stable interaction instead of bouncing back to
     # the main menu while Ren'Py's test runner drives the fixture.
     pause 3600
