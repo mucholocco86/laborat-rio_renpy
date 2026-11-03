@@ -1,6 +1,6 @@
-# 51 — Snapshots do diff: escalares versus containers mutados in-place
+# 51 — Snapshots: diffs rasos, containers e edição comparativa
 
-**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) e [40677490829 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829) e [40677934414 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677934414) e [40678157016 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40678157016).
+**Data:** 2026-10-28. **SDK:** Ren'Py 7.4.11. **Evidência:** runtime com a API `Snapshots` original em jogo descartável. **Run inicial:** [40658456177 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40658456177). **Ampliações:** [40676323550 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676323550) e [40676920686 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40676920686) e [40677490829 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677490829) e [40677934414 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40677934414) e [40678157016 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/40678157016) e [41568691062 — SUCCESS](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41568691062).
 
 ## Pergunta
 
@@ -95,6 +95,25 @@ URM_SNAPSHOT_PROBE_NONE_VS_ABSENT (None, None, 'unknown', 'unknown', True, False
 
 A tupla registra valores antigo/novo, tipos antigo/novo e a presença da chave nos dicionários antigo/novo. O diff distinguiu a mudança de presença e listou a variável, mas os dois objetos `Var` retornaram valor `None` e tipo `unknown`. A tela usa `getButtonValue()`, que para tipo desconhecido exibe o próprio rótulo do tipo; assim, as duas colunas não comunicam visualmente que uma chave existia com valor `None` e a outra estava ausente. Essa conclusão combina o resultado runtime com a implementação da fonte; a renderização de tela não foi automatizada.
 
+### Ampliação runtime: semântica de diff de listas e dicionários internos
+
+O run [41568691062](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41568691062) chamou diretamente as rotinas originais:
+
+~~~text
+URM_SNAPSHOT_PROBE_LIST_ORDER_DUPLICATES []
+URM_SNAPSHOT_PROBE_LIST_COUNT_DIFF [{'type': 'Added', 'val': 3}]
+URM_SNAPSHOT_PROBE_LIST_UNHASHABLE ('TypeError', "unhashable type: 'RevertableList'")
+URM_SNAPSHOT_PROBE_DICT_KEYS [('added', None, 3), ('removed', 2, None)]
+URM_SNAPSHOT_PROBE_DICT_NESTED_VALUE [('nested', {'a': 1}, {'a': 2})]
+~~~
+
+Resultados delimitados:
+
+- `findListChanges` converte ambas as listas para `set`. Reordenar elementos ou mudar apenas sua multiplicidade não gera diferenças; elementos repetidos colapsam.
+- Uma lista contendo outro objeto não hashable (no teste, `RevertableList`) levanta `TypeError`. A tela chama essa rotina ao abrir a comparação de itens da lista; o teste confirmou a exceção na API, não automatizou a abertura/erro visual da screen.
+- `findDictChanges` produz uma linha por chave adicionada, removida ou cujo valor é diferente. No resultado, chave adicionada tem valor antigo `None`; removida tem valor novo `None`.
+- Um valor aninhado do tipo dict aparece como uma diferença de valor do nível atual. A rotina não faz recursão por conta própria: a comparação interna é um passo para o nível fornecido. A screen de comparação de dict mostra botões de valor que abrem `URM_modify_value`; nesta análise não foi encontrado botão de navegação recursiva nessa tabela.
+
 ## Conclusões e classificação
 
 - **OBSERVADO EM RUNTIME:** `Snapshots.findChanges()` detectou a substituição escalar 10→20.
@@ -106,6 +125,7 @@ A tupla registra valores antigo/novo, tipos antigo/novo e a presença da chave n
 - **OBSERVADO EM RUNTIME:** variáveis adicionadas/removidas aparecem com os lados ausentes como `None`; o objeto atual de uma variável removida não a recria via `setValue`, enquanto o lado atual de uma variável adicionada pode ser editado.
 - **OBSERVADO EM RUNTIME:** em comparação entre dois snapshots, os objetos `Var` dos dois lados são somente leitura, valores das chaves preservadas são distintos e chaves ausentes são representadas por `None`.
 - **OBSERVADO EM RUNTIME:** uma chave cujo valor armazenado era `None` e depois foi removida aparece como `None/unknown` nos dois lados; a presença difere nos dicionários, mas não é exposta pelo objeto `Var.value`/tipo.
+- **OBSERVADO EM RUNTIME:** o diff de listas ignora ordem e multiplicidade e lança `TypeError` para elemento `RevertableList` não hashable; diff de dicionário reporta chaves e valores diferentes no nível recebido.
 - **NÃO TESTADO:** igualdade de containers complexos/customizados; mutações concorrentes ou efeitos colaterais em `__eq__`; integração com os menus originais de snapshots. A persistência nativa da instância foi testada depois no doc 53.
 
 ## Execução inválida anterior
