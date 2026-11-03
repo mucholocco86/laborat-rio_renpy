@@ -13,7 +13,7 @@ init python:
         new_var = x52URM.Var("urm_snapshot_probe_ui_list", {"urm_snapshot_probe_ui_list": new_list})
         displayable = renpy.display.screen.ScreenDisplayable(
             screen, "urm_snapshot_probe_list_compare", layer, {},
-            {"compareVar": {"old": old_var, "new": new_var}}
+            {"_args": (), "_kwargs": {"compareVar": {"old": old_var, "new": new_var}}}
         )
         try:
             displayable.update()
