@@ -114,6 +114,16 @@ Resultados delimitados:
 - `findDictChanges` produz uma linha por chave adicionada, removida ou cujo valor é diferente. No resultado, chave adicionada tem valor antigo `None`; removida tem valor novo `None`.
 - Um valor aninhado do tipo dict aparece como uma diferença de valor do nível atual. A rotina não faz recursão por conta própria: a comparação interna é um passo para o nível fornecido. A screen de comparação de dict mostra botões de valor que abrem `URM_modify_value`; nesta análise não foi encontrado botão de navegação recursiva nessa tabela.
 
+### Ampliação: erro de elemento não hashable ao construir a tela de comparação
+
+A inspeção da fonte original `screens/snapshots.rpy.x52` (blob `5766c7f74987738de8d14cbe407f66e8c49b9871`) mostra que `URM_snapshots_listCompare(compareVar)` calcula `listChanges` como valor `default`, chamando `Snapshots.findListChanges(compareVar['old'].value, compareVar['new'].value)` antes de montar o conteúdo visual. Assim, para elementos não hashable, a exceção da rotina ocorre durante a construção/atualização da screen.
+
+No run [41652184534](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41652184534), a fixture chamou diretamente `ScreenDisplayable.update()` para essa screen com listas contendo `RevertableList`. O log confirmou `URM_SNAPSHOT_PROBE_LIST_SCREEN_BUILD ('TypeError', "unhashable type: 'RevertableList'")`. O job terminou **FAILURE**: depois de capturar a exceção, o harness chamou novas interações com a pilha interna de UI ainda aberta, e Ren'Py reportou `ui.interact called with non-empty widget/layer stack`.
+
+A implementação do SDK 7.4.11 em `renpy/display/screen.py`, `ScreenDisplayable.update()`, executa `self.screen.function(**self.scope)` e `renpy.ui.close()` dentro de um `try`, mas o `finally` só restaura `renpy.ui.screen`, o contexto da screen e o escopo. Se a função da screen lança antes do `close()`, esse fechamento não ocorre. `renpy/ui.py:close()` fecha somente o topo da pilha. Isso explica a contaminação da interação subsequente no harness; não prova qual apresentação visual o usuário veria em uma sessão normal.
+
+**Limite da evidência:** o run comprova a propagação do `TypeError` durante uma chamada direta ao builder da screen e também mostra que o teste deixou a pilha UI inconsistente ao capturar a exceção. Não foi um teste end-to-end de abertura dessa tela numa interação normal; portanto, o resultado visual e a recuperação da interface permanecem pendentes. O run não deve ser contado como sucesso de teste.
+
 ## Conclusões e classificação
 
 - **OBSERVADO EM RUNTIME:** `Snapshots.findChanges()` detectou a substituição escalar 10→20.
@@ -126,6 +136,7 @@ Resultados delimitados:
 - **OBSERVADO EM RUNTIME:** em comparação entre dois snapshots, os objetos `Var` dos dois lados são somente leitura, valores das chaves preservadas são distintos e chaves ausentes são representadas por `None`.
 - **OBSERVADO EM RUNTIME:** uma chave cujo valor armazenado era `None` e depois foi removida aparece como `None/unknown` nos dois lados; a presença difere nos dicionários, mas não é exposta pelo objeto `Var.value`/tipo.
 - **OBSERVADO EM RUNTIME:** o diff de listas ignora ordem e multiplicidade e lança `TypeError` para elemento `RevertableList` não hashable; diff de dicionário reporta chaves e valores diferentes no nível recebido.
+- **CONFIRMADO NA FONTE URM CONVERTIDA:** `URM_snapshots_listCompare` chama `findListChanges` ao inicializar `listChanges`, antes de montar os itens da tela. **OBSERVADO EM RUNTIME (teste direto limitado):** `ScreenDisplayable.update()` propagou `TypeError` para lista com `RevertableList` no run 41652184534. **CONFIRMADO NO SDK 7.4.11:** quando a função da screen lança, o `finally` restaura o contexto da screen, mas o `ui.close()` posterior à função não é chamado; o run então deixou a pilha UI do harness não vazia e terminou FAILURE. Resultado visual/recuperação numa interação normal não testados.
 - **NÃO TESTADO:** igualdade de containers complexos/customizados; mutações concorrentes ou efeitos colaterais em `__eq__`; integração com os menus originais de snapshots. A persistência nativa da instância foi testada depois no doc 53.
 
 ## Execução inválida anterior
