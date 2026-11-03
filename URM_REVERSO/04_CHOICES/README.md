@@ -537,9 +537,9 @@ O [documento 52](52_TEXTREPL_MENU_AST_FILTER_PATH.md) rastreia no SDK 7.4.11 `Me
 
 
 
-### Continuação — falha ao construir comparação de listas com elementos não hashable
+### Continuação — erro ao construir comparação de listas com elementos não hashable
 
-O doc 51 foi ampliado com o run [41652184534](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41652184534): a chamada direta a `ScreenDisplayable.update()` propagou o `TypeError` da tela `URM_snapshots_listCompare`. O job falhou depois porque o harness capturou a exceção sem limpar a pilha interna de UI. Isso comprova o erro no builder e a contaminação do runner; apresentação visual/recuperação numa interação normal permanecem pendentes.
+O doc 51 foi ampliado. O primeiro run [41652184534](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41652184534) identificou que capturar a exceção e continuar deixou a pilha UI contaminada. A fixture/workflow então passou a terminar no erro esperado e validar a mensagem após as verificações anteriores; o run [41668286437](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41668286437) terminou SUCCESS no workflow, com o runner Ren'Py encerrado pelo `TypeError` esperado. Isso confirma a propagação no builder da screen. Clique em interação normal e resultado visual/recuperação continuam pendentes.
 
 ### Continuação — persistência de Snapshots em save nativo (2026-10-28)
 
