@@ -541,6 +541,7 @@ O [documento 52](52_TEXTREPL_MENU_AST_FILTER_PATH.md) rastreia no SDK 7.4.11 `Me
 
 O doc 51 foi ampliado. O primeiro run [41652184534](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41652184534) identificou que capturar a exceção e continuar deixou a pilha UI contaminada. A fixture/workflow então passou a terminar no erro esperado e validar a mensagem após as verificações anteriores; o run [41668286437](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41668286437) terminou SUCCESS no workflow, com o runner Ren'Py encerrado pelo `TypeError` esperado. Isso confirma a propagação no builder da screen. Clique em interação normal e resultado visual/recuperação continuam pendentes.
 A fonte também foi rastreada até `URM_main` → aba Snapshots → `URM_snapshots` → `URM_snapshots_comparison` → ação `SetLocalVariable('compareList', var)` → `URM_snapshots_listCompare`. O SDK confirma que `SetLocalVariable` escreve no contexto local e reinicia a interação; esse caminho está confirmado estaticamente, sem clique runtime automatizado. Os limites estão detalhados no doc 51.
+A leitura adicional do SDK mostra que uma exceção não é absorvida pela interação: segue ao handler global, que grava `traceback.txt` e pode abrir o editor no comando `run`. A aparência concreta e a recuperação visual ainda não foram observadas em runtime.
 
 ### Continuação — persistência de Snapshots em save nativo (2026-10-28)
 
