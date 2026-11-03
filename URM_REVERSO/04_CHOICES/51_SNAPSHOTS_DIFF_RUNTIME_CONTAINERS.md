@@ -126,6 +126,20 @@ A implementação do SDK 7.4.11 em `renpy/display/screen.py`, `ScreenDisplayable
 
 **Limite da evidência:** há agora prova runtime de que o builder da screen original propaga a exceção; a execução foi organizada para terminar nesse ponto, sem alegar uma renderização posterior. Não foi testada a abertura por clique durante uma interação normal nem o que o usuário vê/como a interface se recupera. O comportamento visual continua pendente.
 
+### Percurso de navegação até o diff de listas
+
+A fonte da interface permite reconstruir o percurso normal, ainda sem afirmar resultado visual de runtime:
+
+1. Em `screens/main.rpy.x52`, `URM_main` exibe a aba Snapshots por `URM_tabbutton(..., 'snapshots')`; a ação dessa aba define `Settings.currentScreen = 'snapshots'`. O corpo de `URM_main` então usa `URM_snapshots()`.
+2. Em `screens/snapshots.rpy.x52`, o botão “Show changes” de um snapshot define a variável local `comparing = [name]`. A screen passa a usar `URM_snapshots_comparison(name)`, que constrói o diff entre o snapshot e as variáveis atuais.
+3. Na linha do diff para uma variável do tipo lista nos dois lados, “Show changes” define `compareList = var`. A condição `elif compareList` usa `URM_snapshots_listCompare(compareList)`; o `default listChanges` dessa screen chama `findListChanges` antes de construir suas linhas.
+
+O SDK 7.4.11 documenta em `renpy/common/00action_data.rpy:161–178` que `SetLocalVariable` captura o contexto local no qual foi criado e devolve um `SetDict`; `SetDict.__call__` escreve no dicionário capturado e chama `renpy.restart_interaction()` (`00action_data.rpy:96–119`). Portanto, a fonte descreve uma sequência de atualização da screen após cada uma dessas ações. Essa sequência é **CONFIRMADA NA FONTE**, não uma observação de clique automatizado.
+
+O teste [41668286437](https://github.com/mucholocco86/laborat-rio_renpy/actions/runs/41668286437) começou no último estágio: construiu diretamente `ScreenDisplayable` para `URM_snapshots_listCompare` com `compareVar` equivalente ao par de `Var` da linha, e comprovou a exceção. Ele não acionou as ações das etapas 1–3 nem abriu `URM_main` como interação com jogador.
+
+**Pendente:** executar os dois cliques (snapshot → mudanças, variável lista → mudanças) por meio do sistema de interação, e observar como o Ren'Py apresenta e recupera a exceção. O SDK confirma que `ScreenDisplayable.update()` chama a função da screen e depois `ui.close()`; o `finally` restaura o contexto, mas não faz esse `close()` quando a função lança (`renpy/display/screen.py:626–647`). O resultado dessa exceção numa interação real não foi medido. Não converter a análise de fonte nem a chamada direta do builder em alegação sobre tela visível.
+
 ## Conclusões e classificação
 
 - **OBSERVADO EM RUNTIME:** `Snapshots.findChanges()` detectou a substituição escalar 10→20.
