@@ -1,4 +1,10 @@
 # Isolated runtime probe for URM Snapshots shallow values and equality comparison.
+init python:
+    def urm_snapshot_probe_catch(func, *args):
+        try:
+            return ("ok", func(*args))
+        except Exception as e:
+            return (type(e).__name__, str(e))
 default urm_snapshot_probe_scalar = 10
 default urm_snapshot_probe_list = [1, 2]
 default urm_snapshot_probe_dict = {"a": 1}
@@ -121,6 +127,24 @@ label urm_snapshot_probe_start:
     $ none_pair = (none_entry["old"].value, none_entry["new"].value, none_entry["old"].varType, none_entry["new"].varType, "urm_snapshot_probe_none_deleted" in none_entry["old"].storeDict, "urm_snapshot_probe_none_deleted" in none_entry["new"].storeDict)
     $ print("URM_SNAPSHOT_PROBE_NONE_VS_ABSENT", none_pair)
     $ if none_pair != (None, None, "unknown", "unknown", True, False): raise Exception("None and absent comparison did not match expected result: {}".format(none_pair))
+
+    $ list_order_duplicate_diff = x52URM.Snapshots.findListChanges([1, 1, 2], [2, 1])
+    $ list_count_diff = x52URM.Snapshots.findListChanges([1, 1, 2], [1, 2, 2, 3])
+    $ list_unhashable_result = urm_snapshot_probe_catch(x52URM.Snapshots.findListChanges, [[1], {"a": 1}], [[1], {"a": 2}])
+    $ dict_shallow_diff = x52URM.Snapshots.findDictChanges({"same": 1, "removed": 2}, {"same": 1, "added": 3})
+    $ dict_shallow_summary = sorted([(entry["old"].name, entry["old"].value, entry["new"].value) for entry in dict_shallow_diff])
+    $ nested_dict_diff = x52URM.Snapshots.findDictChanges({"nested": {"a": 1}}, {"nested": {"a": 2}})
+    $ nested_dict_summary = [(entry["old"].name, entry["old"].value, entry["new"].value) for entry in nested_dict_diff]
+    $ print("URM_SNAPSHOT_PROBE_LIST_ORDER_DUPLICATES", list_order_duplicate_diff)
+    $ print("URM_SNAPSHOT_PROBE_LIST_COUNT_DIFF", list_count_diff)
+    $ print("URM_SNAPSHOT_PROBE_LIST_UNHASHABLE", list_unhashable_result)
+    $ print("URM_SNAPSHOT_PROBE_DICT_KEYS", dict_shallow_summary)
+    $ print("URM_SNAPSHOT_PROBE_DICT_NESTED_VALUE", nested_dict_summary)
+    $ if list_order_duplicate_diff: raise Exception("list order/duplicate-only change was reported")
+    $ if list_count_diff != [{"type": "Added", "val": 3}]: raise Exception("unexpected set-based list diff: {}".format(list_count_diff))
+    $ if list_unhashable_result[0] != "TypeError": raise Exception("unhashable list entries did not raise TypeError: {}".format(list_unhashable_result))
+    $ if dict_shallow_summary != [("added", None, 3), ("removed", 2, None)]: raise Exception("unexpected dict-key diff: {}".format(dict_shallow_summary))
+    $ if nested_dict_summary != [("nested", {"a": 1}, {"a": 2})]: raise Exception("unexpected nested dict value diff: {}".format(nested_dict_summary))
 
     "URM snapshot shallow-reference probe completed."
     $ renpy.quit()
