@@ -5,6 +5,21 @@ init python:
             return ("ok", func(*args))
         except Exception as e:
             return (type(e).__name__, str(e))
+
+    def urm_snapshot_probe_list_screen_error(old_list, new_list):
+        screen = renpy.display.screen.get_screen_variant("URM_snapshots_listCompare")
+        layer = renpy.display.screen.get_screen_layer("URM_snapshots_listCompare")
+        old_var = x52URM.Var("urm_snapshot_probe_ui_list", {"urm_snapshot_probe_ui_list": old_list})
+        new_var = x52URM.Var("urm_snapshot_probe_ui_list", {"urm_snapshot_probe_ui_list": new_list})
+        displayable = renpy.display.screen.ScreenDisplayable(
+            screen, "urm_snapshot_probe_list_compare", layer, {},
+            {"compareVar": {"old": old_var, "new": new_var}}
+        )
+        try:
+            displayable.update()
+            return ("ok", None)
+        except Exception as e:
+            return (type(e).__name__, str(e))
 default urm_snapshot_probe_scalar = 10
 default urm_snapshot_probe_list = [1, 2]
 default urm_snapshot_probe_dict = {"a": 1}
@@ -145,6 +160,10 @@ label urm_snapshot_probe_start:
     $ if list_unhashable_result[0] != "TypeError": raise Exception("unhashable list entries did not raise TypeError: {}".format(list_unhashable_result))
     $ if dict_shallow_summary != [("added", None, 3), ("removed", 2, None)]: raise Exception("unexpected dict-key diff: {}".format(dict_shallow_summary))
     $ if nested_dict_summary != [("nested", {"a": 1}, {"a": 2})]: raise Exception("unexpected nested dict value diff: {}".format(nested_dict_summary))
+
+    $ list_screen_error = urm_snapshot_probe_list_screen_error([[1]], [[2]])
+    $ print("URM_SNAPSHOT_PROBE_LIST_SCREEN_BUILD", list_screen_error)
+    $ if list_screen_error[0] != "TypeError" or "unhashable" not in list_screen_error[1]: raise Exception("list comparison screen did not propagate the expected TypeError: {}".format(list_screen_error))
 
     "URM snapshot shallow-reference probe completed."
     $ renpy.quit()
