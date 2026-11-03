@@ -50,8 +50,18 @@ jobs:
         run: |
           set -u
           echo "START snapshot shallow probe: $(date -u +%FT%TZ)"
+          probe_log="${RUNNER_TEMP}/urm-snapshot-shallow-probe.log"
           set +e
-          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-snapshot-shallow-probe" test urm_snapshot_probe
+          timeout --signal=TERM --kill-after=10s 120s xvfb-run -a sh renpy-7.4.11-sdk/renpy.sh "${RUNNER_TEMP}/urm-snapshot-shallow-probe" test urm_snapshot_probe >"$probe_log" 2>&1
           result=$?
+          set -e
+          cat "$probe_log"
           echo "END snapshot shallow probe: $(date -u +%FT%TZ), exit=$result"
-          exit "$result"
+          if [ "$result" -eq 0 ]; then
+            echo "Expected the deliberately exercised list comparison screen to raise."
+            exit 1
+          fi
+          grep -F "URM_SNAPSHOT_PROBE_NONE_VS_ABSENT" "$probe_log" >/dev/null
+          grep -F "URM_SNAPSHOT_PROBE_LIST_SCREEN_BUILD_START" "$probe_log" >/dev/null
+          grep -F "unhashable type: 'RevertableList'" "$probe_log" >/dev/null
+          echo "Expected screen-build TypeError observed after all preceding assertions."
