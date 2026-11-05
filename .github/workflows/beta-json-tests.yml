@@ -6,6 +6,11 @@ on:
     paths:
       - 'WELLS MANAGER BETA/**'
       - '.github/workflows/beta-json-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'WELLS MANAGER BETA/**'
+      - '.github/workflows/beta-json-tests.yml'
   workflow_dispatch:
 
 jobs:
