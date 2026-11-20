@@ -1,0 +1,57 @@
+name: JK Ren'Py compatibility audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - jk-compatibility-lab
+    paths:
+      - 'JK/**'
+      - 'renpy-6.99.4-sdk/renpy/**/*.py'
+      - 'renpy-7.4.11-sdk/renpy/**/*.py'
+      - 'renpy-8.5.3-sdk/renpy/**/*.py'
+      - '.github/workflows/jk-compatibility-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jk-compatibility-audit-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  static-audit:
+    name: Static JK API compatibility inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated compatibility branch
+        uses: actions/checkout@v4
+        with:
+          ref: jk-compatibility-lab
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify audit script syntax
+        run: python -m py_compile JK/tools/compatibility_audit.py
+
+      - name: Run read-only compatibility inventory
+        run: python JK/tools/compatibility_audit.py
+
+      - name: Verify protected reference trees were not changed
+        run: |
+          git diff --exit-code --             'renpy-6.99.4-sdk'             'renpy-7.4.11-sdk'             'renpy-8.5.3-sdk'             'JOGOS PARA TESTES'
+
+      - name: Upload compatibility report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jk-compatibility-report
+          path: |
+            jk-compatibility-report/api-compatibility.md
+            jk-compatibility-report/api-compatibility.json
+          if-no-files-found: error
+          retention-days: 30
