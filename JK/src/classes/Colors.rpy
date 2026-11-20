@@ -1,0 +1,33 @@
+init python in JK:
+    _constant = True
+
+    class Colors:
+        theme = "#abe9ff"
+        hover = theme
+        
+        text_primary = "#fff"
+        text_light = "#8f8f8f"
+        text_placeholder = "#454545"
+        
+        success = "#0f0"
+        error = "#ff623a"
+        warning = "#ffb14c"
+        danger = "#f00"
+        info = "#8cb8ed"
+        
+        status_enabled = success
+        status_disabled = error
+        status_enabled_disabled = "#004400"
+        
+        disabled = "#62626255"
+        na = disabled 
+        
+        selected = "#7ff981ff"
+        selected_background = "#7ff98172"
+        
+        block_background = "#ffffff11"
+        block_hover_background = "#abe9ff6c"
+        block_selected_hover_background = "#abffe76c"
+        
+        reset = "#fbbfbf"
+# Decompiled by unrpyc: https://github.com/CensoredUsername/unrpyc
