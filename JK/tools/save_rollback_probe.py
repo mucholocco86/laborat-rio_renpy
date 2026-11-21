@@ -71,7 +71,14 @@ def tuple3_opcode_samples(payload: bytes, limit: int = 12):
 def save_identifiers(path: Path):
     with ZipFile(path) as archive:
         payload = archive.read("log")
-    return triplets(payload), tuple3_opcode_samples(payload)
+        metadata = {}
+        for name in ("renpy_version", "extra_info", "json"):
+            try:
+                value = archive.read(name)
+                metadata[name] = value.decode("utf-8", "replace")
+            except KeyError:
+                pass
+    return triplets(payload), tuple3_opcode_samples(payload), metadata
 
 
 def rpyc_payloads(path: Path):
@@ -93,23 +100,29 @@ def rpyc_payloads(path: Path):
 
 def compiled_identifiers():
     result = {}
+    opcode_samples = {}
     for path in sorted(GAME.rglob("*.rpyc")):
         rel = path.relative_to(GAME).as_posix()
         source_name = "game/" + rel[:-1]
         found = set()
         for _slot, payload in rpyc_payloads(path) or ():
             found.update(triplets(payload))
+            if path.stem in ("script", "scenes", "ending6"):
+                samples = opcode_samples.setdefault(source_name, [])
+                if len(samples) < 3:
+                    samples.extend(tuple3_opcode_samples(payload, limit=3 - len(samples)))
         if found:
             result[source_name] = found
-    return result
+    return result, opcode_samples
 
 
 def main():
-    compiled = compiled_identifiers()
+    compiled, compiled_opcode_samples = compiled_identifiers()
     report = {
         "scope": "read-only pickle opcode and RPYC identifier comparison; not a runtime load test",
         "game_directory_present": GAME.is_dir(),
         "compiled_files_with_identifiers": len(compiled),
+        "compiled_opcode_samples": compiled_opcode_samples,
         "compiled_file_details": {name: {"identifier_count": len(ids), "versions": {str(version): sorted(serial for _filename, found_version, serial in ids if found_version == version) for version in sorted({found_version for _filename, found_version, _serial in ids})}} for name, ids in sorted(compiled.items())},
         "saves": [],
         "warnings": [],
@@ -119,7 +132,7 @@ def main():
         if not path.is_file():
             report["warnings"].append("Save not found: " + name)
             continue
-        saved, opcode_samples = save_identifiers(path)
+        saved, opcode_samples, save_metadata = save_identifiers(path)
         by_file = {}
         for filename, version, serial in sorted(saved):
             exact = (filename, version, serial) in compiled.get(filename, set())
@@ -133,6 +146,7 @@ def main():
         ]
         report["saves"].append({
             "name": name,
+            "save_metadata": save_metadata,
             "identifier_count": len(saved),
             "matched_identifiers": len(saved) - len(unmatched),
             "unmatched_count": len(unmatched),
