@@ -2,8 +2,11 @@
 """Read-only heuristic inventory of Ren'Py API expressions used by JK."""
 from __future__ import annotations
 import argparse
+import base64
+import io
 import json
 import re
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -68,8 +71,19 @@ def main():
     jk_files = sorted(p for p in (ROOT / "JK").rglob("*.rpy") if p.is_file())
     refs = collect(jk_files)
     sdk_files = {v: py_files(p) for v, p in SDK_VERSIONS.items()}
+    # Package only the runtime JK/src tree. The archive is embedded in the
+    # existing JSON artifact so users can obtain JK without downloading the
+    # full repository; no workflow changes or external network access needed.
+    package_buffer = io.BytesIO()
+    with zipfile.ZipFile(package_buffer, "w", zipfile.ZIP_DEFLATED) as package_zip:
+        for source in sorted((ROOT / "JK" / "src").rglob("*")):
+            if source.is_file():
+                package_zip.write(source, source.relative_to(ROOT).as_posix())
+    jk_package_zip_base64 = base64.b64encode(package_buffer.getvalue()).decode("ascii")
+
     report = {"scope": "read-only heuristic static inventory; not proof of runtime compatibility",
               "jk_files_scanned": len(jk_files), "unique_renpy_expressions": len(refs),
+              "jk_package": {"format": "zip", "root": "JK/src", "base64": jk_package_zip_base64},
               "sdks": {}, "api_expressions": [], "warnings": []}
     for version, package in SDK_VERSIONS.items():
         report["sdks"][version] = {
