@@ -10,7 +10,7 @@ from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 GAME = ROOT / "JOGOS PARA TESTES" / "GrandmasHouse-0.95-pc" / "game"
-SAVE_NAMES = ("10-1-LT1.save", "10-2-LT1.save", "10-3-LT1.save", "13-2-LT1.save", "13-4-LT1.save", "13-5-LT1.save")
+SAVE_NAMES = ("1-1-LT1.save", "1-2-LT1.save", "1-3-LT1.save", "13-2-LT1.save", "13-4-LT1.save", "13-5-LT1.save")
 RPYC_HEADER = b"RENPY RPC2"
 MEMO_OPS = {"BINPUT", "LONG_BINPUT", "PUT", "MEMOIZE"}
 
