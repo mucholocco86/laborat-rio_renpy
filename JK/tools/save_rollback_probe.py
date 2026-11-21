@@ -77,7 +77,7 @@ def compiled_identifiers():
     result = {}
     for path in sorted(GAME.rglob("*.rpyc")):
         rel = path.relative_to(GAME).as_posix()
-        source_name = rel[:-1]
+        source_name = "game/" + rel[:-1]
         found = set()
         for _slot, payload in rpyc_payloads(path) or ():
             found.update(triplets(payload))
