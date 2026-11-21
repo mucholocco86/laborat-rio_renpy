@@ -51,6 +51,23 @@ def triplets(payload: bytes) -> set[tuple[str, int, int]]:
     return result
 
 
+def tuple3_opcode_samples(payload: bytes, limit: int = 12):
+    """Show pickle opcodes around tuple3 values to validate memo-reference handling."""
+    try:
+        ops = list(pickletools.genops(payload))
+    except Exception:
+        return []
+    samples = []
+    for i, (op, arg, _pos) in enumerate(ops):
+        if op.name == "TUPLE3":
+            window = ops[max(0, i - 8):i + 1]
+            samples.append([{"op": item.name, "arg": value}
+                            for item, value, _ in window])
+            if len(samples) >= limit:
+                break
+    return samples
+
+
 def save_identifiers(path: Path):
     with ZipFile(path) as archive:
         return triplets(archive.read("log"))
@@ -120,7 +137,7 @@ def main():
             "unmatched_count": len(unmatched),
             "files": by_file,
             "unmatched_identifiers": unmatched,
-            "saved_versions_by_file": {name: {str(version): {"saved_serials": sorted(serial for _filename, found_version, serial in saved if _filename == name and found_version == version), "compiled_serials": sorted(serial for _filename, found_version, serial in compiled.get(name, set()) if found_version == version)} for version in sorted({v for f, v, _s in saved if f == name})} for name in sorted({f for f, _v, _s in saved})},
+            "tuple3_opcode_samples": opcode_samples,\n            "saved_versions_by_file": {name: {str(version): {"saved_serials": sorted(serial for _filename, found_version, serial in saved if _filename == name and found_version == version), "compiled_serials": sorted(serial for _filename, found_version, serial in compiled.get(name, set()) if found_version == version)} for version in sorted({v for f, v, _s in saved if f == name})} for name in sorted({f for f, _v, _s in saved})},
         })
         print("{}: {} identifiers, {} exact matches, {} unmatched".format(
             name, len(saved), len(saved) - len(unmatched), len(unmatched)))
