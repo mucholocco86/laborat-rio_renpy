@@ -16,16 +16,34 @@ MEMO_OPS = {"BINPUT", "LONG_BINPUT", "PUT", "MEMOIZE"}
 
 
 def triplets(payload: bytes) -> set[tuple[str, int, int]]:
-    """Extract direct tuple3 identifiers without executing pickle payloads."""
+    """Extract tuple3 script identifiers without executing pickle payloads."""
     result: set[tuple[str, int, int]] = set()
     try:
         ops = list(pickletools.genops(payload))
     except Exception:
         return result
 
-    for i, (op, _arg, _pos) in enumerate(ops):
+    memo = {}
+
+    def resolve(op, arg):
+        if op.name in {"BINGET", "LONG_BINGET", "GET"}:
+            return memo.get(arg)
+        return (op.name, arg)
+
+    for i, (op, arg, _pos) in enumerate(ops):
+        if op.name in {"BINPUT", "LONG_BINPUT", "PUT", "MEMOIZE"}:
+            j = i - 1
+            while j >= 0 and ops[j][0].name in MEMO_OPS:
+                j -= 1
+            if j >= 0:
+                value = resolve(ops[j][0], ops[j][1])
+                index = max(memo.keys(), default=-1) + 1 if op.name == "MEMOIZE" else arg
+                memo[index] = value
+            continue
+
         if op.name != "TUPLE3":
             continue
+
         values = []
         j = i - 1
         while j >= 0 and len(values) < 3:
@@ -33,23 +51,26 @@ def triplets(payload: bytes) -> set[tuple[str, int, int]]:
             if prev_op.name in MEMO_OPS:
                 j -= 1
                 continue
-            values.append((prev_op.name, prev_arg))
+            values.append(resolve(prev_op, prev_arg))
             j -= 1
+
         if len(values) != 3:
             continue
+
         values.reverse()
         first, second, third = values
         string_ops = {"STRING", "BINSTRING", "SHORT_BINSTRING", "UNICODE",
                       "BINUNICODE", "SHORT_BINUNICODE", "BINUNICODE8"}
         int_ops = {"INT", "BININT", "BININT1", "BININT2", "LONG", "LONG1", "LONG4"}
-        if (first[0] in string_ops and second[0] in int_ops and third[0] in int_ops
+        if (first is not None and second is not None and third is not None
+                and first[0] in string_ops and second[0] in int_ops and third[0] in int_ops
                 and isinstance(first[1], str) and isinstance(second[1], int)
                 and isinstance(third[1], int)):
             filename = first[1].replace("\\", "/")
             if filename.endswith((".rpy", ".rpym")):
                 result.add((filename, second[1], third[1]))
-    return result
 
+    return result
 
 def tuple3_opcode_samples(payload: bytes, limit: int = 12):
     """Show pickle opcodes around tuple3 values to validate memo-reference handling."""
