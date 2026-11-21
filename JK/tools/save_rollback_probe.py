@@ -70,7 +70,8 @@ def tuple3_opcode_samples(payload: bytes, limit: int = 12):
 
 def save_identifiers(path: Path):
     with ZipFile(path) as archive:
-        return triplets(archive.read("log"))
+        payload = archive.read("log")
+    return triplets(payload), tuple3_opcode_samples(payload)
 
 
 def rpyc_payloads(path: Path):
@@ -118,7 +119,7 @@ def main():
         if not path.is_file():
             report["warnings"].append("Save not found: " + name)
             continue
-        saved = save_identifiers(path)
+        saved, opcode_samples = save_identifiers(path)
         by_file = {}
         for filename, version, serial in sorted(saved):
             exact = (filename, version, serial) in compiled.get(filename, set())
