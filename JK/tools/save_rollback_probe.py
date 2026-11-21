@@ -92,6 +92,7 @@ def main():
         "scope": "read-only pickle opcode and RPYC identifier comparison; not a runtime load test",
         "game_directory_present": GAME.is_dir(),
         "compiled_files_with_identifiers": len(compiled),
+        "compiled_file_details": {name: {"identifier_count": len(ids), "sample": [list(x) for x in sorted(ids)[:8]]} for name, ids in sorted(compiled.items())},
         "saves": [],
         "warnings": [],
     }
@@ -119,6 +120,7 @@ def main():
             "unmatched_count": len(unmatched),
             "files": by_file,
             "unmatched_identifiers": unmatched,
+            "saved_versions_by_file": {name: sorted({v for f, v, _s in saved if f == name}) for name in sorted({f for f, _v, _s in saved})},
         })
         print("{}: {} identifiers, {} exact matches, {} unmatched".format(
             name, len(saved), len(saved) - len(unmatched), len(unmatched)))
@@ -154,6 +156,7 @@ def main():
     lines += [
         "## Interpretation",
         "",
+        "The JSON report includes the actual extracted RPYC identifiers and per-save compiled versions to diagnose parser or path mismatches.",
         "Missing matches may indicate that compiled scripts were regenerated or changed after the save was created.",
         "Ren'Py can preserve identifiers during recompilation when the previous RPYC is available.",
         "This report does not recommend automatic identifier remapping, which could resume at a different statement.",
