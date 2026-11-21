@@ -13,8 +13,8 @@ SDK_VERSIONS = {
     "8.5.3": ROOT / "renpy-8.5.3-sdk" / "renpy",
 }
 CHAIN = re.compile(r"\brenpy(?:\.[A-Za-z_]\w*)+")
-TARGETS = re.compile(r"^\s*(?:async\s+)?(?:def|class)\s+(load|save|loads|dump|unfreeze|freeze|complete|rollback|get_changes|scan_saved_game|save_persistent|RollbackLog|Context|StoreDict)\b")
-CORE = ("loadsave.py", "python.py", "rollback.py", "game.py", "exports.py", "config.py")
+TARGETS = re.compile(r"^\s*(?:async\s+)?(?:def|class)\s+(load|save|loads|dump|unfreeze|freeze|complete|rollback|get_changes|scan_saved_game|load_persistent|save_persistent|active_locations|newest|FileLocation|MultiLocation|RollbackLog|Context|StoreDict)\b")
+CORE = ("loadsave.py", "savelocation.py", "python.py", "rollback.py", "game.py", "exports.py", "config.py")
 
 def py_files(path):
     return sorted(p for p in path.rglob("*.py") if "__pycache__" not in p.parts) if path.exists() else []
