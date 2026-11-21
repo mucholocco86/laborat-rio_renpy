@@ -10,7 +10,7 @@ from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 GAME = ROOT / "JOGOS PARA TESTES" / "GrandmasHouse-0.95-pc" / "game"
-SAVE_NAMES = ("13-2-LT1.save", "13-4-LT1.save", "13-5-LT1.save")
+SAVE_NAMES = ("10-1-LT1.save", "10-2-LT1.save", "10-3-LT1.save", "13-2-LT1.save", "13-4-LT1.save", "13-5-LT1.save")
 RPYC_HEADER = b"RENPY RPC2"
 MEMO_OPS = {"BINPUT", "LONG_BINPUT", "PUT", "MEMOIZE"}
 
@@ -107,16 +107,21 @@ def main():
             by_file.setdefault(filename, {"saved_identifiers": 0, "exact_matches": 0})
             by_file[filename]["saved_identifiers"] += 1
             by_file[filename]["exact_matches"] += int(exact)
+        unmatched = [
+            {"file": f, "compiled_version": v, "serial": s}
+            for f, v, s in sorted(saved)
+            if (f, v, s) not in compiled.get(f, set())
+        ]
         report["saves"].append({
             "name": name,
             "identifier_count": len(saved),
+            "matched_identifiers": len(saved) - len(unmatched),
+            "unmatched_count": len(unmatched),
             "files": by_file,
-            "unmatched_identifiers": [
-                {"file": f, "compiled_version": v, "serial": s}
-                for f, v, s in sorted(saved)
-                if (f, v, s) not in compiled.get(f, set())
-            ],
+            "unmatched_identifiers": unmatched,
         })
+        print("{}: {} identifiers, {} exact matches, {} unmatched".format(
+            name, len(saved), len(saved) - len(unmatched), len(unmatched)))
 
     out = ROOT / "save-rollback-probe"
     out.mkdir(exist_ok=True)
