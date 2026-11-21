@@ -7,6 +7,8 @@ on:
       - jk-compatibility-lab
     paths:
       - 'JK/**'
+      - 'JOGOS PARA TESTES/GrandmasHouse-0.95-pc/game/saves/*.save'
+      - 'JOGOS PARA TESTES/GrandmasHouse-0.95-pc/game/**/*.rpyc'
       - 'renpy-6.99.4-sdk/renpy/**/*.py'
       - 'renpy-7.4.11-sdk/renpy/**/*.py'
       - 'renpy-8.5.3-sdk/renpy/**/*.py'
@@ -42,6 +44,9 @@ jobs:
       - name: Run read-only compatibility inventory
         run: python JK/tools/compatibility_audit.py
 
+      - name: Probe save rollback identifiers without unpickling
+        run: python JK/tools/save_rollback_probe.py
+
       - name: Verify protected reference trees were not changed
         run: |
           git diff --exit-code --             'renpy-6.99.4-sdk'             'renpy-7.4.11-sdk'             'renpy-8.5.3-sdk'             'JOGOS PARA TESTES'
@@ -53,5 +58,7 @@ jobs:
           path: |
             jk-compatibility-report/api-compatibility.md
             jk-compatibility-report/api-compatibility.json
+            save-rollback-probe/save-rollback-probe.md
+            save-rollback-probe/save-rollback-probe.json
           if-no-files-found: error
           retention-days: 30
