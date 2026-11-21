@@ -171,6 +171,11 @@ init python in JK:
                     SaveSystem.multilocation.scan()
             
             def _addLocation(self, fileLocation):
+                # Preserve Ren'Py's writability check before deactivating the
+                # location for playthrough isolation.
+                if not fileLocation.active:
+                    return
+
                 fileLocation.active = False
                 SaveSystem.multilocation.add(fileLocation)
                 self.location.add(fileLocation)
