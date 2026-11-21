@@ -92,7 +92,7 @@ def main():
         "scope": "read-only pickle opcode and RPYC identifier comparison; not a runtime load test",
         "game_directory_present": GAME.is_dir(),
         "compiled_files_with_identifiers": len(compiled),
-        "compiled_file_details": {name: {"identifier_count": len(ids), "sample": [list(x) for x in sorted(ids)[:8]]} for name, ids in sorted(compiled.items())},
+        "compiled_file_details": {name: {"identifier_count": len(ids), "versions": {str(version): sorted(serial for _filename, found_version, serial in ids if found_version == version) for version in sorted({found_version for _filename, found_version, _serial in ids})}} for name, ids in sorted(compiled.items())},
         "saves": [],
         "warnings": [],
     }
@@ -120,7 +120,7 @@ def main():
             "unmatched_count": len(unmatched),
             "files": by_file,
             "unmatched_identifiers": unmatched,
-            "saved_versions_by_file": {name: sorted({v for f, v, _s in saved if f == name}) for name in sorted({f for f, _v, _s in saved})},
+            "saved_versions_by_file": {name: {str(version): {"saved_serials": sorted(serial for _filename, found_version, serial in saved if _filename == name and found_version == version), "compiled_serials": sorted(serial for _filename, found_version, serial in compiled.get(name, set()) if found_version == version)} for version in sorted({v for f, v, _s in saved if f == name})} for name in sorted({f for f, _v, _s in saved})},
         })
         print("{}: {} identifiers, {} exact matches, {} unmatched".format(
             name, len(saved), len(saved) - len(unmatched), len(unmatched)))
