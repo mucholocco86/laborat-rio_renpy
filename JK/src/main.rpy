@@ -14,7 +14,16 @@ init python in JK:
     Pagination = PaginationClass()
     Memories = MemoriesClass()
 
-    renpy.config.search_prefixes.append("JK/src/assets/") 
+    # Ren'Py 7.4+ supports filename prefixes. Ren'Py 6.99 uses
+    # searchpath directories instead, so keep JK assets discoverable there too.
+    if hasattr(renpy.config, "search_prefixes"):
+        if "JK/src/assets/" not in renpy.config.search_prefixes:
+            renpy.config.search_prefixes.append("JK/src/assets/")
+    else:
+        import os
+        jk_asset_path = os.path.join(renpy.config.gamedir, "JK", "src", "assets")
+        if jk_asset_path not in renpy.config.searchpath:
+            renpy.config.searchpath.append(jk_asset_path)
 
 init 9999 python in JK:
     _constant = True
